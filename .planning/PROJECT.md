@@ -20,10 +20,10 @@ Instant, glanceable crypto prices in the terminal — one command, no browser ne
 - [ ] Show price, 24h change %, market cap, and volume per coin
 - [ ] Green/red coloring for positive/negative 24h change
 - [ ] `crypto prices` subcommand for one-shot price table
-- [ ] `crypto watch` subcommand with 10-second auto-refresh
+- [ ] `crypto watch` subcommand with auto-refresh (default 30s, configurable via `--interval` flag)
 - [ ] `crypto info <SYMBOL>` subcommand for single-coin detail view
 - [ ] All prices displayed in EUR
-- [ ] Hardcoded top 20 coin list (BTC, ETH, SOL, etc.)
+- [ ] Dynamic top N coins from Bitvavo API, sorted by market cap (default top 20)
 - [ ] Public Bitvavo API (no auth required)
 - [ ] uv-managed project with pyproject.toml
 
@@ -31,7 +31,7 @@ Instant, glanceable crypto prices in the terminal — one command, no browser ne
 
 - Authentication / private Bitvavo endpoints — public data only
 - Extended stats (ATH, supply, 24h high/low) — keep info view simple
-- Dynamic coin list from API — hardcoded top 20 is sufficient
+- Custom coin lists / watchlists — dynamic ranking is sufficient
 - Portfolio tracking / balance management — this is a viewer only
 - USD or multi-currency support — EUR only
 - Mobile or web interface — CLI only
@@ -40,7 +40,7 @@ Instant, glanceable crypto prices in the terminal — one command, no browser ne
 
 - Bitvavo is a European crypto exchange with a public REST API for market data
 - Public endpoints include ticker price, 24h stats, and market info — no API key needed
-- The top 20 list will be maintained as a constant in the code (BTC, ETH, BNB, SOL, XRP, ADA, DOGE, AVAX, DOT, LINK, MATIC, SHIB, TRX, UNI, LTC, ATOM, XLM, BCH, NEAR, APT)
+- The top N coins are fetched dynamically from Bitvavo and sorted by market cap
 - EUR trading pairs are native to Bitvavo (e.g., BTC-EUR)
 
 ## Constraints
@@ -56,8 +56,8 @@ Instant, glanceable crypto prices in the terminal — one command, no browser ne
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
 | Bitvavo API over CoinGecko/CMC | User preference, EUR-native exchange | — Pending |
-| Hardcoded top 20 list | Simpler than dynamic ranking, no extra API calls | — Pending |
-| 10-second refresh for watch mode | User prefers near-real-time updates | — Pending |
+| Dynamic top N from API | More accurate ranking, stays current as market shifts | — Pending |
+| Configurable refresh interval | Default 30s, --interval flag for override, balances freshness and API politeness | — Pending |
 | Public endpoints only | No auth complexity, market data is freely available | — Pending |
 | uv for project management | Modern Python tooling, fast dependency resolution | — Pending |
 
