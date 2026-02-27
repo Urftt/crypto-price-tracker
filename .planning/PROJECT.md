@@ -51,6 +51,18 @@ Instant, glanceable crypto prices in the terminal — one command, no browser ne
 - **Dependencies**: Minimal — CLI framework, HTTP client, table renderer, that's it
 - **Design**: Clean and minimal terminal output, no unnecessary decoration
 
+## Current Milestone: v1.0 Core CLI
+
+**Goal:** Build the core CLI tool that fetches and displays crypto prices from the Bitvavo API in the terminal.
+
+**Target features:**
+- Top 20 crypto price table with color-coded 24h changes
+- `crypto prices` one-shot subcommand
+- `crypto watch` with configurable auto-refresh
+- `crypto info <SYMBOL>` single-coin detail view
+- EUR prices via public Bitvavo API
+- uv-managed Python project
+
 ## Key Decisions
 
 | Decision | Rationale | Outcome |
@@ -62,4 +74,4 @@ Instant, glanceable crypto prices in the terminal — one command, no browser ne
 | uv for project management | Modern Python tooling, fast dependency resolution | — Pending |
 
 ---
-*Last updated: 2026-02-25 after initialization*
+*Last updated: 2026-02-28 after milestone v1.0 started*
