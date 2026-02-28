@@ -26,10 +26,10 @@ Decimal phases appear between their surrounding integers in numeric order.
   1. Running `uv sync` installs the project and all dependencies without error
   2. Running `crypto --help` after install shows the command exists and prints usage
   3. The project has a pyproject.toml with a `[project.scripts]` entry point — no setup.py or requirements.txt
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 01-01: Scaffold uv project with pyproject.toml, entry point, and minimal CLI skeleton
+- [ ] 01-01-PLAN.md — Scaffold uv project with pyproject.toml, entry point, and minimal CLI skeleton
 
 ### Phase 2: API Integration
 **Goal**: Live EUR cryptocurrency price data flows from the public Bitvavo REST API into the application
