@@ -40,10 +40,10 @@ Plans:
   2. The top N coins (default 20) are fetched and sorted by market cap
   3. API calls require no authentication or API key
   4. Price, 24h change %, market cap, and volume are all retrievable for each coin
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 02-01: Implement Bitvavo API client — fetch ticker, 24h stats, and market cap data
+- [ ] 02-01-PLAN.md — Build Bitvavo API client with data models, EUR filtering, volume-based sorting, and unit tests
 
 ### Phase 3: CLI and Display
 **Goal**: Users can run all three subcommands and see formatted, color-coded crypto prices in the terminal
