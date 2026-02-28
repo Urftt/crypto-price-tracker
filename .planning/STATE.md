@@ -5,14 +5,14 @@
 See: .planning/PROJECT.md (updated 2026-02-28)
 
 **Core value:** Instant, glanceable crypto prices in the terminal — one command, no browser needed.
-**Current focus:** Milestone v1.0 Core CLI — Phase 1: Project Setup
+**Current focus:** Milestone v1.0 Core CLI
 
 ## Current Position
 
-Phase: 1 of 3 (Project Setup)
-Plan: — (not yet planned)
-Status: Ready to plan
-Last activity: 2026-02-28 — Roadmap created, 3 phases derived from 11 requirements
+Phase: Not started (defining roadmap)
+Plan: —
+Status: Defining roadmap
+Last activity: 2026-02-28 — Milestone v1.0 started
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -55,5 +55,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-28
-Stopped at: Roadmap written — ready to plan Phase 1
+Stopped at: Rebuilding roadmap for v1.0
 Resume file: None
