@@ -1,35 +1,78 @@
-# Requirements — Crypto Price Tracker
+# Requirements: Crypto Price Tracker
+
+**Defined:** 2026-02-28
+**Core Value:** Instant, glanceable crypto prices in the terminal — one command, no browser needed.
 
 ## v1 Requirements
 
-### Display
-- [ ] **DISP-01**: User can view top 20 crypto prices in a formatted terminal table
-- [ ] **DISP-02**: User can see price, 24h change %, market cap, and volume per coin
-- [ ] **DISP-03**: User can see green/red coloring for positive/negative 24h change
+Requirements for initial release. Each maps to roadmap phases.
 
-### CLI
-- [ ] **CLI-01**: User can run `crypto prices` for a one-shot price table
-- [ ] **CLI-02**: User can run `crypto watch` with auto-refresh (default 30s, configurable via `--interval`)
-- [ ] **CLI-03**: User can run `crypto info <SYMBOL>` for single-coin detail view
+### API (Data Fetching)
 
-### Data
-- [ ] **DATA-01**: Prices fetched from public Bitvavo REST API (no auth)
-- [ ] **DATA-02**: All prices displayed in EUR
-- [ ] **DATA-03**: Top N coins fetched dynamically and sorted by market cap
+- [ ] **API-01**: User can fetch current crypto prices from the public Bitvavo REST API
+- [ ] **API-02**: All prices are displayed in EUR via Bitvavo EUR trading pairs
+- [ ] **API-03**: Top N coins are fetched dynamically and sorted by market cap (default 20)
 
-### Project
-- [ ] **PROJ-01**: uv-managed project with pyproject.toml
+### Display (Terminal Output)
+
+- [ ] **DISP-01**: Prices are shown in a formatted terminal table with price, 24h change %, market cap, and volume
+- [ ] **DISP-02**: 24h change is color-coded green (positive) or red (negative)
+- [ ] **DISP-03**: Single-coin detail view shows expanded information for one cryptocurrency
+
+### CLI (Commands & Interface)
+
+- [ ] **CLI-01**: `crypto prices` displays the price table once and exits
+- [ ] **CLI-02**: `crypto watch` auto-refreshes the price table (default 30s, configurable via `--interval`)
+- [ ] **CLI-03**: `crypto info <SYMBOL>` shows detailed info for a single coin
+
+### Setup (Project Infrastructure)
+
+- [ ] **SETUP-01**: Project uses uv with pyproject.toml (no setup.py or requirements.txt)
+- [ ] **SETUP-02**: CLI is installable with a `crypto` entry point command
+
+## v2 Requirements
+
+Deferred to future release. Tracked but not in current roadmap.
+
+(None yet)
 
 ## Out of Scope
-- Authentication / private Bitvavo endpoints — public data only
-- Extended stats (ATH, supply, 24h high/low) — keep info view simple
-- Custom coin lists / watchlists — dynamic ranking is sufficient
-- Portfolio tracking / balance management — viewer only
-- USD or multi-currency support — EUR only
-- Mobile or web interface — CLI only
+
+Explicitly excluded. Documented to prevent scope creep.
+
+| Feature | Reason |
+|---------|--------|
+| Authentication / private API endpoints | Public data only, no auth complexity |
+| Extended stats (ATH, supply, 24h high/low) | Keep info view simple for v1 |
+| Custom coin lists / watchlists | Dynamic ranking is sufficient |
+| Portfolio tracking / balance management | This is a viewer only |
+| USD or multi-currency support | EUR only |
+| Mobile or web interface | CLI only |
+| WebSocket streaming | REST API is sufficient for v1 refresh intervals |
 
 ## Traceability
 
-| REQ | Phase |
-|-----|-------|
-| (To be filled by roadmapper) | |
+Which phases cover which requirements. Updated during roadmap creation.
+
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| API-01 | — | Pending |
+| API-02 | — | Pending |
+| API-03 | — | Pending |
+| DISP-01 | — | Pending |
+| DISP-02 | — | Pending |
+| DISP-03 | — | Pending |
+| CLI-01 | — | Pending |
+| CLI-02 | — | Pending |
+| CLI-03 | — | Pending |
+| SETUP-01 | — | Pending |
+| SETUP-02 | — | Pending |
+
+**Coverage:**
+- v1 requirements: 11 total
+- Mapped to phases: 0
+- Unmapped: 11
+
+---
+*Requirements defined: 2026-02-28*
+*Last updated: 2026-02-28 after initial definition*
