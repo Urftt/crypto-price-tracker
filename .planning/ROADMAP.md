@@ -54,11 +54,11 @@ Plans:
   2. `crypto watch` refreshes the price table every 30 seconds by default; `--interval N` overrides the refresh period
   3. `crypto info BTC` shows a detailed single-coin view with expanded information
   4. Positive 24h change is displayed in green and negative in red in the terminal
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 03-01: Build terminal table renderer with color-coded 24h change
-- [ ] 03-02: Implement `prices`, `watch`, and `info` subcommands wired to the API client
+- [ ] 03-01-PLAN.md — Build terminal table renderer and single-coin detail view using rich library
+- [ ] 03-02-PLAN.md — Implement `prices`, `watch`, and `info` subcommands wired to the API client and display module
 
 ## Progress
 
