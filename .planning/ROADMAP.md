@@ -64,7 +64,7 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4
+Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
@@ -72,6 +72,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 | 2. API Integration | 1/1 | Complete   | 2026-03-01 |
 | 3. CLI and Display | 2/2 | Complete   | 2026-03-01 |
 | 4. Web Dashboard | 0/2 | Planned | — |
+| 5. Web UX | 0/1 | Planned | — |
 
 ### Phase 4: Web Dashboard
 **Goal**: A browser-based dashboard that displays live, auto-refreshing cryptocurrency prices from the Bitvavo API, started with a single `crypto web` command
@@ -88,3 +89,19 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 Plans:
 - [ ] 04-01-PLAN.md — Add FastAPI web server with JSON API endpoints and `crypto web` CLI subcommand
 - [ ] 04-02-PLAN.md — Build HTML/CSS/JS frontend with auto-refreshing price table and coin detail modal
+
+### Phase 5: Web UX - Add auto-refresh countdown timer and manual refresh button to the web dashboard HTML. Pure frontend change to static/index.html.
+
+**Goal**: User sees a live countdown timer and a manual refresh button on the web dashboard, giving visibility into when the next auto-refresh happens and control to refresh on demand
+**Depends on**: Phase 4
+**Requirements**: UX-01, UX-02
+**Success Criteria** (what must be TRUE):
+  1. The dashboard subtitle area shows a countdown timer that decrements every second from 30 to 0
+  2. When the countdown reaches 0, prices auto-refresh and the countdown resets to 30
+  3. A "Refresh" button is visible next to the countdown timer
+  4. Clicking the "Refresh" button immediately fetches fresh prices and resets the countdown
+  5. Existing table, modal, and color coding remain unchanged
+**Plans**: 1 plan
+
+Plans:
+- [ ] 05-01-PLAN.md — Add countdown timer, refresh button, and 1-second tick interval to index.html

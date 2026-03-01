@@ -37,6 +37,11 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **WEB-03**: Clicking a coin shows a detail view with expanded information
 - [ ] **WEB-04**: Web server starts with a single `crypto web` command on a configurable port
 
+### Web UX (Dashboard Enhancements)
+
+- [ ] **UX-01**: Dashboard shows a countdown timer displaying seconds until the next auto-refresh
+- [ ] **UX-02**: Dashboard has a manual refresh button that immediately reloads prices and resets the countdown
+
 ## v2 Requirements
 
 Deferred to future release. Tracked but not in current roadmap.
@@ -78,12 +83,14 @@ Which phases cover which requirements. Updated during roadmap creation.
 | WEB-02 | Phase 4 | Planned |
 | WEB-03 | Phase 4 | Planned |
 | WEB-04 | Phase 4 | Planned |
+| UX-01 | Phase 5 | Planned |
+| UX-02 | Phase 5 | Planned |
 
 **Coverage:**
-- v1 requirements: 15 total
-- Mapped to phases: 15
+- v1 requirements: 17 total
+- Mapped to phases: 17
 - Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-28*
-*Last updated: 2026-03-01 after Phase 4 planning*
+*Last updated: 2026-03-01 after Phase 5 planning*
