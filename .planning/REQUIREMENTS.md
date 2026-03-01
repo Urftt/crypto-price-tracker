@@ -27,8 +27,8 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Setup (Project Infrastructure)
 
-- [ ] **SETUP-01**: Project uses uv with pyproject.toml (no setup.py or requirements.txt)
-- [ ] **SETUP-02**: CLI is installable with a `crypto` entry point command
+- [x] **SETUP-01**: Project uses uv with pyproject.toml (no setup.py or requirements.txt)
+- [x] **SETUP-02**: CLI is installable with a `crypto` entry point command
 
 ## v2 Requirements
 
@@ -56,8 +56,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| SETUP-01 | Phase 1 | Pending |
-| SETUP-02 | Phase 1 | Pending |
+| SETUP-01 | Phase 1 | Complete |
+| SETUP-02 | Phase 1 | Complete |
 | API-01 | Phase 2 | Pending |
 | API-02 | Phase 2 | Pending |
 | API-03 | Phase 2 | Pending |

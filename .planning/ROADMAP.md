@@ -12,7 +12,7 @@ Three phases to deliver a working CLI tool: scaffold the project so the `crypto`
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Project Setup** - uv project scaffold with installable `crypto` entry point
+- [x] **Phase 1: Project Setup** - uv project scaffold with installable `crypto` entry point (completed 2026-03-01)
 - [ ] **Phase 2: API Integration** - Live EUR crypto prices fetched from the public Bitvavo REST API
 - [ ] **Phase 3: CLI and Display** - All three subcommands working with formatted, color-coded terminal output
 
@@ -67,6 +67,6 @@ Phases execute in numeric order: 1 → 2 → 3
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Project Setup | 0/1 | Not started | - |
+| 1. Project Setup | 1/1 | Complete   | 2026-03-01 |
 | 2. API Integration | 0/1 | Not started | - |
 | 3. CLI and Display | 0/2 | Not started | - |
