@@ -21,9 +21,9 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### CLI (Commands & Interface)
 
-- [ ] **CLI-01**: `crypto prices` displays the price table once and exits
-- [ ] **CLI-02**: `crypto watch` auto-refreshes the price table (default 30s, configurable via `--interval`)
-- [ ] **CLI-03**: `crypto info <SYMBOL>` shows detailed info for a single coin
+- [x] **CLI-01**: `crypto prices` displays the price table once and exits
+- [x] **CLI-02**: `crypto watch` auto-refreshes the price table (default 30s, configurable via `--interval`)
+- [x] **CLI-03**: `crypto info <SYMBOL>` shows detailed info for a single coin
 
 ### Setup (Project Infrastructure)
 
@@ -64,9 +64,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DISP-01 | Phase 3 | Complete |
 | DISP-02 | Phase 3 | Complete |
 | DISP-03 | Phase 3 | Complete |
-| CLI-01 | Phase 3 | Pending |
-| CLI-02 | Phase 3 | Pending |
-| CLI-03 | Phase 3 | Pending |
+| CLI-01 | Phase 3 | Complete |
+| CLI-02 | Phase 3 | Complete |
+| CLI-03 | Phase 3 | Complete |
 
 **Coverage:**
 - v1 requirements: 11 total

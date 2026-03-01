@@ -14,7 +14,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Project Setup** - uv project scaffold with installable `crypto` entry point (completed 2026-03-01)
 - [x] **Phase 2: API Integration** - Live EUR crypto prices fetched from the public Bitvavo REST API (completed 2026-03-01)
-- [ ] **Phase 3: CLI and Display** - All three subcommands working with formatted, color-coded terminal output
+- [x] **Phase 3: CLI and Display** - All three subcommands working with formatted, color-coded terminal output (completed 2026-03-01)
 
 ## Phase Details
 
@@ -69,4 +69,4 @@ Phases execute in numeric order: 1 → 2 → 3
 |-------|----------------|--------|-----------|
 | 1. Project Setup | 1/1 | Complete   | 2026-03-01 |
 | 2. API Integration | 1/1 | Complete   | 2026-03-01 |
-| 3. CLI and Display | 1/2 | In Progress|  |
+| 3. CLI and Display | 2/2 | Complete   | 2026-03-01 |

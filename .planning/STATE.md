@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-last_updated: "2026-03-01T07:05:22Z"
+last_updated: "2026-03-01T07:10:00Z"
 progress:
   total_phases: 3
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 4
-  completed_plans: 3
+  completed_plans: 4
 ---
 
 # Project State
@@ -23,18 +23,18 @@ See: .planning/PROJECT.md (updated 2026-02-28)
 ## Current Position
 
 Phase: 3 of 3 (CLI and Display)
-Plan: 1 of 2 complete
-Status: Plan 03-01 complete — Terminal display module with render_price_table and render_coin_detail implemented and tested
-Last activity: 2026-03-01 — Plan 03-01 executed, display.py with rich formatting and 8 unit tests complete
+Plan: 2 of 2 complete — ALL PHASES COMPLETE
+Status: Plan 03-02 complete — CLI wiring done; prices, watch, and info subcommands fully implemented and tested
+Last activity: 2026-03-01 — Plan 03-02 executed, cli.py rewritten with all subcommands, 7 integration tests passing
 
-Progress: [███████░░░] 75%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 2
-- Average duration: 4 min
-- Total execution time: 7 min
+- Total plans completed: 4
+- Average duration: 3 min
+- Total execution time: 9 min
 
 **By Phase:**
 
@@ -42,10 +42,10 @@ Progress: [███████░░░] 75%
 |-------|-------|-------|----------|
 | 1. Project Setup | 1 | 5 min | 5 min |
 | 2. API Integration | 1 | 2 min | 2 min |
-| 3. CLI and Display | 1 | 2 min | 2 min |
+| 3. CLI and Display | 2 | 4 min | 2 min |
 
 **Recent Trend:**
-- Last 5 plans: 5 min, 2 min, 2 min
+- Last 5 plans: 5 min, 2 min, 2 min, 2 min
 - Trend: Fast execution
 
 *Updated after each plan completion*
@@ -69,6 +69,10 @@ Recent decisions affecting current work:
 - 03-01: Per-cell rich color markup for 24h change column (green for positive, red for negative)
 - 03-01: rich.box.SIMPLE used for coin detail view (clean borderless label/value layout)
 - 03-01: uv sync removes dev extras — must use uv sync --extra dev to retain pytest
+- 03-02: argparse retained (no click/typer) — stdlib only for CLI parsing
+- 03-02: cmd_watch catches HTTP errors inside the loop — one failed refresh does not kill the session
+- 03-02: cmd_info fetches top 100 coins to maximise symbol lookup coverage
+- 03-02: ANSI escape (\033[2J\033[H) used for screen clearing in watch mode — no external dep needed
 
 ### Pending Todos
 
@@ -81,5 +85,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-01
-Stopped at: Completed 03-01-PLAN.md — Phase 3 Plan 1 complete, display module ready for Plan 03-02 CLI wiring
+Stopped at: Completed 03-02-PLAN.md — v1.0 milestone complete, all phases and plans executed successfully
 Resume file: None
