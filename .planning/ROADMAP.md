@@ -71,7 +71,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 | 1. Project Setup | 1/1 | Complete   | 2026-03-01 |
 | 2. API Integration | 1/1 | Complete   | 2026-03-01 |
 | 3. CLI and Display | 2/2 | Complete   | 2026-03-01 |
-| 4. Web Dashboard | 1/2 | In Progress | — |
+| 4. Web Dashboard | 0/2 | Planned | — |
 
 ### Phase 4: Web Dashboard
 **Goal**: A browser-based dashboard that displays live, auto-refreshing cryptocurrency prices from the Bitvavo API, started with a single `crypto web` command
@@ -86,5 +86,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 **Plans**: 2 plans
 
 Plans:
-- [x] 04-01-PLAN.md — Add FastAPI web server with JSON API endpoints and `crypto web` CLI subcommand
+- [ ] 04-01-PLAN.md — Add FastAPI web server with JSON API endpoints and `crypto web` CLI subcommand
 - [ ] 04-02-PLAN.md — Build HTML/CSS/JS frontend with auto-refreshing price table and coin detail modal
