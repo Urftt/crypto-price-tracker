@@ -58,8 +58,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 03-01-PLAN.md — Build terminal table renderer and single-coin detail view using rich library
-- [ ] 03-02-PLAN.md — Implement `prices`, `watch`, and `info` subcommands wired to the API client and display module
+- [x] 03-01-PLAN.md — Build terminal table renderer and single-coin detail view using rich library
+- [x] 03-02-PLAN.md — Implement `prices`, `watch`, and `info` subcommands wired to the API client and display module
 
 ## Progress
 
@@ -71,7 +71,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 | 1. Project Setup | 1/1 | Complete   | 2026-03-01 |
 | 2. API Integration | 1/1 | Complete   | 2026-03-01 |
 | 3. CLI and Display | 2/2 | Complete   | 2026-03-01 |
-| 4. Web Dashboard | 0/2 | Planned    | — |
+| 4. Web Dashboard | 1/2 | In Progress | — |
 
 ### Phase 4: Web Dashboard
 **Goal**: A browser-based dashboard that displays live, auto-refreshing cryptocurrency prices from the Bitvavo API, started with a single `crypto web` command
@@ -86,5 +86,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 **Plans**: 2 plans
 
 Plans:
-- [ ] 04-01-PLAN.md — Add FastAPI web server with JSON API endpoints and `crypto web` CLI subcommand
+- [x] 04-01-PLAN.md — Add FastAPI web server with JSON API endpoints and `crypto web` CLI subcommand
 - [ ] 04-02-PLAN.md — Build HTML/CSS/JS frontend with auto-refreshing price table and coin detail modal
