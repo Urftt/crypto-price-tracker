@@ -45,6 +45,14 @@ def cmd_watch(args: argparse.Namespace) -> None:
         print("\nStopped.")
 
 
+def cmd_web(args: argparse.Namespace) -> None:
+    """Start the web dashboard server."""
+    from crypto_price_tracker.web import run_server
+
+    print(f"Starting web dashboard at http://localhost:{args.port}")
+    run_server(host=args.host, port=args.port)
+
+
 def cmd_info(args: argparse.Namespace) -> None:
     """Fetch coins and display detailed info for the requested symbol."""
     symbol = args.symbol.upper()
@@ -107,6 +115,22 @@ def main() -> None:
         help="Coin symbol (e.g., BTC, ETH)",
     )
 
+    # web subcommand
+    web_parser = subparsers.add_parser("web", help="Start the web dashboard server")
+    web_parser.add_argument(
+        "-p",
+        "--port",
+        type=int,
+        default=8000,
+        help="Port to listen on (default: 8000)",
+    )
+    web_parser.add_argument(
+        "--host",
+        type=str,
+        default="0.0.0.0",
+        help="Host to bind to (default: 0.0.0.0)",
+    )
+
     args = parser.parse_args()
 
     if args.command == "prices":
@@ -115,6 +139,8 @@ def main() -> None:
         cmd_watch(args)
     elif args.command == "info":
         cmd_info(args)
+    elif args.command == "web":
+        cmd_web(args)
     else:
         parser.print_help()
 
