@@ -15,9 +15,9 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Display (Terminal Output)
 
-- [ ] **DISP-01**: Prices are shown in a formatted terminal table with price, 24h change %, market cap, and volume
-- [ ] **DISP-02**: 24h change is color-coded green (positive) or red (negative)
-- [ ] **DISP-03**: Single-coin detail view shows expanded information for one cryptocurrency
+- [x] **DISP-01**: Prices are shown in a formatted terminal table with price, 24h change %, market cap, and volume
+- [x] **DISP-02**: 24h change is color-coded green (positive) or red (negative)
+- [x] **DISP-03**: Single-coin detail view shows expanded information for one cryptocurrency
 
 ### CLI (Commands & Interface)
 
@@ -61,9 +61,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | API-01 | Phase 2 | Complete |
 | API-02 | Phase 2 | Complete |
 | API-03 | Phase 2 | Complete |
-| DISP-01 | Phase 3 | Pending |
-| DISP-02 | Phase 3 | Pending |
-| DISP-03 | Phase 3 | Pending |
+| DISP-01 | Phase 3 | Complete |
+| DISP-02 | Phase 3 | Complete |
+| DISP-03 | Phase 3 | Complete |
 | CLI-01 | Phase 3 | Pending |
 | CLI-02 | Phase 3 | Pending |
 | CLI-03 | Phase 3 | Pending |
