@@ -107,3 +107,63 @@ def test_index_returns_response(client):
     """GET / returns HTTP 200 (either index.html or JSON fallback)."""
     response = client.get("/")
     assert response.status_code == 200
+
+
+def test_index_serves_html_with_table(client):
+    """GET / returns 200 with text/html containing the price table structure (WEB-01)."""
+    response = client.get("/")
+
+    assert response.status_code == 200
+    assert "text/html" in response.headers.get("content-type", "")
+
+    body = response.text
+    assert "<table" in body
+    assert "<th>#</th>" in body
+    assert "<th>Symbol</th>" in body
+    assert "<th>Name</th>" in body
+    assert "<th>Price (EUR)</th>" in body
+    assert "<th>24h %</th>" in body
+    assert "<th>Volume (EUR)</th>" in body
+
+
+def test_index_has_auto_refresh(client):
+    """GET / response body contains the 30-second auto-refresh logic (WEB-02)."""
+    response = client.get("/")
+
+    body = response.text
+    assert "setInterval" in body
+    assert "30000" in body
+
+
+def test_index_has_detail_modal(client):
+    """GET / response body contains the coin detail fetch URL and modal element (WEB-03)."""
+    response = client.get("/")
+
+    body = response.text
+    assert "/api/coin/" in body
+    assert "modal" in body
+
+
+def test_index_has_color_coding(client):
+    """GET / response body contains green and red color codes for 24h change values."""
+    response = client.get("/")
+
+    body = response.text
+    assert "#3fb950" in body
+    assert "#f85149" in body
+
+
+def test_api_coin_detail_fields_complete(client, mock_coins):
+    """GET /api/coin/BTC returns JSON with all 6 CoinData fields matching mock data."""
+    with patch("crypto_price_tracker.web.get_top_coins", return_value=mock_coins):
+        response = client.get("/api/coin/BTC")
+
+    assert response.status_code == 200
+    data = response.json()
+
+    assert data["symbol"] == "BTC"
+    assert data["name"] == "Bitcoin"
+    assert data["price"] == 56754.0
+    assert data["change_24h"] == 1.67
+    assert data["volume"] == 2186.73
+    assert data["volume_eur"] == 120339407.0
