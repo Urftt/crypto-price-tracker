@@ -9,9 +9,9 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### API (Data Fetching)
 
-- [ ] **API-01**: User can fetch current crypto prices from the public Bitvavo REST API
-- [ ] **API-02**: All prices are displayed in EUR via Bitvavo EUR trading pairs
-- [ ] **API-03**: Top N coins are fetched dynamically and sorted by market cap (default 20)
+- [x] **API-01**: User can fetch current crypto prices from the public Bitvavo REST API
+- [x] **API-02**: All prices are displayed in EUR via Bitvavo EUR trading pairs
+- [x] **API-03**: Top N coins are fetched dynamically and sorted by market cap (default 20)
 
 ### Display (Terminal Output)
 
@@ -58,9 +58,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 |-------------|-------|--------|
 | SETUP-01 | Phase 1 | Complete |
 | SETUP-02 | Phase 1 | Complete |
-| API-01 | Phase 2 | Pending |
-| API-02 | Phase 2 | Pending |
-| API-03 | Phase 2 | Pending |
+| API-01 | Phase 2 | Complete |
+| API-02 | Phase 2 | Complete |
+| API-03 | Phase 2 | Complete |
 | DISP-01 | Phase 3 | Pending |
 | DISP-02 | Phase 3 | Pending |
 | DISP-03 | Phase 3 | Pending |

@@ -13,7 +13,7 @@ Three phases to deliver a working CLI tool: scaffold the project so the `crypto`
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Project Setup** - uv project scaffold with installable `crypto` entry point (completed 2026-03-01)
-- [ ] **Phase 2: API Integration** - Live EUR crypto prices fetched from the public Bitvavo REST API
+- [x] **Phase 2: API Integration** - Live EUR crypto prices fetched from the public Bitvavo REST API (completed 2026-03-01)
 - [ ] **Phase 3: CLI and Display** - All three subcommands working with formatted, color-coded terminal output
 
 ## Phase Details
@@ -29,7 +29,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: 1 plan
 
 Plans:
-- [ ] 01-01-PLAN.md — Scaffold uv project with pyproject.toml, entry point, and minimal CLI skeleton
+- [x] 01-01-PLAN.md — Scaffold uv project with pyproject.toml, entry point, and minimal CLI skeleton
 
 ### Phase 2: API Integration
 **Goal**: Live EUR cryptocurrency price data flows from the public Bitvavo REST API into the application
@@ -43,7 +43,7 @@ Plans:
 **Plans**: 1 plan
 
 Plans:
-- [ ] 02-01-PLAN.md — Build Bitvavo API client with data models, EUR filtering, volume-based sorting, and unit tests
+- [x] 02-01-PLAN.md — Build Bitvavo API client with data models, EUR filtering, volume-based sorting, and unit tests
 
 ### Phase 3: CLI and Display
 **Goal**: Users can run all three subcommands and see formatted, color-coded crypto prices in the terminal
@@ -68,5 +68,5 @@ Phases execute in numeric order: 1 → 2 → 3
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Project Setup | 1/1 | Complete   | 2026-03-01 |
-| 2. API Integration | 0/1 | Not started | - |
+| 2. API Integration | 1/1 | Complete   | 2026-03-01 |
 | 3. CLI and Display | 0/2 | Not started | - |
