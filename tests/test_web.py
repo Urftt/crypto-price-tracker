@@ -127,12 +127,32 @@ def test_index_serves_html_with_table(client):
 
 
 def test_index_has_auto_refresh(client):
-    """GET / response body contains the 30-second auto-refresh logic (WEB-02)."""
+    """GET / response body contains countdown-based auto-refresh logic (WEB-02)."""
     response = client.get("/")
 
     body = response.text
     assert "setInterval" in body
-    assert "30000" in body
+    assert "REFRESH_SECONDS" in body
+    assert "tick" in body
+
+
+def test_index_has_countdown_timer(client):
+    """GET / response body contains countdown timer element and tick function."""
+    response = client.get("/")
+
+    body = response.text
+    assert 'id="countdown"' in body
+    assert "secondsLeft" in body
+    assert "tick" in body
+
+
+def test_index_has_refresh_button(client):
+    """GET / response body contains manual refresh button with handler function."""
+    response = client.get("/")
+
+    body = response.text
+    assert 'id="refresh-btn"' in body
+    assert "refreshNow" in body
 
 
 def test_index_has_detail_modal(client):
