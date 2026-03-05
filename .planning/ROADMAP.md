@@ -15,7 +15,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1: Project Setup** - uv project scaffold with installable `crypto` entry point (completed 2026-03-01)
 - [x] **Phase 2: API Integration** - Live EUR crypto prices fetched from the public Bitvavo REST API (completed 2026-03-01)
 - [x] **Phase 3: CLI and Display** - All three subcommands working with formatted, color-coded terminal output (completed 2026-03-01)
-- [ ] **Phase 4: Web Dashboard** - Browser-based auto-refreshing price dashboard started with `crypto web`
+- [x] **Phase 4: Web Dashboard** - Browser-based auto-refreshing price dashboard started with `crypto web` (completed 2026-03-05)
 
 ## Phase Details
 
@@ -71,7 +71,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | 1. Project Setup | 1/1 | Complete   | 2026-03-01 |
 | 2. API Integration | 1/1 | Complete   | 2026-03-01 |
 | 3. CLI and Display | 2/2 | Complete   | 2026-03-01 |
-| 4. Web Dashboard | 0/2 | Planned | — |
+| 4. Web Dashboard | 2/2 | Complete | 2026-03-05 |
 | 5. Web UX | 0/1 | Planned | — |
 
 ### Phase 4: Web Dashboard
@@ -87,8 +87,8 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 **Plans**: 2 plans
 
 Plans:
-- [ ] 04-01-PLAN.md — Add FastAPI web server with JSON API endpoints and `crypto web` CLI subcommand
-- [ ] 04-02-PLAN.md — Build HTML/CSS/JS frontend with auto-refreshing price table and coin detail modal
+- [x] 04-01-PLAN.md — Add FastAPI web server with JSON API endpoints and `crypto web` CLI subcommand
+- [x] 04-02-PLAN.md — Build HTML/CSS/JS frontend with auto-refreshing price table and coin detail modal
 
 ### Phase 5: Web UX - Add auto-refresh countdown timer and manual refresh button to the web dashboard HTML. Pure frontend change to static/index.html.
 
@@ -105,3 +105,13 @@ Plans:
 
 Plans:
 - [ ] 05-01-PLAN.md — Add countdown timer, refresh button, and 1-second tick interval to index.html
+
+### Phase 6: Add portfolio tracking to the crypto tracker
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 5
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 6 to break down)
