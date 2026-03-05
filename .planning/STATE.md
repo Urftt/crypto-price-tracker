@@ -87,7 +87,6 @@ None.
 
 ### Roadmap Evolution
 
-- Phase 6 added: Add portfolio tracking to the crypto tracker
 
 ### Blockers/Concerns
 
