@@ -64,7 +64,7 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
+Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
@@ -73,6 +73,8 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | 3. CLI and Display | 2/2 | Complete   | 2026-03-01 |
 | 4. Web Dashboard | 2/2 | Complete | 2026-03-05 |
 | 5. Web UX | 0/1 | Planned | — |
+| 6. Portfolio Tracking | 0/0 | Planned | — |
+| 7. Price Alerts | 0/0 | Planned | — |
 
 ### Phase 4: Web Dashboard
 **Goal**: A browser-based dashboard that displays live, auto-refreshing cryptocurrency prices from the Bitvavo API, started with a single `crypto web` command
@@ -115,3 +117,13 @@ Plans:
 
 Plans:
 - [ ] TBD (run /gsd:plan-phase 6 to break down)
+
+### Phase 7: Price Alerts
+
+**Goal:** Let users set target prices for coins and get notified when hit. Store alerts in SQLite alongside portfolio. CLI: `crypto alert add BTC 100000`, web: alerts panel.
+**Depends on:** Phase 6
+**Requirements**: TBD
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 7 to break down)

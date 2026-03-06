@@ -5,7 +5,7 @@ milestone_name: milestone
 status: in_progress
 last_updated: "2026-03-05T00:00:00Z"
 progress:
-  total_phases: 6
+  total_phases: 7
   completed_phases: 4
   total_plans: 8
   completed_plans: 6
@@ -86,6 +86,8 @@ Recent decisions affecting current work:
 None.
 
 ### Roadmap Evolution
+
+- 2026-03-06: Added Phase 7 (Price Alerts) — target price notifications via CLI and web alerts panel, SQLite storage
 
 
 ### Blockers/Concerns
