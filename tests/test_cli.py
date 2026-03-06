@@ -12,7 +12,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from crypto_price_tracker.cli import main
-from crypto_price_tracker.models import CoinData
+from crypto_price_tracker.models import CoinData, Holding
 
 
 @pytest.fixture
@@ -120,3 +120,77 @@ def test_watch_command_parses_interval(mock_coins):
 
     mock_api.assert_called()
     mock_render.assert_called()
+
+
+# ---- Portfolio subcommand tests ----
+
+
+def test_portfolio_add_command():
+    """portfolio add should call add_holding with correct arguments."""
+    with patch("crypto_price_tracker.cli.add_holding", return_value=1) as mock_add:
+        sys.argv = ["crypto", "portfolio", "add", "BTC", "0.5", "45000"]
+        main()
+
+    mock_add.assert_called_once_with("BTC", 0.5, 45000.0, None)
+
+
+def test_portfolio_remove_command():
+    """portfolio remove should call remove_holding with the lot ID."""
+    with patch("crypto_price_tracker.cli.remove_holding", return_value=True) as mock_rm:
+        sys.argv = ["crypto", "portfolio", "remove", "1"]
+        main()
+
+    mock_rm.assert_called_once_with(1)
+
+
+def test_portfolio_list_command(mock_coins):
+    """portfolio list should aggregate holdings and render the portfolio table."""
+    holdings = [Holding(1, "BTC", 0.5, 45000.0, "2026-01-15")]
+    with (
+        patch("crypto_price_tracker.cli.get_all_holdings", return_value=holdings),
+        patch("crypto_price_tracker.cli.get_top_coins", return_value=mock_coins),
+        patch("crypto_price_tracker.cli.render_portfolio_table") as mock_render,
+    ):
+        sys.argv = ["crypto", "portfolio", "list"]
+        main()
+
+    mock_render.assert_called_once()
+
+
+def test_portfolio_lots_command():
+    """portfolio lots BTC should render individual lots for BTC."""
+    lots = [Holding(1, "BTC", 0.5, 45000.0, "2026-01-15")]
+    with (
+        patch("crypto_price_tracker.cli.get_holdings_by_symbol", return_value=lots),
+        patch("crypto_price_tracker.cli.render_portfolio_lots") as mock_render,
+    ):
+        sys.argv = ["crypto", "portfolio", "lots", "BTC"]
+        main()
+
+    mock_render.assert_called_once()
+
+
+def test_portfolio_export_csv(capsys):
+    """portfolio export --format csv should print CSV output to stdout."""
+    holdings = [Holding(1, "BTC", 0.5, 45000.0, "2026-01-15")]
+    csv_output = "id,symbol,amount,buy_price,buy_date\r\n1,BTC,0.5,45000.0,2026-01-15\r\n"
+    with (
+        patch("crypto_price_tracker.cli.get_all_holdings", return_value=holdings),
+        patch("crypto_price_tracker.cli.export_csv", return_value=csv_output),
+    ):
+        sys.argv = ["crypto", "portfolio", "export", "--format", "csv"]
+        main()
+
+    captured = capsys.readouterr()
+    assert "BTC" in captured.out
+    assert "symbol" in captured.out
+
+
+def test_portfolio_no_subcommand(capsys):
+    """portfolio with no subcommand should print help text."""
+    sys.argv = ["crypto", "portfolio"]
+    main()
+
+    captured = capsys.readouterr()
+    output = captured.out + captured.err
+    assert "portfolio" in output.lower() or "usage" in output.lower()

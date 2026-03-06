@@ -15,14 +15,41 @@ from __future__ import annotations
 import dataclasses
 from pathlib import Path
 
+import httpx
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel, Field
 
 from crypto_price_tracker.api import get_top_coins
 from crypto_price_tracker.models import CoinData  # noqa: F401 – re-exported for type hints
+from crypto_price_tracker.portfolio import aggregate_portfolio
+from crypto_price_tracker.portfolio_db import (
+    add_holding as db_add_holding,
+    get_all_holdings as db_get_all_holdings,
+    get_holdings_by_symbol as db_get_holdings_by_symbol,
+    remove_holding as db_remove_holding,
+    update_holding as db_update_holding,
+)
 
 STATIC_DIR = Path(__file__).parent / "static"
+
+
+class HoldingCreate(BaseModel):
+    """Request body for creating a new holding."""
+
+    symbol: str
+    amount: float = Field(gt=0)
+    buy_price: float = Field(gt=0)
+    buy_date: str | None = None
+
+
+class HoldingUpdate(BaseModel):
+    """Request body for updating an existing holding."""
+
+    amount: float | None = Field(default=None, gt=0)
+    buy_price: float | None = Field(default=None, gt=0)
+    buy_date: str | None = None
 
 
 def create_app() -> FastAPI:
@@ -47,6 +74,65 @@ def create_app() -> FastAPI:
                 detail=f"Coin '{symbol}' not found in top 100 EUR pairs",
             )
         return dataclasses.asdict(match)
+
+    # --- Portfolio endpoints ---
+
+    @app.get("/api/portfolio")
+    def api_portfolio_list():
+        """Return aggregated portfolio with live prices."""
+        holdings = db_get_all_holdings()
+        prices: dict = {}
+        try:
+            coins = get_top_coins(top_n=100)
+            prices = {c.symbol: c for c in coins}
+        except (httpx.HTTPStatusError, httpx.ConnectError):
+            pass  # best-effort pricing
+        summary = aggregate_portfolio(holdings, prices)
+        return {
+            "rows": [dataclasses.asdict(r) for r in summary.rows],
+            "total_value": summary.total_value,
+            "total_cost": summary.total_cost,
+            "total_pnl_eur": summary.total_pnl_eur,
+            "total_pnl_pct": summary.total_pnl_pct,
+        }
+
+    @app.get("/api/portfolio/lots/{symbol}")
+    def api_portfolio_lots(symbol: str):
+        """Return individual lots for a given coin symbol."""
+        lots = db_get_holdings_by_symbol(symbol.upper())
+        return [dataclasses.asdict(h) for h in lots]
+
+    @app.post("/api/portfolio", status_code=201)
+    def api_portfolio_add(body: HoldingCreate):
+        """Add a new holding to the portfolio."""
+        try:
+            row_id = db_add_holding(body.symbol, body.amount, body.buy_price, body.buy_date)
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=str(e))
+        return {"id": row_id, "status": "created"}
+
+    @app.put("/api/portfolio/{holding_id}")
+    def api_portfolio_update(holding_id: int, body: HoldingUpdate):
+        """Update fields of an existing holding."""
+        kwargs: dict = {}
+        if body.amount is not None:
+            kwargs["amount"] = body.amount
+        if body.buy_price is not None:
+            kwargs["buy_price"] = body.buy_price
+        if body.buy_date is not None:
+            kwargs["buy_date"] = body.buy_date
+        if not kwargs:
+            raise HTTPException(status_code=400, detail="No fields to update")
+        if not db_update_holding(holding_id, **kwargs):
+            raise HTTPException(status_code=404, detail=f"Holding #{holding_id} not found")
+        return {"status": "updated"}
+
+    @app.delete("/api/portfolio/{holding_id}")
+    def api_portfolio_delete(holding_id: int):
+        """Delete a holding by ID."""
+        if not db_remove_holding(holding_id):
+            raise HTTPException(status_code=404, detail=f"Holding #{holding_id} not found")
+        return {"status": "deleted"}
 
     @app.get("/")
     def index():

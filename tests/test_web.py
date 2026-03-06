@@ -21,6 +21,17 @@ def client():
 
 
 @pytest.fixture
+def portfolio_db(tmp_path):
+    """Redirect portfolio DB to a temporary file for test isolation."""
+    db_path = tmp_path / "test.db"
+    from crypto_price_tracker import portfolio_db
+    original = portfolio_db._get_default_db_path
+    portfolio_db._get_default_db_path = lambda: db_path
+    yield db_path
+    portfolio_db._get_default_db_path = original
+
+
+@pytest.fixture
 def mock_coins():
     return [
         CoinData(
@@ -187,3 +198,120 @@ def test_api_coin_detail_fields_complete(client, mock_coins):
     assert data["change_24h"] == 1.67
     assert data["volume"] == 2186.73
     assert data["volume_eur"] == 120339407.0
+
+
+# ---- Portfolio API tests ----
+
+
+def test_api_portfolio_get_empty(client, portfolio_db, mock_coins):
+    """GET /api/portfolio with empty DB returns empty rows and zero totals."""
+    with patch("crypto_price_tracker.web.get_top_coins", return_value=mock_coins):
+        response = client.get("/api/portfolio")
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["rows"] == []
+    assert data["total_value"] == 0
+    assert data["total_pnl_eur"] == 0
+
+
+def test_api_portfolio_add_holding(client, portfolio_db):
+    """POST /api/portfolio creates a holding and returns its ID."""
+    response = client.post("/api/portfolio", json={
+        "symbol": "BTC",
+        "amount": 0.5,
+        "buy_price": 45000.0,
+        "buy_date": "2026-01-15",
+    })
+
+    assert response.status_code == 201
+    data = response.json()
+    assert "id" in data
+    assert data["status"] == "created"
+
+
+def test_api_portfolio_add_then_get(client, portfolio_db, mock_coins):
+    """POST then GET /api/portfolio returns aggregated rows with the new holding."""
+    client.post("/api/portfolio", json={
+        "symbol": "BTC",
+        "amount": 0.5,
+        "buy_price": 45000.0,
+        "buy_date": "2026-01-15",
+    })
+
+    with patch("crypto_price_tracker.web.get_top_coins", return_value=mock_coins):
+        response = client.get("/api/portfolio")
+
+    assert response.status_code == 200
+    data = response.json()
+    assert len(data["rows"]) == 1
+    assert data["rows"][0]["symbol"] == "BTC"
+
+
+def test_api_portfolio_delete_holding(client, portfolio_db):
+    """POST then DELETE /api/portfolio/{id} removes the holding."""
+    resp = client.post("/api/portfolio", json={
+        "symbol": "BTC",
+        "amount": 0.5,
+        "buy_price": 45000.0,
+    })
+    holding_id = resp.json()["id"]
+
+    response = client.delete(f"/api/portfolio/{holding_id}")
+    assert response.status_code == 200
+    assert response.json()["status"] == "deleted"
+
+
+def test_api_portfolio_delete_not_found(client, portfolio_db):
+    """DELETE /api/portfolio/999 returns 404 when holding does not exist."""
+    response = client.delete("/api/portfolio/999")
+    assert response.status_code == 404
+
+
+def test_api_portfolio_update_holding(client, portfolio_db):
+    """POST then PUT /api/portfolio/{id} updates the holding fields."""
+    resp = client.post("/api/portfolio", json={
+        "symbol": "ETH",
+        "amount": 2.0,
+        "buy_price": 2000.0,
+    })
+    holding_id = resp.json()["id"]
+
+    response = client.put(f"/api/portfolio/{holding_id}", json={"amount": 3.0})
+    assert response.status_code == 200
+    assert response.json()["status"] == "updated"
+
+
+def test_api_portfolio_lots(client, portfolio_db):
+    """POST BTC then GET /api/portfolio/lots/BTC returns one lot."""
+    client.post("/api/portfolio", json={
+        "symbol": "BTC",
+        "amount": 0.5,
+        "buy_price": 45000.0,
+        "buy_date": "2026-01-15",
+    })
+
+    response = client.get("/api/portfolio/lots/BTC")
+    assert response.status_code == 200
+    data = response.json()
+    assert len(data) == 1
+    assert data[0]["symbol"] == "BTC"
+
+
+def test_api_portfolio_add_validation(client, portfolio_db):
+    """POST /api/portfolio with negative amount returns 422."""
+    response = client.post("/api/portfolio", json={
+        "symbol": "BTC",
+        "amount": -1,
+        "buy_price": 45000.0,
+    })
+    assert response.status_code == 422
+
+
+def test_index_has_portfolio_tab(client):
+    """GET / should contain Portfolio tab, tab-portfolio div, and switchTab function."""
+    response = client.get("/")
+    body = response.text
+    assert "Portfolio" in body
+    assert "tab-portfolio" in body
+    assert "switchTab" in body

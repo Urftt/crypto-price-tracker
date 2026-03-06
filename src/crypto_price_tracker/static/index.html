@@ -88,25 +88,157 @@
     .detail-value { font-weight: bold; text-align: right; }
 
     #modal-error { color: #f85149; padding: 16px 0; }
+
+    /* Tabs */
+    .tabs { display: flex; gap: 4px; margin-bottom: 16px; }
+    .tab-btn {
+      background: #21262d;
+      color: #8b949e;
+      border: 1px solid #30363d;
+      border-radius: 4px 4px 0 0;
+      padding: 6px 16px;
+      font-family: monospace;
+      font-size: 0.9em;
+      cursor: pointer;
+    }
+    .tab-btn:hover { color: #c9d1d9; border-color: #58a6ff; }
+    .tab-btn.active { background: #0d1117; color: #58a6ff; border-bottom-color: #0d1117; font-weight: bold; }
+
+    /* Portfolio form */
+    .portfolio-form {
+      display: flex;
+      gap: 8px;
+      align-items: flex-end;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+      padding: 12px;
+      background: #161b22;
+      border-radius: 6px;
+      border: 1px solid #21262d;
+    }
+    .portfolio-form label {
+      display: flex;
+      flex-direction: column;
+      font-size: 0.75em;
+      color: #8b949e;
+      text-transform: uppercase;
+    }
+    .portfolio-form input {
+      background: #0d1117;
+      border: 1px solid #30363d;
+      border-radius: 4px;
+      color: #c9d1d9;
+      font-family: monospace;
+      font-size: 0.9em;
+      padding: 4px 8px;
+      margin-top: 2px;
+      width: 100px;
+    }
+    .portfolio-form input:focus { border-color: #58a6ff; outline: none; }
+    .portfolio-form button {
+      background: #238636;
+      color: #fff;
+      border: 1px solid #2ea043;
+      border-radius: 4px;
+      padding: 5px 14px;
+      font-family: monospace;
+      font-size: 0.9em;
+      cursor: pointer;
+    }
+    .portfolio-form button:hover { background: #2ea043; }
+
+    /* Form messages */
+    .form-msg { font-size: 0.8em; margin-bottom: 8px; min-height: 1.2em; }
+    .form-msg.ok { color: #3fb950; }
+    .form-msg.err { color: #f85149; }
+
+    /* Lots toggle and actions */
+    .lots-toggle {
+      background: none;
+      border: none;
+      color: #58a6ff;
+      cursor: pointer;
+      font-family: monospace;
+      font-size: 0.85em;
+      padding: 0;
+    }
+    .lots-toggle:hover { text-decoration: underline; }
+    .lots-row td { background: #161b22; font-size: 0.85em; }
+    .lot-actions button {
+      background: none;
+      border: none;
+      color: #f85149;
+      cursor: pointer;
+      font-family: monospace;
+      font-size: 0.8em;
+      padding: 0 4px;
+    }
+    .lot-actions button:hover { text-decoration: underline; }
+
+    /* Summary footer */
+    .summary-footer {
+      margin-top: 12px;
+      padding: 10px 12px;
+      background: #161b22;
+      border-radius: 6px;
+      border: 1px solid #21262d;
+      font-size: 0.9em;
+      max-width: 800px;
+    }
+
+    .na { color: #8b949e; }
   </style>
 </head>
 <body>
   <h1>&#11041; Crypto Prices</h1>
-  <div class="subtitle">
-    Live EUR prices via Bitvavo &middot;
-    next refresh in <span id="countdown">30</span>s
-    <button id="refresh-btn" onclick="refreshNow()" title="Refresh now">&#8635; Refresh</button>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('prices')">Prices</button>
+    <button class="tab-btn" onclick="switchTab('portfolio')">Portfolio</button>
   </div>
-  <table>
-    <thead>
-      <tr>
-        <th>#</th><th>Symbol</th><th>Name</th>
-        <th>Price (EUR)</th><th>24h %</th><th>Volume (EUR)</th>
-      </tr>
-    </thead>
-    <tbody id="tbody"></tbody>
-  </table>
-  <div class="updated" id="updated"></div>
+
+  <!-- Prices tab -->
+  <div id="tab-prices" class="tab-content">
+    <div class="subtitle">
+      Live EUR prices via Bitvavo &middot;
+      next refresh in <span id="countdown">30</span>s
+      <button id="refresh-btn" onclick="refreshNow()" title="Refresh now">&#8635; Refresh</button>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>#</th><th>Symbol</th><th>Name</th>
+          <th>Price (EUR)</th><th>24h %</th><th>Volume (EUR)</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+    <div class="updated" id="updated"></div>
+  </div>
+
+  <!-- Portfolio tab -->
+  <div id="tab-portfolio" class="tab-content" style="display:none;">
+    <form class="portfolio-form" onsubmit="addHolding(event)">
+      <label>Symbol <input type="text" id="pf-symbol" required placeholder="BTC"></label>
+      <label>Amount <input type="number" id="pf-amount" required step="any" min="0.0001" placeholder="0.5"></label>
+      <label>Buy Price <input type="number" id="pf-price" required step="any" min="0.01" placeholder="45000"></label>
+      <label>Date <input type="date" id="pf-date"></label>
+      <button type="submit">+ Add</button>
+    </form>
+    <div class="form-msg" id="pf-msg"></div>
+
+    <table id="portfolio-table">
+      <thead>
+        <tr>
+          <th>Symbol</th><th>Amount</th><th>Avg Buy</th>
+          <th>Value</th><th>P&amp;L</th><th>%</th><th>Alloc</th><th></th>
+        </tr>
+      </thead>
+      <tbody id="pf-tbody"></tbody>
+    </table>
+
+    <div class="summary-footer" id="pf-summary"></div>
+  </div>
 
   <!-- Coin detail modal -->
   <div id="modal-backdrop" onclick="handleBackdropClick(event)">
@@ -145,6 +277,16 @@
     const fmtPrice = n => n >= 1 ? fmt(n) : n.toFixed(6);
     const fmtVol = n => n.toLocaleString('nl-NL', {minimumFractionDigits: 0, maximumFractionDigits: 0});
 
+    /* --- Tab switching --- */
+    function switchTab(name) {
+      document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+      document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+      document.getElementById('tab-' + name).style.display = '';
+      document.querySelector(`.tab-btn[onclick="switchTab('${name}')"]`).classList.add('active');
+      if (name === 'portfolio') loadPortfolio();
+    }
+
+    /* --- Prices tab --- */
     async function load() {
       const data = await fetch('/api/prices').then(r => r.json());
       const tbody = document.getElementById('tbody');
@@ -229,6 +371,121 @@
       secondsLeft = REFRESH_SECONDS;
       document.getElementById('countdown').textContent = secondsLeft;
       await load();
+    }
+
+    /* --- Portfolio tab --- */
+    async function loadPortfolio() {
+      try {
+        const data = await fetch('/api/portfolio').then(r => r.json());
+        const tbody = document.getElementById('pf-tbody');
+        if (!data.rows || data.rows.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="8" class="na" style="text-align:center;">No holdings yet. Add one above.</td></tr>';
+          document.getElementById('pf-summary').innerHTML = '';
+          return;
+        }
+        tbody.innerHTML = data.rows.map(r => {
+          const hasPrice = r.current_price !== null;
+          const amtStr = r.total_amount.toFixed(4);
+          const avgStr = '\u20ac ' + fmtPrice(r.avg_buy_price);
+          const valStr = hasPrice ? ('\u20ac ' + fmtPrice(r.current_value)) : '<span class="na">N/A</span>';
+          const pnlVal = hasPrice ? r.pnl_eur : null;
+          const pnlStr = pnlVal !== null
+            ? `<span class="${pnlVal >= 0 ? 'up' : 'down'}">\u20ac ${pnlVal >= 0 ? '+' : ''}${fmt(pnlVal)}</span>`
+            : '<span class="na">N/A</span>';
+          const pctVal = hasPrice ? r.pnl_pct : null;
+          const pctStr = pctVal !== null
+            ? `<span class="${pctVal >= 0 ? 'up' : 'down'}">${pctVal >= 0 ? '+' : ''}${fmt(pctVal)}%</span>`
+            : '<span class="na">N/A</span>';
+          const allocStr = r.allocation_pct !== null ? (fmt(r.allocation_pct, 1) + '%') : '<span class="na">N/A</span>';
+          return `<tr>
+            <td class="symbol">${r.symbol}</td>
+            <td>${amtStr}</td>
+            <td>${avgStr}</td>
+            <td>${valStr}</td>
+            <td>${pnlStr}</td>
+            <td>${pctStr}</td>
+            <td>${allocStr}</td>
+            <td><button class="lots-toggle" onclick="toggleLots('${r.symbol}', this)">lots</button></td>
+          </tr>`;
+        }).join('');
+
+        // Summary footer
+        const tv = '\u20ac ' + fmtPrice(data.total_value);
+        const tp = data.total_pnl_eur;
+        const tpClass = tp >= 0 ? 'up' : 'down';
+        const tpStr = `<span class="${tpClass}">\u20ac ${tp >= 0 ? '+' : ''}${fmt(tp)}</span>`;
+        const tpPct = data.total_pnl_pct;
+        const tpPctStr = `<span class="${tpClass}">${tpPct >= 0 ? '+' : ''}${fmt(tpPct)}%</span>`;
+        document.getElementById('pf-summary').innerHTML =
+          `Total Value: ${tv} &nbsp;|&nbsp; P&amp;L: ${tpStr} (${tpPctStr})`;
+      } catch (err) {
+        document.getElementById('pf-tbody').innerHTML =
+          `<tr><td colspan="8" class="na" style="text-align:center;">Error loading portfolio.</td></tr>`;
+      }
+    }
+
+    async function toggleLots(symbol, button) {
+      const row = button.closest('tr');
+      // If lots rows already shown, remove them
+      const existing = row.parentNode.querySelectorAll(`.lots-row-${symbol}`);
+      if (existing.length > 0) {
+        existing.forEach(el => el.remove());
+        return;
+      }
+      try {
+        const lots = await fetch('/api/portfolio/lots/' + symbol).then(r => r.json());
+        const html = lots.map(l =>
+          `<tr class="lots-row lots-row-${symbol}">
+            <td></td>
+            <td>${l.amount.toFixed(4)}</td>
+            <td>\u20ac ${fmtPrice(l.buy_price)}</td>
+            <td>${l.buy_date}</td>
+            <td></td><td></td><td></td>
+            <td class="lot-actions"><button onclick="deleteLot(${l.id})">delete</button></td>
+          </tr>`
+        ).join('');
+        row.insertAdjacentHTML('afterend', html);
+      } catch (err) {
+        // silently fail
+      }
+    }
+
+    async function deleteLot(id) {
+      if (!confirm('Delete lot #' + id + '?')) return;
+      await fetch('/api/portfolio/' + id, {method: 'DELETE'});
+      loadPortfolio();
+    }
+
+    async function addHolding(event) {
+      event.preventDefault();
+      const msgEl = document.getElementById('pf-msg');
+      const sym = document.getElementById('pf-symbol').value.trim();
+      const amt = parseFloat(document.getElementById('pf-amount').value);
+      const price = parseFloat(document.getElementById('pf-price').value);
+      const dateVal = document.getElementById('pf-date').value || null;
+      try {
+        const resp = await fetch('/api/portfolio', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({symbol: sym, amount: amt, buy_price: price, buy_date: dateVal}),
+        });
+        if (!resp.ok) {
+          const err = await resp.json();
+          msgEl.className = 'form-msg err';
+          msgEl.textContent = err.detail || 'Error adding holding';
+          return;
+        }
+        msgEl.className = 'form-msg ok';
+        msgEl.textContent = 'Added ' + sym.toUpperCase();
+        document.getElementById('pf-symbol').value = '';
+        document.getElementById('pf-amount').value = '';
+        document.getElementById('pf-price').value = '';
+        document.getElementById('pf-date').value = '';
+        loadPortfolio();
+      } catch (err) {
+        msgEl.className = 'form-msg err';
+        msgEl.textContent = 'Network error';
+      }
     }
 
     // Initial load + start 1-second countdown tick
