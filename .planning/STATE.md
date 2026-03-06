@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: in_progress
-last_updated: "2026-03-06T21:59:40Z"
+last_updated: "2026-03-06T22:10:03Z"
 progress:
   total_phases: 13
-  completed_phases: 4
-  total_plans: 8
-  completed_plans: 8
+  completed_phases: 5
+  total_plans: 9
+  completed_plans: 9
 ---
 
 # Project State
@@ -18,23 +18,23 @@ progress:
 See: .planning/PROJECT.md (updated 2026-02-28)
 
 **Core value:** Instant, glanceable crypto prices in the terminal — one command, no browser needed.
-**Current focus:** Phase 8: Historical Charts — Plan 1 of 2 complete
+**Current focus:** Phase 8: Historical Charts -- Complete
 
 ## Current Position
 
 Phase: 8 of 13 (Historical Charts)
-Plan: 1 of 2 complete
-Status: Backend + CLI complete (Candle model, API, sparkline rendering, chart subcommand); Plan 08-02 (web dashboard integration) next
-Last activity: 2026-03-06 — Plan 08-01 executed, all 151 tests passing (9 API, 26 CLI, 24 display, 13 web, 17 portfolio DB, 11 portfolio aggregation, 39 alerts, 12 other)
+Plan: 2 of 2 complete
+Status: Phase 8 complete -- Candle model, API, sparkline CLI, web candle endpoint, Plotly charts in modal, 7D/30D toggle
+Last activity: 2026-03-06 -- Plan 08-02 executed, all 161 tests passing (9 API, 26 CLI, 24 display, 43 web, 17 portfolio DB, 11 portfolio aggregation, 39 alerts, 12 other -- includes 10 new chart web tests)
 
-Progress: [█████-----] 50% (Phase 8)
+Progress: [██████████] 100% (Phase 8)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 8
+- Total plans completed: 9
 - Average duration: 2 min
-- Total execution time: ~19 min
+- Total execution time: ~22 min
 
 **By Phase:**
 
@@ -45,10 +45,10 @@ Progress: [█████-----] 50% (Phase 8)
 | 3. CLI and Display | 2 | 4 min | 2 min |
 | 4. Web Dashboard | 2 | 2 min | 1 min |
 | 6. Portfolio Tracking | 1 | 3 min | 3 min |
-| 8. Historical Charts | 1 | 5 min | 5 min |
+| 8. Historical Charts | 2 | 8 min | 4 min |
 
 **Recent Trend:**
-- Last 5 plans: 2 min, 2 min, 0 min, 3 min, 5 min
+- Last 5 plans: 2 min, 0 min, 3 min, 5 min, 3 min
 - Trend: Fast execution
 
 *Updated after each plan completion*
@@ -90,6 +90,9 @@ Recent decisions affecting current work:
 - 06-01: Unpriced coins included at cost basis in total_value
 - 08-01: pytest-httpx v0.36.0 requires full URL with query params for strict matching
 - 08-01: Rich bold markup splits numeric-prefixed labels ("7-Day") with ANSI codes; tests check parts separately
+- 08-02: Plotly CDN v3.4.0 pinned (not plotly-latest which is frozen at v1.58.5)
+- 08-02: Chart placed inside existing coin detail modal, not a new tab; line chart only (closing prices)
+- 08-02: Modal widened from 400px to 600px for chart space; Plotly.purge() on close for memory cleanup
 
 ### Pending Todos
 
@@ -113,5 +116,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-06
-Stopped at: Completed 08-01-PLAN.md — Historical charts backend + CLI (Candle model, API, sparkline, chart subcommand) with 151 passing tests
+Stopped at: Completed 08-02-PLAN.md -- Phase 8 complete (candle API endpoint, Plotly charts in web modal, 7D/30D toggle) with 161 passing tests
 Resume file: None

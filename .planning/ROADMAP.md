@@ -19,7 +19,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [ ] **Phase 5: Web UX** - Auto-refresh countdown timer and manual refresh button
 - [ ] **Phase 6: Portfolio Tracking** - Portfolio tracking for the crypto tracker
 - [ ] **Phase 7: Price Alerts** - Target price notifications via CLI and web alerts panel
-- [ ] **Phase 8: Historical Charts** - 7d/30d price history with ASCII sparklines in CLI and Plotly charts in web dashboard
+- [x] **Phase 8: Historical Charts** - 7d/30d price history with ASCII sparklines in CLI and Plotly charts in web dashboard (completed 2026-03-06)
 - [ ] **Phase 9: React Frontend** - Replace static HTML/JS dashboard with Vite + React + Tailwind app with real-time updates
 - [ ] **Phase 10: Multi-Exchange Support** - Abstract the exchange layer with Binance as second source, auto-fallback, and `--exchange` CLI flag
 - [ ] **Phase 11: Watchlist & Tags** - Tag coins (DeFi, Layer1, Meme) and filter by tag; persistent watchlist separate from portfolio
@@ -84,7 +84,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 5. Web UX | 0/1 | Planned | — |
 | 6. Portfolio Tracking | 1/2 | In Progress | — |
 | 7. Price Alerts | 0/2 | Planned | — |
-| 8. Historical Charts | 0/0 | Planned | — |
+| 8. Historical Charts | 2/2 | Complete | 2026-03-06 |
 | 9. React Frontend | 0/0 | Planned | — |
 | 10. Multi-Exchange Support | 0/0 | Planned | — |
 | 11. Watchlist & Tags | 0/0 | Planned | — |
@@ -167,13 +167,21 @@ Plans:
 
 ### Phase 8: Historical Charts
 
-**Goal:** Show 7d/30d price history. ASCII sparklines in CLI (`crypto chart BTC`), interactive Plotly chart in web dashboard. Use Bitvavo candles endpoint.
+**Goal:** Show 7d/30d price history with ASCII sparklines in CLI (`crypto chart`) and interactive Plotly charts in web dashboard coin modal. Use Bitvavo candles endpoint.
 **Depends on:** Phase 7
-**Requirements**: TBD
-**Plans:** 0 plans
+**Requirements**: CHART-01, CHART-02, CHART-03, CHART-04, CHART-05, CHART-06
+**Success Criteria** (what must be TRUE):
+  1. `crypto chart` shows a compact sparkline overview table for all top 20 coins with 7d and 30d Unicode sparklines
+  2. `crypto chart BTC` shows a detailed single-coin view with sparklines + stats (open, close, high, low, change %) for both timeframes
+  3. Sparklines use Unicode block characters and stats are color-coded green/red
+  4. Web coin detail modal includes an interactive Plotly line chart below the coin info
+  5. 7D/30D toggle buttons switch between timeframes in the web chart, defaulting to 7D
+  6. `/api/candles/{symbol}` endpoint returns OHLCV candle data from Bitvavo in chronological order
+**Plans**: 2 plans
 
 Plans:
-- [ ] TBD (run /gsd:plan-phase 8 to break down)
+- [x] 08-01-PLAN.md — Backend + CLI: Candle model, API candle fetching, sparkline rendering, chart CLI subcommand, and tests
+- [x] 08-02-PLAN.md — Web dashboard: candle API endpoint, Plotly CDN integration, chart in coin modal with 7D/30D toggle, and tests
 
 ### Phase 9: React Frontend
 
