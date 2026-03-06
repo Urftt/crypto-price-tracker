@@ -15,8 +15,19 @@ import time
 
 import httpx
 
+from crypto_price_tracker.alerts import check_alerts
+from crypto_price_tracker.alerts_db import (
+    add_alert,
+    clear_triggered_alerts,
+    get_active_alerts,
+    get_all_alerts,
+    mark_triggered,
+    remove_alert as remove_alert_db,
+)
 from crypto_price_tracker.api import get_top_coins
 from crypto_price_tracker.display import (
+    render_alert_banner,
+    render_alert_list,
     render_coin_detail,
     render_portfolio_lots,
     render_portfolio_table,
@@ -39,7 +50,15 @@ def cmd_prices(args: argparse.Namespace) -> None:
     except (httpx.HTTPStatusError, httpx.ConnectError) as e:
         print(f"Error fetching data: {e}", file=sys.stderr)
         sys.exit(1)
-    render_price_table(coins)
+    # Passive alert checking
+    active = get_active_alerts()
+    triggered = check_alerts(coins, active)
+    for alert in triggered:
+        mark_triggered(alert.id)
+    triggered_symbols = {a.symbol for a in triggered}
+    if triggered:
+        render_alert_banner(triggered)
+    render_price_table(coins, triggered_symbols=triggered_symbols)
 
 
 def cmd_watch(args: argparse.Namespace) -> None:
@@ -50,7 +69,15 @@ def cmd_watch(args: argparse.Namespace) -> None:
             print("\033[2J\033[H", end="")
             try:
                 coins = get_top_coins(top_n=args.top)
-                render_price_table(coins)
+                # Passive alert checking (flash once — mark_triggered prevents repeats)
+                active = get_active_alerts()
+                triggered = check_alerts(coins, active)
+                for alert in triggered:
+                    mark_triggered(alert.id)
+                triggered_symbols = {a.symbol for a in triggered}
+                if triggered:
+                    render_alert_banner(triggered)
+                render_price_table(coins, triggered_symbols=triggered_symbols)
             except (httpx.HTTPStatusError, httpx.ConnectError) as e:
                 print(f"Error fetching data: {e}", file=sys.stderr)
             print(f"\nRefreshing every {args.interval}s \u2014 Ctrl+C to stop")
@@ -167,6 +194,56 @@ def cmd_portfolio_export(args: argparse.Namespace) -> None:
         print(data, end="")
 
 
+def cmd_alert_add(args: argparse.Namespace) -> None:
+    """Add a new price alert."""
+    try:
+        alert_id = add_alert(args.symbol, args.target_price, args.direction)
+    except ValueError as e:
+        print(f"Invalid direction: {e}", file=sys.stderr)
+        sys.exit(1)
+    except sqlite3.IntegrityError as e:
+        print(f"Constraint error: {e}", file=sys.stderr)
+        sys.exit(1)
+    print(f"Alert #{alert_id}: {args.symbol.upper()} {args.direction} EUR {args.target_price:,.2f}")
+
+
+def cmd_alert_list(args: argparse.Namespace) -> None:
+    """List all alerts."""
+    alerts = get_all_alerts()
+    render_alert_list(alerts)
+
+
+def cmd_alert_remove(args: argparse.Namespace) -> None:
+    """Remove an alert by ID."""
+    if remove_alert_db(args.id):
+        print(f"Removed alert #{args.id}")
+    else:
+        print(f"Alert #{args.id} not found.", file=sys.stderr)
+        sys.exit(1)
+
+
+def cmd_alert_check(args: argparse.Namespace) -> None:
+    """Check alerts against current prices."""
+    try:
+        coins = get_top_coins(top_n=100)
+    except (httpx.HTTPStatusError, httpx.ConnectError) as e:
+        print(f"Error fetching data: {e}", file=sys.stderr)
+        sys.exit(1)
+    active = get_active_alerts()
+    if not active:
+        print("No active alerts.")
+        sys.exit(0)
+    triggered = check_alerts(coins, active)
+    for alert in triggered:
+        mark_triggered(alert.id)
+    if triggered:
+        render_alert_banner(triggered)
+        sys.exit(1)
+    else:
+        print("No alerts triggered.")
+        sys.exit(0)
+
+
 def main() -> None:
     """Entry point -- parse arguments and dispatch to the appropriate command."""
     parser = argparse.ArgumentParser(
@@ -281,6 +358,35 @@ def main() -> None:
         "--output", "-o", type=str, default=None, help="Output file path (default: stdout)"
     )
 
+    # alert subcommand group
+    alert_parser = subparsers.add_parser("alert", help="Manage price alerts")
+    alert_sub = alert_parser.add_subparsers(dest="alert_command")
+
+    # alert add
+    alert_add_parser = alert_sub.add_parser("add", help="Add a price alert")
+    alert_add_parser.add_argument("symbol", type=str, help="Coin symbol (e.g. BTC)")
+    alert_add_parser.add_argument("target_price", type=float, help="Target price in EUR")
+    direction_group = alert_add_parser.add_mutually_exclusive_group()
+    direction_group.add_argument(
+        "--above", dest="direction", action="store_const",
+        const="above", help="Alert when price goes above target (default)",
+    )
+    direction_group.add_argument(
+        "--below", dest="direction", action="store_const",
+        const="below", help="Alert when price goes below target",
+    )
+    alert_add_parser.set_defaults(direction="above")
+
+    # alert list
+    alert_sub.add_parser("list", help="List all alerts")
+
+    # alert remove
+    alert_remove_parser = alert_sub.add_parser("remove", help="Remove an alert by ID")
+    alert_remove_parser.add_argument("id", type=int, help="Alert ID to remove")
+
+    # alert check
+    alert_sub.add_parser("check", help="Check alerts against current prices")
+
     args = parser.parse_args()
 
     if args.command == "prices":
@@ -306,6 +412,17 @@ def main() -> None:
             cmd_portfolio_lots(args)
         elif args.portfolio_command == "export":
             cmd_portfolio_export(args)
+    elif args.command == "alert":
+        if not hasattr(args, "alert_command") or args.alert_command is None:
+            alert_parser.print_help()
+        elif args.alert_command == "add":
+            cmd_alert_add(args)
+        elif args.alert_command == "remove":
+            cmd_alert_remove(args)
+        elif args.alert_command == "list":
+            cmd_alert_list(args)
+        elif args.alert_command == "check":
+            cmd_alert_check(args)
     else:
         parser.print_help()
 

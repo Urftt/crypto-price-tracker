@@ -4,13 +4,14 @@ from __future__ import annotations
 
 import rich.box
 from rich.console import Console
+from rich.panel import Panel
 from rich.table import Table
 
-from crypto_price_tracker.models import CoinData, Holding
+from crypto_price_tracker.models import CoinData, Holding, PriceAlert
 from crypto_price_tracker.portfolio import PortfolioRow, PortfolioSummary
 
 
-def render_price_table(coins: list[CoinData], console: Console | None = None) -> None:
+def render_price_table(coins: list[CoinData], console: Console | None = None, triggered_symbols: set[str] | None = None) -> None:
     """Render a list of CoinData objects as a formatted terminal price table.
 
     Args:
@@ -20,6 +21,8 @@ def render_price_table(coins: list[CoinData], console: Console | None = None) ->
     """
     if console is None:
         console = Console()
+    if triggered_symbols is None:
+        triggered_symbols = set()
 
     table = Table(title="Crypto Prices (EUR)", show_lines=False)
 
@@ -39,7 +42,11 @@ def render_price_table(coins: list[CoinData], console: Console | None = None) ->
             change_colored = f"[red]{change_str}[/red]"
         volume_str = f"EUR {coin.volume_eur:,.0f}"
 
-        table.add_row(str(rank), coin.symbol, coin.name, price_str, change_colored, volume_str)
+        symbol_str = coin.symbol
+        if coin.symbol in triggered_symbols:
+            symbol_str = f"[bold yellow]\u26a0 {coin.symbol}[/bold yellow]"
+
+        table.add_row(str(rank), symbol_str, coin.name, price_str, change_colored, volume_str)
 
     console.print(table)
 
@@ -160,5 +167,73 @@ def render_coin_detail(coin: CoinData, console: Console | None = None) -> None:
     table.add_row("24h Change", change_colored)
     table.add_row("Volume", volume_str)
     table.add_row("Volume (EUR)", volume_eur_str)
+
+    console.print(table)
+
+
+def render_alert_banner(triggered: list[PriceAlert], console: Console | None = None) -> None:
+    """Render a warning banner for triggered alerts."""
+    if console is None:
+        console = Console()
+    lines = []
+    for a in triggered:
+        lines.append(
+            f"[bold yellow]\u26a0[/bold yellow] {a.symbol} hit EUR {a.target_price:,.2f} ({a.direction} target)"
+        )
+    text = "\n".join(lines)
+    console.print(
+        Panel(
+            text,
+            title="[bold yellow]ALERTS TRIGGERED[/bold yellow]",
+            border_style="yellow",
+            expand=True,
+        )
+    )
+
+
+def render_alert_list(alerts: list[PriceAlert], console: Console | None = None) -> None:
+    """Render all alerts as a Rich table with active and triggered sections."""
+    if console is None:
+        console = Console()
+
+    active = [a for a in alerts if a.status == "active"]
+    triggered = [a for a in alerts if a.status == "triggered"]
+
+    if not active and not triggered:
+        console.print("No alerts set.")
+        return
+
+    table = Table(title="Price Alerts", show_lines=False)
+    table.add_column("ID", justify="right")
+    table.add_column("Symbol", justify="left", style="bold")
+    table.add_column("Target (EUR)", justify="right")
+    table.add_column("Direction", justify="left")
+    table.add_column("Status", justify="left")
+    table.add_column("Created", justify="left")
+    table.add_column("Triggered", justify="left")
+
+    for a in active:
+        table.add_row(
+            str(a.id),
+            a.symbol,
+            f"EUR {a.target_price:,.2f}",
+            a.direction,
+            "[green]active[/green]",
+            a.created_at,
+            "",
+        )
+
+    if triggered:
+        table.add_section()
+        for a in triggered:
+            table.add_row(
+                str(a.id),
+                a.symbol,
+                f"EUR {a.target_price:,.2f}",
+                a.direction,
+                "[yellow]triggered[/yellow]",
+                a.created_at,
+                a.triggered_at or "",
+            )
 
     console.print(table)

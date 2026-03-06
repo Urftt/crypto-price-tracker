@@ -61,22 +61,24 @@ def mock_coins():
     ]
 
 
-def test_api_prices_returns_json_list(client, mock_coins):
-    """GET /api/prices returns a JSON array with all expected fields."""
+def test_api_prices_returns_json_list(client, portfolio_db, mock_coins):
+    """GET /api/prices returns a JSON dict with coins and triggered_alerts."""
     with patch("crypto_price_tracker.web.get_top_coins", return_value=mock_coins):
         response = client.get("/api/prices")
 
     assert response.status_code == 200
     data = response.json()
-    assert isinstance(data, list)
-    assert len(data) == 3
+    assert isinstance(data, dict)
+    assert "coins" in data
+    assert "triggered_alerts" in data
+    assert len(data["coins"]) == 3
 
-    first = data[0]
+    first = data["coins"][0]
     assert set(["symbol", "name", "price", "change_24h", "volume", "volume_eur"]).issubset(first.keys())
     assert first["symbol"] == "BTC"
 
 
-def test_api_prices_respects_top_param(client, mock_coins):
+def test_api_prices_respects_top_param(client, portfolio_db, mock_coins):
     """GET /api/prices?top=2 calls get_top_coins with top_n=2."""
     with patch("crypto_price_tracker.web.get_top_coins", return_value=mock_coins) as mock_fn:
         response = client.get("/api/prices?top=2")
@@ -315,3 +317,139 @@ def test_index_has_portfolio_tab(client):
     assert "Portfolio" in body
     assert "tab-portfolio" in body
     assert "switchTab" in body
+
+
+# ---- Alert API tests ----
+
+
+def test_api_prices_returns_new_format(client, portfolio_db, mock_coins):
+    """GET /api/prices returns dict with coins and triggered_alerts keys."""
+    with patch("crypto_price_tracker.web.get_top_coins", return_value=mock_coins):
+        response = client.get("/api/prices")
+
+    assert response.status_code == 200
+    data = response.json()
+    assert isinstance(data, dict)
+    assert "coins" in data
+    assert "triggered_alerts" in data
+    assert isinstance(data["coins"], list)
+    assert len(data["coins"]) == 3
+    assert isinstance(data["triggered_alerts"], list)
+
+
+def test_api_prices_triggers_alerts(client, portfolio_db, mock_coins):
+    """GET /api/prices with active alert triggers and returns it."""
+    from crypto_price_tracker.alerts_db import add_alert
+    # BTC mock price is 56754.0, alert target is 50000.0 above — should trigger
+    add_alert("BTC", 50000.0, "above", db_path=portfolio_db)
+
+    with patch("crypto_price_tracker.web.get_top_coins", return_value=mock_coins):
+        response = client.get("/api/prices")
+
+    data = response.json()
+    assert len(data["triggered_alerts"]) == 1
+    assert data["triggered_alerts"][0]["symbol"] == "BTC"
+
+
+def test_api_alerts_get_empty(client, portfolio_db):
+    """GET /api/alerts returns empty list when no alerts exist."""
+    response = client.get("/api/alerts")
+    assert response.status_code == 200
+    assert response.json() == []
+
+
+def test_api_alerts_add(client, portfolio_db):
+    """POST /api/alerts creates an alert and returns its ID."""
+    response = client.post("/api/alerts", json={
+        "symbol": "BTC",
+        "target_price": 100000,
+        "direction": "above",
+    })
+    assert response.status_code == 201
+    data = response.json()
+    assert "id" in data
+    assert data["status"] == "created"
+
+
+def test_api_alerts_add_then_get(client, portfolio_db):
+    """POST an alert then GET /api/alerts returns it."""
+    client.post("/api/alerts", json={
+        "symbol": "BTC",
+        "target_price": 100000,
+        "direction": "above",
+    })
+
+    response = client.get("/api/alerts")
+    assert response.status_code == 200
+    data = response.json()
+    assert len(data) == 1
+    assert data[0]["symbol"] == "BTC"
+
+
+def test_api_alerts_delete(client, portfolio_db):
+    """POST then DELETE /api/alerts/{id} removes the alert."""
+    resp = client.post("/api/alerts", json={
+        "symbol": "BTC",
+        "target_price": 100000,
+        "direction": "above",
+    })
+    alert_id = resp.json()["id"]
+
+    response = client.delete(f"/api/alerts/{alert_id}")
+    assert response.status_code == 200
+    assert response.json()["status"] == "deleted"
+
+
+def test_api_alerts_delete_not_found(client, portfolio_db):
+    """DELETE /api/alerts/999 returns 404."""
+    response = client.delete("/api/alerts/999")
+    assert response.status_code == 404
+
+
+def test_api_alerts_clear_triggered(client, portfolio_db):
+    """POST alert, mark triggered, DELETE /api/alerts/triggered clears it."""
+    from crypto_price_tracker.alerts_db import mark_triggered
+
+    resp = client.post("/api/alerts", json={
+        "symbol": "BTC",
+        "target_price": 100000,
+        "direction": "above",
+    })
+    alert_id = resp.json()["id"]
+    mark_triggered(alert_id, db_path=portfolio_db)
+
+    response = client.delete("/api/alerts/triggered")
+    assert response.status_code == 200
+    assert response.json()["count"] == 1
+
+    # Verify cleared
+    response = client.get("/api/alerts")
+    assert response.json() == []
+
+
+def test_api_alerts_add_validation(client, portfolio_db):
+    """POST /api/alerts with negative price returns 422."""
+    response = client.post("/api/alerts", json={
+        "symbol": "BTC",
+        "target_price": -100,
+        "direction": "above",
+    })
+    assert response.status_code == 422
+
+
+def test_index_has_alerts_tab(client):
+    """GET / should contain Alerts tab elements."""
+    response = client.get("/")
+    body = response.text
+    assert "Alerts" in body
+    assert "tab-alerts" in body
+    assert "alert-symbol" in body
+    assert "toast-container" in body
+
+
+def test_index_has_set_alert_modal_button(client):
+    """GET / should contain Set Alert button in modal."""
+    response = client.get("/")
+    body = response.text
+    assert "setAlertFromModal" in body
+    assert "Set Alert" in body

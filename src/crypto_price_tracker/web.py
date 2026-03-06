@@ -21,6 +21,15 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
+from crypto_price_tracker.alerts import check_alerts
+from crypto_price_tracker.alerts_db import (
+    add_alert as db_add_alert,
+    clear_triggered_alerts as db_clear_triggered,
+    get_active_alerts as db_get_active_alerts,
+    get_all_alerts as db_get_all_alerts,
+    mark_triggered as db_mark_triggered,
+    remove_alert as db_remove_alert,
+)
 from crypto_price_tracker.api import get_top_coins
 from crypto_price_tracker.models import CoinData  # noqa: F401 – re-exported for type hints
 from crypto_price_tracker.portfolio import aggregate_portfolio
@@ -52,15 +61,31 @@ class HoldingUpdate(BaseModel):
     buy_date: str | None = None
 
 
+class AlertCreate(BaseModel):
+    """Request body for creating a new price alert."""
+
+    symbol: str
+    target_price: float = Field(gt=0)
+    direction: str = Field(default="above", pattern="^(above|below)$")
+
+
 def create_app() -> FastAPI:
     """Create and return a configured FastAPI application instance."""
     app = FastAPI(title="Crypto Price Tracker", version="0.1.0")
 
     @app.get("/api/prices")
     def api_prices(top: int = Query(default=20, ge=1, le=100)):
-        """Return the top N coins as a JSON array."""
+        """Return top N coins with triggered alerts flagged."""
         coins = get_top_coins(top_n=top)
-        return [dataclasses.asdict(c) for c in coins]
+        # Passive alert checking
+        active = db_get_active_alerts()
+        triggered_alerts = check_alerts(coins, active)
+        for alert in triggered_alerts:
+            db_mark_triggered(alert.id)
+        return {
+            "coins": [dataclasses.asdict(c) for c in coins],
+            "triggered_alerts": [dataclasses.asdict(a) for a in triggered_alerts],
+        }
 
     @app.get("/api/coin/{symbol}")
     def api_coin(symbol: str):
@@ -132,6 +157,36 @@ def create_app() -> FastAPI:
         """Delete a holding by ID."""
         if not db_remove_holding(holding_id):
             raise HTTPException(status_code=404, detail=f"Holding #{holding_id} not found")
+        return {"status": "deleted"}
+
+    # --- Alert endpoints ---
+
+    @app.get("/api/alerts")
+    def api_alerts():
+        """Return all alerts grouped by status."""
+        alerts = db_get_all_alerts()
+        return [dataclasses.asdict(a) for a in alerts]
+
+    @app.post("/api/alerts", status_code=201)
+    def api_alerts_add(body: AlertCreate):
+        """Create a new price alert."""
+        try:
+            alert_id = db_add_alert(body.symbol, body.target_price, body.direction)
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=str(e))
+        return {"id": alert_id, "status": "created"}
+
+    @app.delete("/api/alerts/triggered")
+    def api_alerts_clear_triggered():
+        """Remove all triggered alerts."""
+        count = db_clear_triggered()
+        return {"status": "cleared", "count": count}
+
+    @app.delete("/api/alerts/{alert_id}")
+    def api_alerts_delete(alert_id: int):
+        """Remove an alert by ID."""
+        if not db_remove_alert(alert_id):
+            raise HTTPException(status_code=404, detail=f"Alert #{alert_id} not found")
         return {"status": "deleted"}
 
     @app.get("/")

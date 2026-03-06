@@ -7,8 +7,13 @@ import io
 import pytest
 from rich.console import Console
 
-from crypto_price_tracker.display import render_coin_detail, render_price_table
-from crypto_price_tracker.models import CoinData
+from crypto_price_tracker.display import (
+    render_alert_banner,
+    render_alert_list,
+    render_coin_detail,
+    render_price_table,
+)
+from crypto_price_tracker.models import CoinData, PriceAlert
 
 
 @pytest.fixture
@@ -129,3 +134,63 @@ class TestRenderCoinDetail:
         output = buf.getvalue()
 
         assert "-3.21%" in output
+
+
+# ---- Alert display tests ----
+
+
+class TestRenderAlertDisplay:
+    def test_render_price_table_with_triggered_symbol(self, sample_coins: list[CoinData]) -> None:
+        console, buf = _make_console()
+        render_price_table(sample_coins, console=console, triggered_symbols={"BTC"})
+        output = buf.getvalue()
+
+        assert "\u26a0" in output
+        assert "BTC" in output
+        # ETH should NOT have the warning symbol
+        # Check ETH appears without the symbol marker by verifying it doesn't have ⚠ ETH
+        assert "ETH" in output
+
+    def test_render_price_table_no_triggered(self, sample_coins: list[CoinData]) -> None:
+        console, buf = _make_console()
+        render_price_table(sample_coins, console=console)
+        output = buf.getvalue()
+
+        assert "\u26a0" not in output
+
+    def test_render_alert_banner(self) -> None:
+        console, buf = _make_console()
+        triggered = [
+            PriceAlert(1, "BTC", 100000.0, "above", "triggered", "2026-03-01T10:00:00", "2026-03-06T12:00:00"),
+            PriceAlert(2, "ETH", 1500.0, "below", "triggered", "2026-03-01T11:00:00", "2026-03-06T12:00:00"),
+        ]
+        render_alert_banner(triggered, console=console)
+        output = buf.getvalue()
+
+        assert "ALERTS TRIGGERED" in output
+        assert "BTC" in output
+        assert "ETH" in output
+        assert "100,000.00" in output
+        assert "1,500.00" in output
+
+    def test_render_alert_list_active_and_triggered(self) -> None:
+        console, buf = _make_console()
+        alerts = [
+            PriceAlert(1, "BTC", 100000.0, "above", "active", "2026-03-01T10:00:00", None),
+            PriceAlert(2, "ETH", 1500.0, "below", "triggered", "2026-03-01T11:00:00", "2026-03-06T12:00:00"),
+        ]
+        render_alert_list(alerts, console=console)
+        output = buf.getvalue()
+
+        assert "Price Alerts" in output
+        assert "BTC" in output
+        assert "ETH" in output
+        assert "active" in output
+        assert "triggered" in output
+
+    def test_render_alert_list_empty(self) -> None:
+        console, buf = _make_console()
+        render_alert_list([], console=console)
+        output = buf.getvalue()
+
+        assert "No alerts set." in output

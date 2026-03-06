@@ -187,6 +187,35 @@
     }
 
     .na { color: #8b949e; }
+
+    /* Toast notifications */
+    #toast-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 200;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .toast {
+      background: #161b22;
+      color: #c9d1d9;
+      border: 1px solid #f0883e;
+      border-left: 4px solid #f0883e;
+      border-radius: 4px;
+      padding: 12px 16px;
+      font-family: monospace;
+      font-size: 0.85em;
+      max-width: 350px;
+      opacity: 0;
+      transform: translateX(100%);
+      transition: opacity 0.3s, transform 0.3s;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateX(0);
+    }
   </style>
 </head>
 <body>
@@ -195,6 +224,7 @@
   <div class="tabs">
     <button class="tab-btn active" onclick="switchTab('prices')">Prices</button>
     <button class="tab-btn" onclick="switchTab('portfolio')">Portfolio</button>
+    <button class="tab-btn" onclick="switchTab('alerts')">Alerts</button>
   </div>
 
   <!-- Prices tab -->
@@ -240,6 +270,47 @@
     <div class="summary-footer" id="pf-summary"></div>
   </div>
 
+  <!-- Alerts tab -->
+  <div id="tab-alerts" class="tab-content" style="display:none;">
+    <form class="portfolio-form" onsubmit="addAlert(event)">
+      <label>Coin
+        <select id="alert-symbol" required style="background:#0d1117;border:1px solid #30363d;border-radius:4px;color:#c9d1d9;font-family:monospace;font-size:0.9em;padding:4px 8px;margin-top:2px;width:120px;">
+          <option value="">Select...</option>
+        </select>
+      </label>
+      <label>Target Price
+        <input type="number" id="alert-price" required step="any" min="0.01" placeholder="100000">
+      </label>
+      <label>Direction
+        <select id="alert-direction" style="background:#0d1117;border:1px solid #30363d;border-radius:4px;color:#c9d1d9;font-family:monospace;font-size:0.9em;padding:4px 8px;margin-top:2px;">
+          <option value="above">Above</option>
+          <option value="below">Below</option>
+        </select>
+      </label>
+      <button type="submit">+ Add Alert</button>
+    </form>
+    <div class="form-msg" id="alert-msg"></div>
+
+    <h3 style="color:#58a6ff;margin:16px 0 8px;font-size:0.9em;">Active Alerts</h3>
+    <table>
+      <thead>
+        <tr><th>ID</th><th>Symbol</th><th>Target (EUR)</th><th>Direction</th><th>Created</th><th></th></tr>
+      </thead>
+      <tbody id="alerts-active-tbody"></tbody>
+    </table>
+
+    <h3 style="color:#8b949e;margin:16px 0 8px;font-size:0.9em;">Triggered Alerts</h3>
+    <table>
+      <thead>
+        <tr><th>ID</th><th>Symbol</th><th>Target (EUR)</th><th>Direction</th><th>Triggered</th><th></th></tr>
+      </thead>
+      <tbody id="alerts-triggered-tbody"></tbody>
+    </table>
+    <button id="clear-triggered-btn" onclick="clearTriggered()" style="display:none;background:#21262d;color:#8b949e;border:1px solid #30363d;border-radius:4px;padding:4px 12px;font-family:monospace;font-size:0.8em;cursor:pointer;margin-top:8px;">Clear All Triggered</button>
+  </div>
+
+  <div id="toast-container"></div>
+
   <!-- Coin detail modal -->
   <div id="modal-backdrop" onclick="handleBackdropClick(event)">
     <div id="modal-card">
@@ -267,6 +338,9 @@
             <span class="detail-value" id="modal-volume-eur"></span>
           </div>
         </div>
+        <div style="margin-top:12px;text-align:center;">
+          <button onclick="setAlertFromModal()" style="background:#21262d;color:#f0883e;border:1px solid #f0883e;border-radius:4px;padding:6px 16px;font-family:monospace;font-size:0.85em;cursor:pointer;">Set Alert</button>
+        </div>
         <div id="modal-error" style="display:none;"></div>
       </div>
     </div>
@@ -284,11 +358,20 @@
       document.getElementById('tab-' + name).style.display = '';
       document.querySelector(`.tab-btn[onclick="switchTab('${name}')"]`).classList.add('active');
       if (name === 'portfolio') loadPortfolio();
+      if (name === 'alerts') loadAlerts();
     }
 
     /* --- Prices tab --- */
     async function load() {
-      const data = await fetch('/api/prices').then(r => r.json());
+      const raw = await fetch('/api/prices').then(r => r.json());
+      const data = raw.coins;
+      const triggeredAlerts = raw.triggered_alerts || [];
+
+      // Show toast for each triggered alert
+      triggeredAlerts.forEach(a => {
+        showToast(`\u26a0 ${a.symbol} hit \u20ac ${fmtPrice(a.target_price)} (${a.direction} target)`);
+      });
+
       const tbody = document.getElementById('tbody');
       tbody.innerHTML = data.map((c, i) => `
         <tr class="clickable" onclick="showDetail('${c.symbol}')">
@@ -300,6 +383,9 @@
           <td>&euro; ${fmtVol(c.volume_eur)}</td>
         </tr>`).join('');
       document.getElementById('updated').textContent = 'Updated: ' + new Date().toLocaleTimeString('nl-NL');
+
+      // Populate alert coin dropdown from fetched data
+      populateAlertDropdown(data);
     }
 
     async function showDetail(symbol) {
@@ -486,6 +572,134 @@
         msgEl.className = 'form-msg err';
         msgEl.textContent = 'Network error';
       }
+    }
+
+    /* --- Toast notification --- */
+    function showToast(message) {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.textContent = message;
+      container.appendChild(toast);
+      // Trigger reflow for CSS transition
+      toast.offsetHeight;
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+        toast.addEventListener('transitionend', () => toast.remove());
+      }, 10000);
+    }
+
+    /* --- Alert coin dropdown --- */
+    function populateAlertDropdown(coins) {
+      const select = document.getElementById('alert-symbol');
+      // Keep first "Select..." option, remove rest
+      while (select.options.length > 1) select.remove(1);
+      coins.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c.symbol;
+        opt.textContent = c.symbol + ' - ' + c.name;
+        select.appendChild(opt);
+      });
+    }
+
+    /* --- Alerts tab --- */
+    async function loadAlerts() {
+      try {
+        const alerts = await fetch('/api/alerts').then(r => r.json());
+        const active = alerts.filter(a => a.status === 'active');
+        const triggered = alerts.filter(a => a.status === 'triggered');
+
+        const activeTbody = document.getElementById('alerts-active-tbody');
+        if (active.length === 0) {
+          activeTbody.innerHTML = '<tr><td colspan="6" class="na" style="text-align:center;">No active alerts</td></tr>';
+        } else {
+          activeTbody.innerHTML = active.map(a => `
+            <tr>
+              <td>${a.id}</td>
+              <td class="symbol">${a.symbol}</td>
+              <td>&euro; ${fmtPrice(a.target_price)}</td>
+              <td>${a.direction}</td>
+              <td>${a.created_at.replace('T', ' ').slice(0, 19)}</td>
+              <td><button class="lot-actions" onclick="removeAlert(${a.id})" style="background:none;border:none;color:#f85149;cursor:pointer;font-family:monospace;font-size:0.8em;">remove</button></td>
+            </tr>`).join('');
+        }
+
+        const triggeredTbody = document.getElementById('alerts-triggered-tbody');
+        if (triggered.length === 0) {
+          triggeredTbody.innerHTML = '<tr><td colspan="6" class="na" style="text-align:center;">No triggered alerts</td></tr>';
+          document.getElementById('clear-triggered-btn').style.display = 'none';
+        } else {
+          triggeredTbody.innerHTML = triggered.map(a => `
+            <tr>
+              <td>${a.id}</td>
+              <td class="symbol">${a.symbol}</td>
+              <td>&euro; ${fmtPrice(a.target_price)}</td>
+              <td>${a.direction}</td>
+              <td>${(a.triggered_at || '').replace('T', ' ').slice(0, 19)}</td>
+              <td><button class="lot-actions" onclick="removeAlert(${a.id})" style="background:none;border:none;color:#f85149;cursor:pointer;font-family:monospace;font-size:0.8em;">remove</button></td>
+            </tr>`).join('');
+          document.getElementById('clear-triggered-btn').style.display = '';
+        }
+      } catch (err) {
+        document.getElementById('alerts-active-tbody').innerHTML =
+          '<tr><td colspan="6" class="na" style="text-align:center;">Error loading alerts</td></tr>';
+      }
+    }
+
+    async function addAlert(event) {
+      event.preventDefault();
+      const msgEl = document.getElementById('alert-msg');
+      const sym = document.getElementById('alert-symbol').value;
+      const price = parseFloat(document.getElementById('alert-price').value);
+      const dir = document.getElementById('alert-direction').value;
+      if (!sym) { msgEl.className = 'form-msg err'; msgEl.textContent = 'Select a coin'; return; }
+      try {
+        const resp = await fetch('/api/alerts', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({symbol: sym, target_price: price, direction: dir}),
+        });
+        if (!resp.ok) {
+          const err = await resp.json();
+          msgEl.className = 'form-msg err';
+          msgEl.textContent = err.detail || 'Error adding alert';
+          return;
+        }
+        msgEl.className = 'form-msg ok';
+        msgEl.textContent = 'Alert added for ' + sym;
+        document.getElementById('alert-price').value = '';
+        loadAlerts();
+      } catch (err) {
+        msgEl.className = 'form-msg err';
+        msgEl.textContent = 'Network error';
+      }
+    }
+
+    async function removeAlert(id) {
+      await fetch('/api/alerts/' + id, {method: 'DELETE'});
+      loadAlerts();
+    }
+
+    async function clearTriggered() {
+      await fetch('/api/alerts/triggered', {method: 'DELETE'});
+      loadAlerts();
+    }
+
+    /* --- Set Alert from modal --- */
+    function setAlertFromModal() {
+      const symbol = document.getElementById('modal-symbol').textContent;
+      closeModal();
+      switchTab('alerts');
+      // Pre-fill the symbol dropdown
+      const select = document.getElementById('alert-symbol');
+      for (let i = 0; i < select.options.length; i++) {
+        if (select.options[i].value === symbol) {
+          select.selectedIndex = i;
+          break;
+        }
+      }
+      document.getElementById('alert-price').focus();
     }
 
     // Initial load + start 1-second countdown tick
