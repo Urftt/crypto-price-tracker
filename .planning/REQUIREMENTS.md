@@ -42,6 +42,16 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **UX-01**: Dashboard shows a countdown timer displaying seconds until the next auto-refresh
 - [ ] **UX-02**: Dashboard has a manual refresh button that immediately reloads prices and resets the countdown
 
+### Price Alerts
+
+- [ ] **ALERT-01**: SQLite CRUD for alerts: add, get active, get all, remove, mark triggered, clear triggered
+- [ ] **ALERT-02**: Pure alert checking logic: above/below price targets fire one-shot alerts
+- [ ] **ALERT-03**: CLI subcommands: `crypto alert add/list/remove/check` with argparse
+- [ ] **ALERT-04**: Web API endpoints: GET/POST/DELETE /api/alerts, modified /api/prices with triggered alerts
+- [ ] **ALERT-05**: Rich CLI banner and inline markers render correctly when alerts trigger
+- [ ] **ALERT-06**: Web HTML has alerts tab, toast notifications, coin dropdown, Set Alert modal button
+- [ ] **ALERT-07**: `crypto alert check` exit code 1 on trigger, exit 0 on none (scriptable)
+
 ## v2 Requirements
 
 Deferred to future release. Tracked but not in current roadmap.
@@ -85,12 +95,19 @@ Which phases cover which requirements. Updated during roadmap creation.
 | WEB-04 | Phase 4 | Planned |
 | UX-01 | Phase 5 | Planned |
 | UX-02 | Phase 5 | Planned |
+| ALERT-01 | Phase 7 | Planned |
+| ALERT-02 | Phase 7 | Planned |
+| ALERT-03 | Phase 7 | Planned |
+| ALERT-04 | Phase 7 | Planned |
+| ALERT-05 | Phase 7 | Planned |
+| ALERT-06 | Phase 7 | Planned |
+| ALERT-07 | Phase 7 | Planned |
 
 **Coverage:**
-- v1 requirements: 17 total
-- Mapped to phases: 17
+- v1 requirements: 24 total
+- Mapped to phases: 24
 - Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-28*
-*Last updated: 2026-03-01 after Phase 5 planning*
+*Last updated: 2026-03-06 after Phase 7 planning*

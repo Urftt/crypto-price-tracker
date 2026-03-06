@@ -83,7 +83,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 4. Web Dashboard | 2/2 | Complete | 2026-03-05 |
 | 5. Web UX | 0/1 | Planned | — |
 | 6. Portfolio Tracking | 1/2 | In Progress | — |
-| 7. Price Alerts | 0/0 | Planned | — |
+| 7. Price Alerts | 0/2 | Planned | — |
 | 8. Historical Charts | 0/0 | Planned | — |
 | 9. React Frontend | 0/0 | Planned | — |
 | 10. Multi-Exchange Support | 0/0 | Planned | — |
@@ -146,13 +146,24 @@ Plans:
 
 ### Phase 7: Price Alerts
 
-**Goal:** Let users set target prices for coins and get notified when hit. Store alerts in SQLite alongside portfolio. CLI: `crypto alert add BTC 100000`, web: alerts panel.
+**Goal:** Let users set target prices for coins and get notified when hit. Store alerts in SQLite alongside portfolio. CLI: `crypto alert add BTC 100000 --above`, web: alerts panel with toast notifications.
 **Depends on:** Phase 6
-**Requirements**: TBD
-**Plans:** 0 plans
+**Requirements**: ALERT-01, ALERT-02, ALERT-03, ALERT-04, ALERT-05, ALERT-06, ALERT-07
+**Success Criteria** (what must be TRUE):
+  1. `crypto alert add BTC 100000 --above` creates an alert stored in SQLite
+  2. `crypto alert list` shows active alerts first, then triggered alerts
+  3. `crypto alert remove <ID>` removes an alert by ID
+  4. `crypto alert check` fetches prices, checks all active alerts, prints triggered ones, exits 1 if any triggered, 0 if none
+  5. When `crypto prices` or `crypto watch` detects a triggered alert, a colored banner appears above the price table plus inline marker on affected row
+  6. In watch mode, alert banner appears once (flash once), then marked as triggered
+  7. Web dashboard has "Alerts" tab with add alert form, active/triggered sections, remove/clear buttons
+  8. Web coin detail modal has "Set Alert" button
+  9. Toast notification on web when alert triggers (auto-dismiss ~10s, no sound)
+**Plans**: 2 plans
 
 Plans:
-- [ ] TBD (run /gsd:plan-phase 7 to break down)
+- [ ] 07-01-PLAN.md — Backend: PriceAlert model, alerts_db.py (SQLite CRUD), alerts.py (checking logic), and unit tests
+- [ ] 07-02-PLAN.md — Integration: CLI alert subcommands, display functions (banner + alert list + modified price table), web API endpoints, HTML alerts tab + toast + modal button, and integration tests
 
 ### Phase 8: Historical Charts
 
