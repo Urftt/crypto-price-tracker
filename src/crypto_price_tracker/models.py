@@ -41,3 +41,26 @@ class Holding:
     amount: float
     buy_price: float
     buy_date: str
+
+
+@dataclass(slots=True)
+class PriceAlert:
+    """A price alert for a cryptocurrency.
+
+    Fields:
+        id:            SQLite row ID (autoincrement primary key)
+        symbol:        Coin ticker symbol (e.g. "BTC"), stored uppercase
+        target_price:  Target price in EUR
+        direction:     "above" or "below"
+        status:        "active" or "triggered"
+        created_at:    Creation timestamp as ISO 8601 string
+        triggered_at:  Trigger timestamp as ISO 8601 string, or None
+    """
+
+    id: int
+    symbol: str
+    target_price: float
+    direction: str
+    status: str
+    created_at: str
+    triggered_at: str | None
