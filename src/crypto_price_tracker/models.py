@@ -22,3 +22,22 @@ class CoinData:
     change_24h: float
     volume: float
     volume_eur: float
+
+
+@dataclass(slots=True)
+class Holding:
+    """A single portfolio holding (one lot).
+
+    Fields:
+        id:        SQLite row ID (autoincrement primary key)
+        symbol:    Coin ticker symbol (e.g. "BTC"), stored uppercase
+        amount:    Quantity held (e.g. 0.5)
+        buy_price: Purchase price per unit in EUR
+        buy_date:  Purchase date as ISO 8601 string "YYYY-MM-DD"
+    """
+
+    id: int
+    symbol: str
+    amount: float
+    buy_price: float
+    buy_date: str
