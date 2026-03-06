@@ -16,6 +16,15 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 2: API Integration** - Live EUR crypto prices fetched from the public Bitvavo REST API (completed 2026-03-01)
 - [x] **Phase 3: CLI and Display** - All three subcommands working with formatted, color-coded terminal output (completed 2026-03-01)
 - [x] **Phase 4: Web Dashboard** - Browser-based auto-refreshing price dashboard started with `crypto web` (completed 2026-03-05)
+- [ ] **Phase 5: Web UX** - Auto-refresh countdown timer and manual refresh button
+- [ ] **Phase 6: Portfolio Tracking** - Portfolio tracking for the crypto tracker
+- [ ] **Phase 7: Price Alerts** - Target price notifications via CLI and web alerts panel
+- [ ] **Phase 8: Historical Charts** - 7d/30d price history with ASCII sparklines in CLI and Plotly charts in web dashboard
+- [ ] **Phase 9: React Frontend** - Replace static HTML/JS dashboard with Vite + React + Tailwind app with real-time updates
+- [ ] **Phase 10: Multi-Exchange Support** - Abstract the exchange layer with Binance as second source, auto-fallback, and `--exchange` CLI flag
+- [ ] **Phase 11: Watchlist & Tags** - Tag coins (DeFi, Layer1, Meme) and filter by tag; persistent watchlist separate from portfolio
+- [ ] **Phase 12: Export & Reporting** - Export portfolio to CSV/PDF; weekly summary email or Telegram message; `crypto export --format pdf`
+- [ ] **Phase 13: Mobile PWA** - Progressive Web App with manifest, service worker, offline support, and install-to-home-screen
 
 ## Phase Details
 
@@ -64,7 +73,7 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
+Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9 → 10 → 11 → 12 → 13
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
@@ -73,8 +82,14 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | 3. CLI and Display | 2/2 | Complete   | 2026-03-01 |
 | 4. Web Dashboard | 2/2 | Complete | 2026-03-05 |
 | 5. Web UX | 0/1 | Planned | — |
-| 6. Portfolio Tracking | 0/0 | Planned | — |
+| 6. Portfolio Tracking | 1/2 | In Progress | — |
 | 7. Price Alerts | 0/0 | Planned | — |
+| 8. Historical Charts | 0/0 | Planned | — |
+| 9. React Frontend | 0/0 | Planned | — |
+| 10. Multi-Exchange Support | 0/0 | Planned | — |
+| 11. Watchlist & Tags | 0/0 | Planned | — |
+| 12. Export & Reporting | 0/0 | Planned | — |
+| 13. Mobile PWA | 0/0 | Planned | — |
 
 ### Phase 4: Web Dashboard
 **Goal**: A browser-based dashboard that displays live, auto-refreshing cryptocurrency prices from the Bitvavo API, started with a single `crypto web` command
@@ -108,15 +123,26 @@ Plans:
 Plans:
 - [ ] 05-01-PLAN.md — Add countdown timer, refresh button, and 1-second tick interval to index.html
 
-### Phase 6: Add portfolio tracking to the crypto tracker
+### Phase 6: Portfolio Tracking
 
-**Goal:** [To be planned]
-**Requirements**: TBD
+**Goal:** Add portfolio tracking with holdings CRUD, P&L aggregation, and CSV/JSON export to both CLI and web surfaces, using SQLite for persistence
 **Depends on:** Phase 5
-**Plans:** 0 plans
+**Requirements**: PORT-01, PORT-02, PORT-03, PORT-04, PORT-05, PORT-06, PORT-07, PORT-08
+**Success Criteria** (what must be TRUE):
+  1. `crypto portfolio add BTC 0.5 45000` adds a holding to SQLite DB at `~/.local/share/crypto-tracker/portfolio.db`
+  2. `crypto portfolio list` shows aggregated per-coin view with total amount, avg buy price, current value, P&L (EUR + %), allocation %
+  3. `crypto portfolio lots BTC` shows individual lots with IDs, buy prices, dates
+  4. `crypto portfolio remove <ID>` removes a holding by lot ID
+  5. `crypto portfolio edit <ID> --amount 0.3` edits a holding by lot ID
+  6. `crypto portfolio export --format csv|json` exports holdings
+  7. Web dashboard has a "Portfolio" tab with same data + add holding form
+  8. Summary footer shows total portfolio value and total P&L
+  9. Coins not in top 100 show "N/A" for current price and P&L
+**Plans**: 2 plans
 
 Plans:
-- [ ] TBD (run /gsd:plan-phase 6 to break down)
+- [x] 06-01-PLAN.md — Backend storage layer (SQLite CRUD), aggregation service (P&L calculations), export (CSV/JSON), and unit tests
+- [ ] 06-02-PLAN.md — CLI portfolio subcommands, Rich display, FastAPI CRUD endpoints, HTML portfolio tab, and integration tests
 
 ### Phase 7: Price Alerts
 
@@ -127,3 +153,63 @@ Plans:
 
 Plans:
 - [ ] TBD (run /gsd:plan-phase 7 to break down)
+
+### Phase 8: Historical Charts
+
+**Goal:** Show 7d/30d price history. ASCII sparklines in CLI (`crypto chart BTC`), interactive Plotly chart in web dashboard. Use Bitvavo candles endpoint.
+**Depends on:** Phase 7
+**Requirements**: TBD
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 8 to break down)
+
+### Phase 9: React Frontend
+
+**Goal:** Replace the static HTML/JS dashboard with a proper React app. Vite + React + Tailwind. Real-time updates via WebSocket or SSE. Keep FastAPI backend.
+**Depends on:** Phase 8
+**Requirements**: TBD
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 9 to break down)
+
+### Phase 10: Multi-Exchange Support
+
+**Goal:** Abstract the exchange layer. Add Binance as second source alongside Bitvavo. Auto-fallback if one is down. CLI flag `--exchange binance`.
+**Depends on:** Phase 9
+**Requirements**: TBD
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 10 to break down)
+
+### Phase 11: Watchlist & Tags
+
+**Goal:** Let users tag coins (DeFi, Layer1, Meme) and filter by tag. Persistent watchlist separate from portfolio. CLI: `crypto watch add ETH`, web: tag filters.
+**Depends on:** Phase 10
+**Requirements**: TBD
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 11 to break down)
+
+### Phase 12: Export & Reporting
+
+**Goal:** Export portfolio to CSV/PDF. Generate a weekly summary email (or Telegram message). `crypto export --format pdf`.
+**Depends on:** Phase 11
+**Requirements**: TBD
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 12 to break down)
+
+### Phase 13: Mobile PWA
+
+**Goal:** Make the web dashboard a Progressive Web App. Add manifest, service worker, offline support. Install to home screen on phone.
+**Depends on:** Phase 12
+**Requirements**: TBD
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 13 to break down)

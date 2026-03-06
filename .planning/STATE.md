@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: in_progress
-last_updated: "2026-03-05T00:00:00Z"
+last_updated: "2026-03-06T15:48:00Z"
 progress:
-  total_phases: 7
+  total_phases: 13
   completed_phases: 4
   total_plans: 8
-  completed_plans: 6
+  completed_plans: 7
 ---
 
 # Project State
@@ -18,23 +18,23 @@ progress:
 See: .planning/PROJECT.md (updated 2026-02-28)
 
 **Core value:** Instant, glanceable crypto prices in the terminal — one command, no browser needed.
-**Current focus:** Phase 4: Web Dashboard — COMPLETE
+**Current focus:** Phase 6: Portfolio Tracking — Plan 1 of 2 complete
 
 ## Current Position
 
-Phase: 4 of 6 (Web Dashboard)
-Plan: 2 of 2 complete — PHASE 4 COMPLETE
-Status: Both plans verified — FastAPI backend + HTML/CSS/JS frontend dashboard fully operational
-Last activity: 2026-03-05 — Phase 4 executed, all 33 tests passing (5 API, 7 CLI, 8 display, 13 web)
+Phase: 6 of 13 (Portfolio Tracking)
+Plan: 1 of 2 complete
+Status: Backend storage layer, aggregation service, and export complete; Plan 06-02 (CLI + web integration) next
+Last activity: 2026-03-06 — Plan 06-01 executed, all 61 tests passing (5 API, 7 CLI, 8 display, 13 web, 17 portfolio DB, 11 portfolio aggregation)
 
-Progress: [██████████] 100% (Phase 4)
+Progress: [█████-----] 50% (Phase 6)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 6
+- Total plans completed: 7
 - Average duration: 2 min
-- Total execution time: ~11 min
+- Total execution time: ~14 min
 
 **By Phase:**
 
@@ -44,9 +44,10 @@ Progress: [██████████] 100% (Phase 4)
 | 2. API Integration | 1 | 2 min | 2 min |
 | 3. CLI and Display | 2 | 4 min | 2 min |
 | 4. Web Dashboard | 2 | 2 min | 1 min |
+| 6. Portfolio Tracking | 1 | 3 min | 3 min |
 
 **Recent Trend:**
-- Last 5 plans: 2 min, 2 min, 2 min, 2 min, 0 min
+- Last 5 plans: 2 min, 2 min, 2 min, 0 min, 3 min
 - Trend: Fast execution
 
 *Updated after each plan completion*
@@ -80,6 +81,12 @@ Recent decisions affecting current work:
 - 04-02: Single self-contained HTML file with inline CSS + JS — no build tools
 - 04-02: nl-NL locale for EUR number formatting
 - 04-02: 1-second countdown tick for visible refresh timer
+- 06-01: stdlib sqlite3 only -- no ORM, no new dependencies
+- 06-01: Connection-per-call with try/finally close for CLI/web concurrency safety
+- 06-01: WAL journal mode set on every connection open
+- 06-01: XDG_DATA_HOME with fallback to ~/.local/share for DB path
+- 06-01: Row factory returns Holding instances directly from queries
+- 06-01: Unpriced coins included at cost basis in total_value
 
 ### Pending Todos
 
@@ -88,6 +95,12 @@ None.
 ### Roadmap Evolution
 
 - 2026-03-06: Added Phase 7 (Price Alerts) — target price notifications via CLI and web alerts panel, SQLite storage
+- 2026-03-06: Added Phase 8 (Historical Charts) — 7d/30d price history with ASCII sparklines in CLI and Plotly charts in web dashboard
+- 2026-03-06: Added Phase 9 (React Frontend) — Replace static HTML/JS dashboard with Vite + React + Tailwind app, real-time updates via WebSocket/SSE
+- 2026-03-06: Added Phase 10 (Multi-Exchange Support) — Abstract exchange layer, add Binance as second source, auto-fallback, --exchange CLI flag
+- 2026-03-06: Added Phase 11 (Watchlist & Tags) — Tag coins by category (DeFi, Layer1, Meme), filter by tag, persistent watchlist separate from portfolio
+- 2026-03-06: Added Phase 12 (Export & Reporting) — Export portfolio to CSV/PDF, weekly summary email or Telegram message, `crypto export --format pdf`
+- 2026-03-06: Added Phase 13 (Mobile PWA) — Progressive Web App with manifest, service worker, offline support, install-to-home-screen
 
 
 ### Blockers/Concerns
@@ -96,6 +109,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-05
-Stopped at: Phase 4 complete — Web Dashboard fully operational with 33 passing tests
+Last session: 2026-03-06
+Stopped at: Completed 06-01-PLAN.md — Portfolio backend (storage + aggregation + export) with 61 passing tests
 Resume file: None
