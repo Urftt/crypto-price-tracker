@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: in_progress
-last_updated: "2026-03-06T15:48:00Z"
+last_updated: "2026-03-06T21:59:40Z"
 progress:
   total_phases: 13
   completed_phases: 4
   total_plans: 8
-  completed_plans: 7
+  completed_plans: 8
 ---
 
 # Project State
@@ -18,23 +18,23 @@ progress:
 See: .planning/PROJECT.md (updated 2026-02-28)
 
 **Core value:** Instant, glanceable crypto prices in the terminal — one command, no browser needed.
-**Current focus:** Phase 6: Portfolio Tracking — Plan 1 of 2 complete
+**Current focus:** Phase 8: Historical Charts — Plan 1 of 2 complete
 
 ## Current Position
 
-Phase: 6 of 13 (Portfolio Tracking)
+Phase: 8 of 13 (Historical Charts)
 Plan: 1 of 2 complete
-Status: Backend storage layer, aggregation service, and export complete; Plan 06-02 (CLI + web integration) next
-Last activity: 2026-03-06 — Plan 06-01 executed, all 61 tests passing (5 API, 7 CLI, 8 display, 13 web, 17 portfolio DB, 11 portfolio aggregation)
+Status: Backend + CLI complete (Candle model, API, sparkline rendering, chart subcommand); Plan 08-02 (web dashboard integration) next
+Last activity: 2026-03-06 — Plan 08-01 executed, all 151 tests passing (9 API, 26 CLI, 24 display, 13 web, 17 portfolio DB, 11 portfolio aggregation, 39 alerts, 12 other)
 
-Progress: [█████-----] 50% (Phase 6)
+Progress: [█████-----] 50% (Phase 8)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 7
+- Total plans completed: 8
 - Average duration: 2 min
-- Total execution time: ~14 min
+- Total execution time: ~19 min
 
 **By Phase:**
 
@@ -45,9 +45,10 @@ Progress: [█████-----] 50% (Phase 6)
 | 3. CLI and Display | 2 | 4 min | 2 min |
 | 4. Web Dashboard | 2 | 2 min | 1 min |
 | 6. Portfolio Tracking | 1 | 3 min | 3 min |
+| 8. Historical Charts | 1 | 5 min | 5 min |
 
 **Recent Trend:**
-- Last 5 plans: 2 min, 2 min, 2 min, 0 min, 3 min
+- Last 5 plans: 2 min, 2 min, 0 min, 3 min, 5 min
 - Trend: Fast execution
 
 *Updated after each plan completion*
@@ -87,6 +88,8 @@ Recent decisions affecting current work:
 - 06-01: XDG_DATA_HOME with fallback to ~/.local/share for DB path
 - 06-01: Row factory returns Holding instances directly from queries
 - 06-01: Unpriced coins included at cost basis in total_value
+- 08-01: pytest-httpx v0.36.0 requires full URL with query params for strict matching
+- 08-01: Rich bold markup splits numeric-prefixed labels ("7-Day") with ANSI codes; tests check parts separately
 
 ### Pending Todos
 
@@ -110,5 +113,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-06
-Stopped at: Completed 06-01-PLAN.md — Portfolio backend (storage + aggregation + export) with 61 passing tests
+Stopped at: Completed 08-01-PLAN.md — Historical charts backend + CLI (Candle model, API, sparkline, chart subcommand) with 151 passing tests
 Resume file: None
