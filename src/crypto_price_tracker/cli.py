@@ -24,15 +24,19 @@ from crypto_price_tracker.alerts_db import (
     mark_triggered,
     remove_alert as remove_alert_db,
 )
-from crypto_price_tracker.api import get_top_coins
+from crypto_price_tracker.api import get_candles, get_top_coins
 from crypto_price_tracker.display import (
     render_alert_banner,
     render_alert_list,
+    render_chart_detail,
+    render_chart_table,
     render_coin_detail,
     render_portfolio_lots,
     render_portfolio_table,
     render_price_table,
+    sparkline,
 )
+from rich.console import Console
 from crypto_price_tracker.portfolio import aggregate_portfolio, export_csv, export_json
 from crypto_price_tracker.portfolio_db import (
     add_holding,
@@ -244,6 +248,71 @@ def cmd_alert_check(args: argparse.Namespace) -> None:
         sys.exit(0)
 
 
+def cmd_chart(args: argparse.Namespace) -> None:
+    """Show price history charts with sparklines.
+
+    If a symbol is provided, show detailed single-coin view.
+    Otherwise, show compact sparkline overview for all top coins.
+    """
+    console = Console()
+
+    if args.symbol:
+        # Single coin detail mode
+        symbol = args.symbol.upper()
+        try:
+            coins = get_top_coins(top_n=100)
+        except (httpx.HTTPStatusError, httpx.ConnectError) as e:
+            print(f"Error fetching data: {e}", file=sys.stderr)
+            sys.exit(1)
+
+        match = next((c for c in coins if c.symbol == symbol), None)
+        if match is None:
+            print(
+                f"Coin '{symbol}' not found in top 100 EUR pairs on Bitvavo.",
+                file=sys.stderr,
+            )
+            sys.exit(1)
+
+        market = f"{symbol}-EUR"
+        try:
+            candles_7d = get_candles(market, interval="4h", limit=42)
+        except (httpx.HTTPStatusError, httpx.ConnectError):
+            candles_7d = []
+        try:
+            candles_30d = get_candles(market, interval="1d", limit=30)
+        except (httpx.HTTPStatusError, httpx.ConnectError):
+            candles_30d = []
+
+        render_chart_detail(match, candles_7d, candles_30d, console=console)
+    else:
+        # All coins overview mode
+        try:
+            coins = get_top_coins(top_n=args.top)
+        except (httpx.HTTPStatusError, httpx.ConnectError) as e:
+            print(f"Error fetching data: {e}", file=sys.stderr)
+            sys.exit(1)
+
+        sparklines_7d: dict[str, str] = {}
+        sparklines_30d: dict[str, str] = {}
+
+        with console.status("Fetching chart data..."):
+            for coin in coins:
+                market = f"{coin.symbol}-EUR"
+                try:
+                    candles_7d = get_candles(market, interval="4h", limit=42)
+                    candles_30d = get_candles(market, interval="1d", limit=30)
+                except (httpx.HTTPStatusError, httpx.ConnectError):
+                    candles_7d, candles_30d = [], []
+                sparklines_7d[coin.symbol] = sparkline(
+                    [c.close for c in candles_7d]
+                )
+                sparklines_30d[coin.symbol] = sparkline(
+                    [c.close for c in candles_30d]
+                )
+
+        render_chart_table(coins, sparklines_7d, sparklines_30d, console=console)
+
+
 def main() -> None:
     """Entry point -- parse arguments and dispatch to the appropriate command."""
     parser = argparse.ArgumentParser(
@@ -387,6 +456,23 @@ def main() -> None:
     # alert check
     alert_sub.add_parser("check", help="Check alerts against current prices")
 
+    # chart subcommand
+    chart_parser = subparsers.add_parser("chart", help="Show price history charts")
+    chart_parser.add_argument(
+        "symbol",
+        type=str,
+        nargs="?",
+        default=None,
+        help="Coin symbol (e.g. BTC). Omit for all top coins.",
+    )
+    chart_parser.add_argument(
+        "-n",
+        "--top",
+        type=int,
+        default=20,
+        help="Number of top coins to chart (default: 20, ignored if symbol given)",
+    )
+
     args = parser.parse_args()
 
     if args.command == "prices":
@@ -423,6 +509,8 @@ def main() -> None:
             cmd_alert_list(args)
         elif args.alert_command == "check":
             cmd_alert_check(args)
+    elif args.command == "chart":
+        cmd_chart(args)
     else:
         parser.print_help()
 

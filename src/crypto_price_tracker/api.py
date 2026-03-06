@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import httpx
 
-from crypto_price_tracker.models import CoinData
+from crypto_price_tracker.models import Candle, CoinData
 
 BASE_URL = "https://api.bitvavo.com/v2"
 
@@ -132,6 +132,40 @@ class BitvavoClient:
 
         return coins[: self.top_n]
 
+    def get_candles(self, market: str, interval: str = "4h", limit: int = 42) -> list[Candle]:
+        """Fetch OHLCV candles for a market, returned in chronological order.
+
+        Args:
+            market:   Market pair (e.g. "BTC-EUR").
+            interval: Candle interval (e.g. "4h", "1d").
+            limit:    Number of candles to return.
+
+        Returns:
+            List of Candle instances sorted oldest-first (chronological).
+
+        Raises:
+            httpx.HTTPStatusError: on non-2xx HTTP responses (e.g. 400 for invalid market).
+        """
+        response = self._client.get(
+            f"{BASE_URL}/{market}/candles",
+            params={"interval": interval, "limit": limit},
+        )
+        response.raise_for_status()
+        raw: list[list] = response.json()
+        candles = [
+            Candle(
+                timestamp=entry[0],
+                open=float(entry[1]),
+                high=float(entry[2]),
+                low=float(entry[3]),
+                close=float(entry[4]),
+                volume=float(entry[5]),
+            )
+            for entry in raw
+        ]
+        candles.reverse()  # API returns newest-first; we want chronological
+        return candles
+
 
 def get_top_coins(top_n: int = 20) -> list[CoinData]:
     """Fetch top N coins by 24h EUR trading volume from Bitvavo.
@@ -147,3 +181,21 @@ def get_top_coins(top_n: int = 20) -> list[CoinData]:
     """
     with BitvavoClient(top_n=top_n) as client:
         return client.get_top_coins()
+
+
+def get_candles(market: str, interval: str = "4h", limit: int = 42) -> list[Candle]:
+    """Fetch OHLCV candles for a market from Bitvavo.
+
+    Convenience function that opens a client, fetches candles, and closes
+    the connection automatically.
+
+    Args:
+        market:   Market pair (e.g. "BTC-EUR").
+        interval: Candle interval (e.g. "4h", "1d").
+        limit:    Number of candles to return.
+
+    Returns:
+        List of Candle instances sorted oldest-first (chronological).
+    """
+    with BitvavoClient() as client:
+        return client.get_candles(market, interval, limit)

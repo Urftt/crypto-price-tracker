@@ -3,8 +3,10 @@
 import pytest
 from pytest_httpx import HTTPXMock
 
+import httpx
+
 from crypto_price_tracker.api import BitvavoClient
-from crypto_price_tracker.models import CoinData
+from crypto_price_tracker.models import Candle, CoinData
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -35,6 +37,11 @@ def make_ticker(market: str, last: str, open_: str, volume: str, volume_quote: s
 
 def make_assets(*symbols_names: tuple[str, str]) -> list[dict]:
     return [{"symbol": s, "name": n} for s, n in symbols_names]
+
+
+def make_candle(ts: int, open_: str, high: str, low: str, close: str, vol: str) -> list:
+    """Create a raw candle array matching the Bitvavo API response format."""
+    return [ts, open_, high, low, close, vol]
 
 
 BITVAVO_TICKER_URL = "https://api.bitvavo.com/v2/ticker/24h"
@@ -151,3 +158,79 @@ def test_get_top_coins_skips_zero_open(httpx_mock: HTTPXMock) -> None:
     assert "BAD" not in symbols
     assert "GOOD" in symbols
     assert len(results) == 1
+
+
+# ---------------------------------------------------------------------------
+# Candle API tests
+# ---------------------------------------------------------------------------
+
+
+def test_get_candles_returns_chronological(httpx_mock: HTTPXMock) -> None:
+    """Candles must be returned in chronological order (oldest first)."""
+    raw = [
+        make_candle(3000, "103", "105", "101", "104", "10"),
+        make_candle(2000, "101", "103", "100", "102", "20"),
+        make_candle(1000, "100", "102", "99", "101", "30"),
+    ]
+    httpx_mock.add_response(
+        url="https://api.bitvavo.com/v2/BTC-EUR/candles?interval=4h&limit=3",
+        json=raw,
+    )
+
+    with BitvavoClient() as client:
+        candles = client.get_candles("BTC-EUR", interval="4h", limit=3)
+
+    assert len(candles) == 3
+    assert candles[0].timestamp == 1000  # oldest first after reversal
+    assert candles[-1].timestamp == 3000  # newest last
+    assert candles[0].close == 101.0  # string "101" converted to float
+
+
+def test_get_candles_converts_strings_to_float(httpx_mock: HTTPXMock) -> None:
+    """All numeric candle fields except timestamp must be converted to float."""
+    raw = [make_candle(1000, "58756.50", "58869.25", "58453.75", "58805.00", "78.41")]
+    httpx_mock.add_response(
+        url="https://api.bitvavo.com/v2/BTC-EUR/candles?interval=4h&limit=42",
+        json=raw,
+    )
+
+    with BitvavoClient() as client:
+        candles = client.get_candles("BTC-EUR")
+
+    candle = candles[0]
+    assert isinstance(candle.timestamp, int)
+    assert isinstance(candle.open, float)
+    assert candle.open == 58756.50
+    assert isinstance(candle.high, float)
+    assert candle.high == 58869.25
+    assert isinstance(candle.low, float)
+    assert candle.low == 58453.75
+    assert isinstance(candle.close, float)
+    assert candle.close == 58805.00
+    assert isinstance(candle.volume, float)
+    assert candle.volume == 78.41
+
+
+def test_get_candles_empty_response(httpx_mock: HTTPXMock) -> None:
+    """Empty candle response should return an empty list."""
+    httpx_mock.add_response(
+        url="https://api.bitvavo.com/v2/BTC-EUR/candles?interval=4h&limit=42",
+        json=[],
+    )
+
+    with BitvavoClient() as client:
+        candles = client.get_candles("BTC-EUR")
+
+    assert len(candles) == 0
+
+
+def test_get_candles_raises_on_invalid_market(httpx_mock: HTTPXMock) -> None:
+    """Invalid market should raise HTTPStatusError on 400 response."""
+    httpx_mock.add_response(
+        url="https://api.bitvavo.com/v2/INVALID-EUR/candles?interval=4h&limit=42",
+        status_code=400,
+    )
+
+    with BitvavoClient() as client:
+        with pytest.raises(httpx.HTTPStatusError):
+            client.get_candles("INVALID-EUR")

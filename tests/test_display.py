@@ -8,12 +8,16 @@ import pytest
 from rich.console import Console
 
 from crypto_price_tracker.display import (
+    SPARK_CHARS,
     render_alert_banner,
     render_alert_list,
+    render_chart_detail,
+    render_chart_table,
     render_coin_detail,
     render_price_table,
+    sparkline,
 )
-from crypto_price_tracker.models import CoinData, PriceAlert
+from crypto_price_tracker.models import Candle, CoinData, PriceAlert
 
 
 @pytest.fixture
@@ -194,3 +198,120 @@ class TestRenderAlertDisplay:
         output = buf.getvalue()
 
         assert "No alerts set." in output
+
+
+# ---- Sparkline and chart display tests ----
+
+
+@pytest.fixture
+def sample_candles_7d() -> list[Candle]:
+    """Return sample 7-day candles (3 candles for test simplicity)."""
+    return [
+        Candle(timestamp=1000, open=100.0, high=110.0, low=95.0, close=105.0, volume=50.0),
+        Candle(timestamp=2000, open=105.0, high=115.0, low=100.0, close=110.0, volume=60.0),
+        Candle(timestamp=3000, open=110.0, high=120.0, low=105.0, close=108.0, volume=45.0),
+    ]
+
+
+@pytest.fixture
+def sample_candles_30d() -> list[Candle]:
+    """Return sample 30-day candles (3 candles for test simplicity)."""
+    return [
+        Candle(timestamp=1000, open=90.0, high=105.0, low=85.0, close=100.0, volume=100.0),
+        Candle(timestamp=2000, open=100.0, high=115.0, low=95.0, close=110.0, volume=120.0),
+        Candle(timestamp=3000, open=110.0, high=120.0, low=100.0, close=108.0, volume=90.0),
+    ]
+
+
+class TestSparkline:
+    def test_sparkline_basic(self) -> None:
+        result = sparkline([1, 3, 5, 2, 8, 4])
+        assert len(result) == 6
+        assert all(c in SPARK_CHARS for c in result)
+        assert result[4] == SPARK_CHARS[7]  # value 8 is max -> tallest bar
+        assert result[0] == SPARK_CHARS[0]  # value 1 is min -> shortest bar
+
+    def test_sparkline_empty(self) -> None:
+        assert sparkline([]) == ""
+
+    def test_sparkline_single_value(self) -> None:
+        result = sparkline([42.0])
+        assert result == SPARK_CHARS[3]
+
+    def test_sparkline_constant_values(self) -> None:
+        result = sparkline([5.0, 5.0, 5.0, 5.0])
+        assert result == SPARK_CHARS[3] * 4
+
+    def test_sparkline_ascending(self) -> None:
+        result = sparkline([1, 2, 3, 4, 5, 6, 7, 8])
+        # Monotonically non-decreasing block heights
+        for i in range(len(result) - 1):
+            assert result[i] <= result[i + 1]
+        assert result[0] == SPARK_CHARS[0]
+        assert result[-1] == SPARK_CHARS[7]
+
+    def test_sparkline_two_values(self) -> None:
+        result = sparkline([0.0, 100.0])
+        assert result[0] == SPARK_CHARS[0]
+        assert result[1] == SPARK_CHARS[7]
+
+
+class TestRenderChartTable:
+    def test_render_chart_table_contains_symbols(self, sample_coins: list[CoinData]) -> None:
+        console, buf = _make_console()
+        sparklines_7d = {"BTC": "\u2581\u2583\u2585\u2587", "ETH": "\u2582\u2584\u2586\u2588"}
+        sparklines_30d = {"BTC": "\u2588\u2586\u2584\u2582", "ETH": "\u2587\u2585\u2583\u2581"}
+        render_chart_table(sample_coins, sparklines_7d, sparklines_30d, console=console)
+        output = buf.getvalue()
+
+        assert "BTC" in output
+        assert "ETH" in output
+        assert "Price Charts (EUR)" in output
+
+    def test_render_chart_table_empty_sparklines(self, sample_coins: list[CoinData]) -> None:
+        console, buf = _make_console()
+        render_chart_table(sample_coins, {}, {}, console=console)
+        output = buf.getvalue()
+
+        assert "BTC" in output
+        assert "Price Charts (EUR)" in output
+
+
+class TestRenderChartDetail:
+    def test_render_chart_detail_shows_stats(
+        self, sample_coins: list[CoinData], sample_candles_7d: list[Candle], sample_candles_30d: list[Candle]
+    ) -> None:
+        console, buf = _make_console()
+        render_chart_detail(sample_coins[0], sample_candles_7d, sample_candles_30d, console=console)
+        output = buf.getvalue()
+
+        assert "BTC" in output
+        assert "Bitcoin" in output
+        # Rich may split "7-Day" with ANSI codes; check parts separately
+        assert "7" in output and "Day" in output
+        assert "30" in output
+        assert "Open" in output
+        assert "Close" in output
+        assert "High" in output
+        assert "Low" in output
+        assert "Change" in output
+
+    def test_render_chart_detail_no_candle_data(self, sample_coins: list[CoinData]) -> None:
+        console, buf = _make_console()
+        render_chart_detail(sample_coins[0], [], [], console=console)
+        output = buf.getvalue()
+
+        assert "BTC" in output
+        assert "No data available" in output
+
+    def test_render_chart_detail_one_period_only(
+        self, sample_coins: list[CoinData], sample_candles_7d: list[Candle]
+    ) -> None:
+        console, buf = _make_console()
+        render_chart_detail(sample_coins[0], sample_candles_7d, [], console=console)
+        output = buf.getvalue()
+
+        # Rich may insert ANSI codes within "7-Day"; check for "Day" presence
+        assert "Day" in output
+        assert "No data available" in output
+        assert "Open" in output

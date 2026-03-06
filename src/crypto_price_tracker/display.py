@@ -7,8 +7,34 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
-from crypto_price_tracker.models import CoinData, Holding, PriceAlert
+from crypto_price_tracker.models import Candle, CoinData, Holding, PriceAlert
 from crypto_price_tracker.portfolio import PortfolioRow, PortfolioSummary
+
+SPARK_CHARS = "\u2581\u2582\u2583\u2584\u2585\u2586\u2587\u2588"
+
+
+def sparkline(values: list[float]) -> str:
+    """Convert numeric values to a Unicode sparkline string.
+
+    Maps values linearly across 8 Unicode block characters (U+2581..U+2588).
+    Returns empty string for empty input, uniform mid-height bars for constant values.
+
+    Args:
+        values: List of numeric values to render.
+
+    Returns:
+        A string of Unicode block characters representing the data.
+    """
+    if not values:
+        return ""
+    mn, mx = min(values), max(values)
+    if mn == mx:
+        return SPARK_CHARS[3] * len(values)
+    extent = mx - mn
+    return "".join(
+        SPARK_CHARS[min(7, int((v - mn) / extent * 8))]
+        for v in values
+    )
 
 
 def render_price_table(coins: list[CoinData], console: Console | None = None, triggered_symbols: set[str] | None = None) -> None:
@@ -237,3 +263,83 @@ def render_alert_list(alerts: list[PriceAlert], console: Console | None = None) 
             )
 
     console.print(table)
+
+
+def render_chart_table(
+    coins: list[CoinData],
+    sparklines_7d: dict[str, str],
+    sparklines_30d: dict[str, str],
+    console: Console | None = None,
+) -> None:
+    """Render a compact sparkline overview table for all coins.
+
+    Args:
+        coins:          List of CoinData objects (determines row order).
+        sparklines_7d:  Dict mapping symbol -> 7-day sparkline string.
+        sparklines_30d: Dict mapping symbol -> 30-day sparkline string.
+        console:        Optional Rich Console instance for output capture.
+    """
+    if console is None:
+        console = Console()
+
+    table = Table(title="Price Charts (EUR)", show_lines=False)
+    table.add_column("#", justify="right", style="dim")
+    table.add_column("Symbol", justify="left", style="bold")
+    table.add_column("7d", justify="left")
+    table.add_column("30d", justify="left")
+
+    for rank, coin in enumerate(coins, start=1):
+        table.add_row(
+            str(rank),
+            coin.symbol,
+            sparklines_7d.get(coin.symbol, ""),
+            sparklines_30d.get(coin.symbol, ""),
+        )
+
+    console.print(table)
+
+
+def render_chart_detail(
+    coin: CoinData,
+    candles_7d: list[Candle],
+    candles_30d: list[Candle],
+    console: Console | None = None,
+) -> None:
+    """Render a detailed single-coin chart view with sparklines and stats.
+
+    Shows both 7-day and 30-day sparklines with open, close, high, low,
+    and change % statistics. Stats are color-coded green/red.
+
+    Args:
+        coin:        CoinData object for the coin header.
+        candles_7d:  List of 7-day Candle objects (chronological).
+        candles_30d: List of 30-day Candle objects (chronological).
+        console:     Optional Rich Console instance for output capture.
+    """
+    if console is None:
+        console = Console()
+
+    console.print(f"\n[bold]{coin.symbol}[/bold] \u2014 {coin.name}\n")
+
+    for label, candles in [("7-Day", candles_7d), ("30-Day", candles_30d)]:
+        if not candles:
+            console.print(f"  {label}: No data available")
+            continue
+
+        spark = sparkline([c.close for c in candles])
+        o = candles[0].open
+        c = candles[-1].close
+        hi = max(c_.high for c_ in candles)
+        lo = min(c_.low for c_ in candles)
+        change = ((c - o) / o) * 100 if o else 0
+
+        console.print(f"  [bold]{label}[/bold]  {spark}")
+        change_str = f"{change:+.2f}%"
+        color = "green" if change >= 0 else "red"
+        console.print(
+            f"    Open: EUR {o:,.2f}  Close: EUR {c:,.2f}  "
+            f"High: EUR {hi:,.2f}  Low: EUR {lo:,.2f}  "
+            f"Change: [{color}]{change_str}[/{color}]"
+        )
+
+    console.print()

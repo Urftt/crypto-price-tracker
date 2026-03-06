@@ -12,7 +12,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from crypto_price_tracker.cli import main
-from crypto_price_tracker.models import CoinData, Holding, PriceAlert
+from crypto_price_tracker.models import Candle, CoinData, Holding, PriceAlert
 
 
 @pytest.fixture
@@ -299,3 +299,73 @@ def test_prices_command_with_alert_checking(mock_coins):
         main()
 
     mock_render.assert_called_once_with(mock_coins, triggered_symbols=set())
+
+
+# ---- Chart subcommand tests ----
+
+
+def test_chart_command_all_coins(mock_coins):
+    """chart with no symbol should fetch candles for all coins and render chart table."""
+    with (
+        patch("crypto_price_tracker.cli.get_top_coins", return_value=mock_coins),
+        patch("crypto_price_tracker.cli.get_candles", return_value=[]),
+        patch("crypto_price_tracker.cli.render_chart_table") as mock_render,
+    ):
+        sys.argv = ["crypto", "chart"]
+        main()
+
+    mock_render.assert_called_once()
+    assert mock_render.call_args[0][0] == mock_coins
+
+
+def test_chart_command_single_coin(mock_coins):
+    """chart BTC should show detailed view for BTC."""
+    with (
+        patch("crypto_price_tracker.cli.get_top_coins", return_value=mock_coins),
+        patch("crypto_price_tracker.cli.get_candles", return_value=[]),
+        patch("crypto_price_tracker.cli.render_chart_detail") as mock_render,
+    ):
+        sys.argv = ["crypto", "chart", "BTC"]
+        main()
+
+    mock_render.assert_called_once()
+    assert mock_render.call_args[0][0].symbol == "BTC"
+
+
+def test_chart_command_single_coin_case_insensitive(mock_coins):
+    """chart btc (lowercase) should normalise to BTC and render detail."""
+    with (
+        patch("crypto_price_tracker.cli.get_top_coins", return_value=mock_coins),
+        patch("crypto_price_tracker.cli.get_candles", return_value=[]),
+        patch("crypto_price_tracker.cli.render_chart_detail") as mock_render,
+    ):
+        sys.argv = ["crypto", "chart", "btc"]
+        main()
+
+    mock_render.assert_called_once()
+    assert mock_render.call_args[0][0].symbol == "BTC"
+
+
+def test_chart_command_coin_not_found(mock_coins):
+    """chart DOESNOTEXIST should exit with code 1."""
+    with (
+        patch("crypto_price_tracker.cli.get_top_coins", return_value=mock_coins),
+        pytest.raises(SystemExit) as exc_info,
+    ):
+        sys.argv = ["crypto", "chart", "DOESNOTEXIST"]
+        main()
+
+    assert exc_info.value.code == 1
+
+
+def test_chart_command_respects_top_n(mock_coins):
+    """chart -n 10 should call get_top_coins(top_n=10)."""
+    with (
+        patch("crypto_price_tracker.cli.get_top_coins", return_value=mock_coins) as mock_api,
+        patch("crypto_price_tracker.cli.get_candles", return_value=[]),
+        patch("crypto_price_tracker.cli.render_chart_table"),
+    ):
+        sys.argv = ["crypto", "chart", "-n", "10"]
+        main()
+
+    mock_api.assert_called_once_with(top_n=10)

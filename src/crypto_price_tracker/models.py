@@ -64,3 +64,24 @@ class PriceAlert:
     status: str
     created_at: str
     triggered_at: str | None
+
+
+@dataclass(slots=True)
+class Candle:
+    """A single OHLCV candle from the Bitvavo candles endpoint.
+
+    Fields:
+        timestamp: Unix timestamp in milliseconds
+        open:      Opening price in EUR
+        high:      Highest price in interval
+        low:       Lowest price in interval
+        close:     Closing price in EUR
+        volume:    Volume traded in the interval
+    """
+
+    timestamp: int
+    open: float
+    high: float
+    low: float
+    close: float
+    volume: float
