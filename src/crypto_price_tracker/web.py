@@ -30,8 +30,8 @@ from crypto_price_tracker.alerts_db import (
     mark_triggered as db_mark_triggered,
     remove_alert as db_remove_alert,
 )
-from crypto_price_tracker.api import get_top_coins
-from crypto_price_tracker.models import CoinData  # noqa: F401 – re-exported for type hints
+from crypto_price_tracker.api import get_candles, get_top_coins
+from crypto_price_tracker.models import Candle, CoinData  # noqa: F401 – re-exported for type hints
 from crypto_price_tracker.portfolio import aggregate_portfolio
 from crypto_price_tracker.portfolio_db import (
     add_holding as db_add_holding,
@@ -188,6 +188,28 @@ def create_app() -> FastAPI:
         if not db_remove_alert(alert_id):
             raise HTTPException(status_code=404, detail=f"Alert #{alert_id} not found")
         return {"status": "deleted"}
+
+    # --- Candle/Chart endpoints ---
+
+    @app.get("/api/candles/{symbol}")
+    def api_candles(
+        symbol: str,
+        interval: str = Query(default="4h", pattern="^(1m|5m|15m|30m|1h|2h|4h|6h|8h|12h|1d)$"),
+        limit: int = Query(default=42, ge=1, le=1440),
+    ):
+        """Return OHLCV candle data for a market in chronological order."""
+        symbol = symbol.upper()
+        market = f"{symbol}-EUR"
+        try:
+            candles = get_candles(market, interval=interval, limit=limit)
+        except httpx.HTTPStatusError as e:
+            if e.response.status_code == 400:
+                raise HTTPException(
+                    status_code=404,
+                    detail=f"No candle data for '{symbol}'",
+                )
+            raise
+        return [dataclasses.asdict(c) for c in candles]
 
     @app.get("/")
     def index():

@@ -58,7 +58,7 @@
       background: #161b22;
       border-radius: 8px;
       padding: 24px;
-      max-width: 400px;
+      max-width: 600px;
       width: calc(100% - 48px);
       position: relative;
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
@@ -216,7 +216,21 @@
       opacity: 1;
       transform: translateX(0);
     }
+    /* Chart period toggle buttons */
+    .chart-period-btn {
+      background: #21262d;
+      color: #8b949e;
+      border: 1px solid #30363d;
+      border-radius: 4px;
+      padding: 4px 12px;
+      font-family: monospace;
+      font-size: 0.85em;
+      cursor: pointer;
+    }
+    .chart-period-btn:hover { color: #c9d1d9; border-color: #58a6ff; }
+    .chart-period-btn.active { background: #0d1117; color: #58a6ff; border-color: #58a6ff; font-weight: bold; }
   </style>
+  <script src="https://cdn.plot.ly/plotly-3.4.0.min.js" charset="utf-8"></script>
 </head>
 <body>
   <h1>&#11041; Crypto Prices</h1>
@@ -341,6 +355,13 @@
         <div style="margin-top:12px;text-align:center;">
           <button onclick="setAlertFromModal()" style="background:#21262d;color:#f0883e;border:1px solid #f0883e;border-radius:4px;padding:6px 16px;font-family:monospace;font-size:0.85em;cursor:pointer;">Set Alert</button>
         </div>
+        <div id="chart-section" style="margin-top:16px; display:none;">
+          <div style="display:flex; gap:4px; margin-bottom:8px;">
+            <button class="chart-period-btn active" onclick="switchPeriod('7d')">7D</button>
+            <button class="chart-period-btn" onclick="switchPeriod('30d')">30D</button>
+          </div>
+          <div id="chart-container" style="width:100%; height:250px;"></div>
+        </div>
         <div id="modal-error" style="display:none;"></div>
       </div>
     </div>
@@ -396,6 +417,7 @@
       // Reset state and show modal
       errorEl.style.display = 'none';
       detailsEl.style.display = '';
+      document.getElementById('chart-section').style.display = 'none';
       document.getElementById('modal-symbol').textContent = symbol;
       document.getElementById('modal-name').textContent = '';
       document.getElementById('modal-price').textContent = '...';
@@ -424,6 +446,11 @@
 
         document.getElementById('modal-volume').textContent = c.volume.toFixed(4);
         document.getElementById('modal-volume-eur').textContent = '\u20ac ' + fmtVol(c.volume_eur);
+
+        // Load 7D chart (default period)
+        document.querySelectorAll('.chart-period-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelector('.chart-period-btn:first-child').classList.add('active');
+        loadChart(symbol, '4h', 42);
       } catch (err) {
         detailsEl.style.display = 'none';
         errorEl.style.display = '';
@@ -433,6 +460,12 @@
 
     function closeModal() {
       document.getElementById('modal-backdrop').style.display = 'none';
+      // Clean up Plotly chart to free memory
+      const container = document.getElementById('chart-container');
+      if (typeof Plotly !== 'undefined') {
+        Plotly.purge(container);
+      }
+      document.getElementById('chart-section').style.display = 'none';
     }
 
     function handleBackdropClick(event) {
@@ -700,6 +733,77 @@
         }
       }
       document.getElementById('alert-price').focus();
+    }
+
+    /* --- Chart in modal --- */
+    let currentChartSymbol = '';
+
+    async function loadChart(symbol, interval, limit) {
+      currentChartSymbol = symbol;
+      const chartSection = document.getElementById('chart-section');
+      const container = document.getElementById('chart-container');
+
+      try {
+        const resp = await fetch(`/api/candles/${symbol}?interval=${interval}&limit=${limit}`);
+        if (!resp.ok) {
+          chartSection.style.display = 'none';
+          return;
+        }
+        const candles = await resp.json();
+        if (candles.length === 0) {
+          chartSection.style.display = 'none';
+          return;
+        }
+
+        chartSection.style.display = '';
+
+        const trace = {
+          x: candles.map(c => new Date(c.timestamp)),
+          y: candles.map(c => c.close),
+          type: 'scatter',
+          mode: 'lines',
+          line: { color: '#58a6ff', width: 2 },
+          hovertemplate: '%{x|%b %d, %H:%M}<br>\u20ac %{y:,.2f}<extra></extra>'
+        };
+
+        const layout = {
+          paper_bgcolor: '#161b22',
+          plot_bgcolor: '#161b22',
+          font: { color: '#c9d1d9', family: 'monospace' },
+          xaxis: {
+            gridcolor: '#21262d',
+            tickformat: interval === '1d' ? '%b %d' : '%b %d %H:%M'
+          },
+          yaxis: {
+            gridcolor: '#21262d',
+            tickprefix: '\u20ac ',
+            tickformat: ',.2f'
+          },
+          margin: { t: 10, r: 20, b: 40, l: 70 },
+          height: 250
+        };
+
+        const config = { responsive: true, displayModeBar: false };
+        Plotly.newPlot(container, [trace], layout, config);
+      } catch (err) {
+        chartSection.style.display = 'none';
+      }
+    }
+
+    function switchPeriod(period) {
+      // Update button states
+      document.querySelectorAll('.chart-period-btn').forEach(btn => btn.classList.remove('active'));
+      const activeBtn = period === '7d'
+        ? document.querySelector('.chart-period-btn:first-child')
+        : document.querySelector('.chart-period-btn:last-child');
+      if (activeBtn) activeBtn.classList.add('active');
+
+      // Load chart with appropriate interval and limit
+      if (period === '7d') {
+        loadChart(currentChartSymbol, '4h', 42);
+      } else {
+        loadChart(currentChartSymbol, '1d', 30);
+      }
     }
 
     // Initial load + start 1-second countdown tick

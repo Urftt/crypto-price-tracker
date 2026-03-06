@@ -10,7 +10,9 @@ from unittest.mock import patch
 import pytest
 from starlette.testclient import TestClient
 
-from crypto_price_tracker.models import CoinData
+import httpx
+
+from crypto_price_tracker.models import Candle, CoinData
 from crypto_price_tracker.web import create_app
 
 
@@ -453,3 +455,107 @@ def test_index_has_set_alert_modal_button(client):
     body = response.text
     assert "setAlertFromModal" in body
     assert "Set Alert" in body
+
+
+# ---- Candle/Chart API tests ----
+
+
+def make_test_candles() -> list[Candle]:
+    """Return a small list of Candle objects for testing."""
+    return [
+        Candle(timestamp=1000, open=100.0, high=110.0, low=95.0, close=105.0, volume=50.0),
+        Candle(timestamp=2000, open=105.0, high=115.0, low=100.0, close=110.0, volume=60.0),
+        Candle(timestamp=3000, open=110.0, high=120.0, low=105.0, close=108.0, volume=45.0),
+    ]
+
+
+def test_api_candles_returns_json_list(client):
+    """GET /api/candles/BTC returns a JSON list of candle dicts."""
+    with patch("crypto_price_tracker.web.get_candles", return_value=make_test_candles()):
+        response = client.get("/api/candles/BTC")
+
+    assert response.status_code == 200
+    data = response.json()
+    assert isinstance(data, list)
+    assert len(data) == 3
+    first = data[0]
+    assert set(["timestamp", "open", "high", "low", "close", "volume"]).issubset(first.keys())
+    assert first["timestamp"] == 1000
+    assert first["close"] == 105.0
+
+
+def test_api_candles_case_insensitive(client):
+    """GET /api/candles/btc (lowercase) uppercases to BTC-EUR for the API call."""
+    with patch("crypto_price_tracker.web.get_candles", return_value=make_test_candles()) as mock_fn:
+        response = client.get("/api/candles/btc")
+
+    assert response.status_code == 200
+    assert mock_fn.call_args[0][0] == "BTC-EUR"
+
+
+def test_api_candles_with_interval_param(client):
+    """GET /api/candles/BTC?interval=1d&limit=30 passes params through."""
+    with patch("crypto_price_tracker.web.get_candles", return_value=make_test_candles()) as mock_fn:
+        response = client.get("/api/candles/BTC?interval=1d&limit=30")
+
+    assert response.status_code == 200
+    mock_fn.assert_called_once_with("BTC-EUR", interval="1d", limit=30)
+
+
+def test_api_candles_invalid_market(client):
+    """GET /api/candles/INVALID returns 404 when Bitvavo returns 400."""
+    mock_request = httpx.Request("GET", "https://api.bitvavo.com/v2/INVALID-EUR/candles")
+    mock_response = httpx.Response(400, request=mock_request)
+    with patch("crypto_price_tracker.web.get_candles") as mock_fn:
+        mock_fn.side_effect = httpx.HTTPStatusError("Bad Request", request=mock_request, response=mock_response)
+        response = client.get("/api/candles/INVALID")
+
+    assert response.status_code == 404
+    assert "No candle data" in response.json()["detail"]
+
+
+def test_api_candles_invalid_interval(client):
+    """GET /api/candles/BTC?interval=invalid returns 422 from pattern validation."""
+    response = client.get("/api/candles/BTC?interval=invalid")
+    assert response.status_code == 422
+
+
+def test_api_candles_empty_response(client):
+    """GET /api/candles/BTC returns empty list when no candles available."""
+    with patch("crypto_price_tracker.web.get_candles", return_value=[]):
+        response = client.get("/api/candles/BTC")
+
+    assert response.status_code == 200
+    assert response.json() == []
+
+
+def test_index_has_plotly_script(client):
+    """GET / response body contains the Plotly CDN script tag."""
+    response = client.get("/")
+    assert "plotly-3.4.0.min.js" in response.text
+
+
+def test_index_has_chart_elements(client):
+    """GET / response body contains all chart-related elements."""
+    response = client.get("/")
+    body = response.text
+    assert "chart-section" in body
+    assert "chart-container" in body
+    assert "chart-period-btn" in body
+    assert "loadChart" in body
+    assert "switchPeriod" in body
+    assert "/api/candles/" in body
+
+
+def test_index_has_chart_period_buttons(client):
+    """GET / response body contains 7D and 30D toggle button text."""
+    response = client.get("/")
+    body = response.text
+    assert ">7D<" in body
+    assert ">30D<" in body
+
+
+def test_index_modal_width_increased(client):
+    """GET / response body confirms modal card max-width is 600px."""
+    response = client.get("/")
+    assert "max-width: 600px" in response.text
