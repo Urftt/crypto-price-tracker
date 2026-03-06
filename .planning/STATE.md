@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: in_progress
-last_updated: "2026-03-06T22:10:03Z"
+last_updated: "2026-03-06T23:16:54Z"
 progress:
   total_phases: 13
   completed_phases: 5
-  total_plans: 9
-  completed_plans: 9
+  total_plans: 10
+  completed_plans: 10
 ---
 
 # Project State
@@ -18,16 +18,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-02-28)
 
 **Core value:** Instant, glanceable crypto prices in the terminal — one command, no browser needed.
-**Current focus:** Phase 8: Historical Charts -- Complete
+**Current focus:** Phase 7: Price Alerts -- Plan 1 complete, Plan 2 pending
 
 ## Current Position
 
-Phase: 8 of 13 (Historical Charts)
-Plan: 2 of 2 complete
-Status: Phase 8 complete -- Candle model, API, sparkline CLI, web candle endpoint, Plotly charts in modal, 7D/30D toggle
-Last activity: 2026-03-06 -- Plan 08-02 executed, all 161 tests passing (9 API, 26 CLI, 24 display, 43 web, 17 portfolio DB, 11 portfolio aggregation, 39 alerts, 12 other -- includes 10 new chart web tests)
+Phase: 7 of 13 (Price Alerts)
+Plan: 1 of 2 complete
+Status: Plan 07-01 complete -- PriceAlert model, alerts_db.py CRUD, alerts.py pure checking, 31 tests
+Last activity: 2026-03-06 -- Plan 07-01 verified, all 161 tests passing (20 alerts DB + 11 alerts checking + 130 existing)
 
-Progress: [██████████] 100% (Phase 8)
+Progress: [█████-----] 50% (Phase 7)
 
 ## Performance Metrics
 
@@ -45,6 +45,7 @@ Progress: [██████████] 100% (Phase 8)
 | 3. CLI and Display | 2 | 4 min | 2 min |
 | 4. Web Dashboard | 2 | 2 min | 1 min |
 | 6. Portfolio Tracking | 1 | 3 min | 3 min |
+| 7. Price Alerts | 1 | 2 min | 2 min |
 | 8. Historical Charts | 2 | 8 min | 4 min |
 
 **Recent Trend:**
@@ -93,6 +94,12 @@ Recent decisions affecting current work:
 - 08-02: Plotly CDN v3.4.0 pinned (not plotly-latest which is frozen at v1.58.5)
 - 08-02: Chart placed inside existing coin detail modal, not a new tab; line chart only (closing prices)
 - 08-02: Modal widened from 400px to 600px for chart space; Plotly.purge() on close for memory cleanup
+- 07-01: alerts_db.py imports portfolio_db as module (not from-import) so test patches propagate
+- 07-01: Both alerts and holdings tables share the same SQLite DB file
+- 07-01: check_alerts() is pure -- no DB side effects, caller handles mark_triggered
+- 07-01: Race condition guard: UPDATE WHERE status='active' prevents double-triggering
+- 07-01: Direction validated in Python (ValueError) AND via SQLite CHECK constraint
+- 07-01: get_all_alerts orders active-first then triggered for display readiness
 
 ### Pending Todos
 
@@ -116,5 +123,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-06
-Stopped at: Completed 08-02-PLAN.md -- Phase 8 complete (candle API endpoint, Plotly charts in web modal, 7D/30D toggle) with 161 passing tests
+Stopped at: Completed 07-01-PLAN.md -- PriceAlert model, alerts_db CRUD, pure check_alerts, 31 new tests (161 total)
 Resume file: None

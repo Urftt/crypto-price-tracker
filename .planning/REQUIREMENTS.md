@@ -44,8 +44,8 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Price Alerts
 
-- [ ] **ALERT-01**: SQLite CRUD for alerts: add, get active, get all, remove, mark triggered, clear triggered
-- [ ] **ALERT-02**: Pure alert checking logic: above/below price targets fire one-shot alerts
+- [x] **ALERT-01**: SQLite CRUD for alerts: add, get active, get all, remove, mark triggered, clear triggered
+- [x] **ALERT-02**: Pure alert checking logic: above/below price targets fire one-shot alerts
 - [ ] **ALERT-03**: CLI subcommands: `crypto alert add/list/remove/check` with argparse
 - [ ] **ALERT-04**: Web API endpoints: GET/POST/DELETE /api/alerts, modified /api/prices with triggered alerts
 - [ ] **ALERT-05**: Rich CLI banner and inline markers render correctly when alerts trigger
@@ -95,8 +95,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | WEB-04 | Phase 4 | Planned |
 | UX-01 | Phase 5 | Planned |
 | UX-02 | Phase 5 | Planned |
-| ALERT-01 | Phase 7 | Planned |
-| ALERT-02 | Phase 7 | Planned |
+| ALERT-01 | Phase 7 | Complete |
+| ALERT-02 | Phase 7 | Complete |
 | ALERT-03 | Phase 7 | Planned |
 | ALERT-04 | Phase 7 | Planned |
 | ALERT-05 | Phase 7 | Planned |

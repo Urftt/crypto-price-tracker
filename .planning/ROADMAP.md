@@ -83,7 +83,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 4. Web Dashboard | 2/2 | Complete | 2026-03-05 |
 | 5. Web UX | 0/1 | Planned | — |
 | 6. Portfolio Tracking | 1/2 | In Progress | — |
-| 7. Price Alerts | 0/2 | Planned | — |
+| 7. Price Alerts | 1/2 | In Progress | — |
 | 8. Historical Charts | 2/2 | Complete | 2026-03-06 |
 | 9. React Frontend | 0/0 | Planned | — |
 | 10. Multi-Exchange Support | 0/0 | Planned | — |
@@ -162,7 +162,7 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 07-01-PLAN.md — Backend: PriceAlert model, alerts_db.py (SQLite CRUD), alerts.py (checking logic), and unit tests
+- [x] 07-01-PLAN.md — Backend: PriceAlert model, alerts_db.py (SQLite CRUD), alerts.py (checking logic), and unit tests
 - [ ] 07-02-PLAN.md — Integration: CLI alert subcommands, display functions (banner + alert list + modified price table), web API endpoints, HTML alerts tab + toast + modal button, and integration tests
 
 ### Phase 8: Historical Charts
