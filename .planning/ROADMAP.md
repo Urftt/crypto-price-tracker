@@ -87,7 +87,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 8. Historical Charts | 2/2 | Complete | 2026-03-06 |
 | 9. React Frontend | 2/2 | Complete | 2026-03-07 |
 | 10. Multi-Exchange Support | 1/2 | In Progress | — |
-| 11. Watchlist & Tags | 0/0 | Planned | — |
+| 11. Watchlist & Tags | 1/2 | In Progress | — |
 | 12. Export & Reporting | 0/0 | Planned | — |
 | 13. Mobile PWA | 0/0 | Planned | — |
 
@@ -229,13 +229,25 @@ Plans:
 
 ### Phase 11: Watchlist & Tags
 
-**Goal:** Let users tag coins (DeFi, Layer1, Meme) and filter by tag. Persistent watchlist separate from portfolio. CLI: `crypto watch add ETH`, web: tag filters.
+**Goal:** Let users tag coins (DeFi, Layer1, Meme) and filter by tag. Persistent watchlist separate from portfolio. CLI: `crypto watchlist add ETH --tag defi`, web: Watchlist tab with tag filter pills.
 **Depends on:** Phase 10
-**Requirements**: TBD
-**Plans:** 0 plans
+**Requirements**: WATCH-01, WATCH-02, WATCH-03, WATCH-04, WATCH-05, WATCH-06, WATCH-07, WATCH-08, WATCH-09, WATCH-10
+**Success Criteria** (what must be TRUE):
+  1. `crypto watchlist add ETH --tag defi` adds ETH to the watchlist with the DeFi tag
+  2. `crypto watchlist list` shows all watchlist entries with live prices, tags, and 24h change
+  3. `crypto watchlist list --tag defi` filters to only show entries tagged DeFi
+  4. `crypto watchlist remove ETH` removes ETH from the watchlist
+  5. `crypto watchlist tag ETH --tag layer1` updates tags on an existing entry
+  6. `crypto prices --watchlist` filters the price table to only show watched symbols
+  7. Watchlist data persists in the same SQLite DB as portfolio and alerts
+  8. Web dashboard has a "Watchlist" tab with tag filter pills and watchlist table
+  9. Star icon on Prices tab rows toggles watchlist membership
+  10. GET/POST/DELETE /api/watchlist endpoints work correctly
+**Plans**: 2 plans
 
 Plans:
-- [ ] TBD (run /gsd:plan-phase 11 to break down)
+- [x] 11-01-PLAN.md — Backend: WatchlistEntry model, watchlist_db.py (SQLite CRUD), render_watchlist_table, CLI watchlist subcommands, --watchlist flag, unit tests
+- [ ] 11-02-PLAN.md — Web: FastAPI watchlist endpoints, WatchlistPage with tag pills, PriceTable star icon, App routing, web tests
 
 ### Phase 12: Export & Reporting
 

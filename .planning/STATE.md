@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: in_progress
-last_updated: "2026-03-07T13:27:00Z"
+last_updated: "2026-03-07T15:11:00Z"
 progress:
   total_phases: 13
   completed_phases: 6
-  total_plans: 13
-  completed_plans: 13
+  total_plans: 14
+  completed_plans: 14
 ---
 
 # Project State
@@ -18,23 +18,23 @@ progress:
 See: .planning/PROJECT.md (updated 2026-02-28)
 
 **Core value:** Instant, glanceable crypto prices in the terminal — one command, no browser needed.
-**Current focus:** Phase 10 in progress -- Exchange abstraction layer built, Plan 10-01 complete. Plan 10-02 (web integration) next.
+**Current focus:** Phase 11 in progress -- Watchlist backend + CLI complete (Plan 11-01). Plan 11-02 (web integration) next.
 
 ## Current Position
 
-Phase: 10 of 13 (Multi-Exchange Support) -- IN PROGRESS
+Phase: 11 of 13 (Watchlist & Tags) -- IN PROGRESS
 Plan: 1 of 2 complete
-Status: Plan 10-01 complete -- ExchangeClient protocol, BinanceClient, auto-fallback, CLI --exchange flag, 168 tests passing
-Last activity: 2026-03-07 -- Plan 10-01 verified, all 168 tests passing
+Status: Plan 11-01 complete -- WatchlistEntry model, watchlist_db CRUD, CLI subcommands, --watchlist flag, 208 tests passing
+Last activity: 2026-03-07 -- Plan 11-01 verified, all 208 tests passing
 
-Progress: [█████-----] 50% (Phase 10)
+Progress: [█████-----] 50% (Phase 11)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 13
+- Total plans completed: 14
 - Average duration: 3 min
-- Total execution time: ~42 min
+- Total execution time: ~46 min
 
 **By Phase:**
 
@@ -49,9 +49,10 @@ Progress: [█████-----] 50% (Phase 10)
 | 8. Historical Charts | 2 | 8 min | 4 min |
 | 9. React Frontend | 2 | 8 min | 4 min |
 | 10. Multi-Exchange | 1 | 7 min | 7 min |
+| 11. Watchlist & Tags | 1 | 4 min | 4 min |
 
 **Recent Trend:**
-- Last 5 plans: 5 min, 3 min, 5 min, 3 min, 7 min
+- Last 5 plans: 3 min, 5 min, 3 min, 7 min, 4 min
 - Trend: Fast execution
 
 *Updated after each plan completion*
@@ -117,6 +118,11 @@ Recent decisions affecting current work:
 - 10-01: Stablecoins filtered from Binance: USDC, BUSD, DAI, TUSD, FDUSD, USDD, USDP
 - 10-01: render_price_table shows "via {source}" as Rich table caption with dim style
 - 10-01: CLI --exchange flag on prices, watch, info, web, chart subcommands (default: bitvavo)
+- 11-01: watchlist_db mirrors alerts_db pattern: connection-per-call with try/finally close
+- 11-01: Tags validated against VALID_TAGS frozenset, case-insensitive input, canonical casing stored
+- 11-01: Symbol UNIQUE constraint in SQLite, stored uppercase, IntegrityError on duplicate
+- 11-01: render_watchlist_table shows N/A for coins without live price data
+- 11-01: cmd_watchlist_add converts None tags to empty list via `args.tag or []`
 
 ### Pending Todos
 
@@ -140,5 +146,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-07
-Stopped at: Completed 10-01-PLAN.md -- Exchange abstraction layer, BinanceClient, auto-fallback, CLI --exchange flag, 168 tests passing
+Stopped at: Completed 11-01-PLAN.md -- Watchlist backend + CLI: WatchlistEntry model, watchlist_db CRUD, CLI subcommands, --watchlist flag, 208 tests passing
 Resume file: None
