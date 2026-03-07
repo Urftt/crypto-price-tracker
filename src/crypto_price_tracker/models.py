@@ -85,3 +85,20 @@ class Candle:
     low: float
     close: float
     volume: float
+
+
+@dataclass(slots=True)
+class WatchlistEntry:
+    """A watchlist entry with optional category tags.
+
+    Fields:
+        id:        SQLite row ID (autoincrement primary key)
+        symbol:    Coin ticker symbol (e.g. "ETH"), stored uppercase
+        tags:      Comma-separated tag string (e.g. "Layer1,DeFi") or empty string
+        added_at:  Timestamp as ISO 8601 string
+    """
+
+    id: int
+    symbol: str
+    tags: str
+    added_at: str
