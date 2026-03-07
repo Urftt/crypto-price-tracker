@@ -45,6 +45,14 @@ from crypto_price_tracker.portfolio_db import (
     remove_holding as db_remove_holding,
     update_holding as db_update_holding,
 )
+from crypto_price_tracker.watchlist_db import (
+    add_watchlist_entry as db_add_watchlist,
+    get_all_watchlist_entries as db_get_watchlist,
+    get_watchlist_symbols as db_get_watchlist_symbols,
+    remove_watchlist_entry as db_remove_watchlist,
+    update_watchlist_tags as db_update_watchlist_tags,
+    VALID_TAGS as WATCHLIST_VALID_TAGS,
+)
 
 STATIC_DIR = Path(__file__).parent / "static"
 
@@ -72,6 +80,19 @@ class AlertCreate(BaseModel):
     symbol: str
     target_price: float = Field(gt=0)
     direction: str = Field(default="above", pattern="^(above|below)$")
+
+
+class WatchlistAdd(BaseModel):
+    """Request body for adding a coin to the watchlist."""
+
+    symbol: str
+    tags: list[str] = Field(default_factory=list)
+
+
+class WatchlistTagUpdate(BaseModel):
+    """Request body for updating tags on a watchlist entry."""
+
+    tags: list[str]
 
 
 def create_app() -> FastAPI:
@@ -204,6 +225,86 @@ def create_app() -> FastAPI:
         if not db_remove_alert(alert_id):
             raise HTTPException(status_code=404, detail=f"Alert #{alert_id} not found")
         return {"status": "deleted"}
+
+    # --- Watchlist endpoints ---
+
+    @app.get("/api/watchlist")
+    def api_watchlist_list(tag: str | None = Query(default=None)):
+        """Return all watchlist entries with live prices, optionally filtered by tag."""
+        entries = db_get_watchlist(tag=tag)
+        # Fetch live prices (best-effort)
+        prices: dict = {}
+        try:
+            coins, _ = get_top_coins_with_fallback(top_n=100)
+            prices = {c.symbol: c for c in coins}
+        except (httpx.HTTPStatusError, httpx.ConnectError, httpx.TimeoutException):
+            pass
+        result = []
+        for entry in entries:
+            entry_dict = dataclasses.asdict(entry)
+            coin = prices.get(entry.symbol)
+            if coin:
+                entry_dict["price"] = coin.price
+                entry_dict["change_24h"] = coin.change_24h
+                entry_dict["volume_eur"] = coin.volume_eur
+                entry_dict["name"] = coin.name
+            else:
+                entry_dict["price"] = None
+                entry_dict["change_24h"] = None
+                entry_dict["volume_eur"] = None
+                entry_dict["name"] = None
+            result.append(entry_dict)
+        return result
+
+    @app.post("/api/watchlist", status_code=201)
+    def api_watchlist_add(body: WatchlistAdd):
+        """Add a coin to the watchlist."""
+        try:
+            row_id = db_add_watchlist(body.symbol, body.tags or None)
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=str(e))
+        except Exception as e:
+            if "UNIQUE constraint" in str(e):
+                raise HTTPException(
+                    status_code=409,
+                    detail=f"{body.symbol.upper()} is already on the watchlist",
+                )
+            raise
+        return {"id": row_id, "status": "created"}
+
+    @app.delete("/api/watchlist/{symbol}")
+    def api_watchlist_delete(symbol: str):
+        """Remove a coin from the watchlist by symbol."""
+        if not db_remove_watchlist(symbol):
+            raise HTTPException(
+                status_code=404,
+                detail=f"{symbol.upper()} not found on watchlist",
+            )
+        return {"status": "deleted"}
+
+    @app.put("/api/watchlist/{symbol}/tags")
+    def api_watchlist_update_tags(symbol: str, body: WatchlistTagUpdate):
+        """Replace tags on a watchlist entry."""
+        try:
+            if not db_update_watchlist_tags(symbol, body.tags):
+                raise HTTPException(
+                    status_code=404,
+                    detail=f"{symbol.upper()} not found on watchlist",
+                )
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=str(e))
+        return {"status": "updated"}
+
+    @app.get("/api/watchlist/tags")
+    def api_watchlist_tags():
+        """Return the list of valid pre-defined tags."""
+        return {"tags": sorted(WATCHLIST_VALID_TAGS)}
+
+    @app.get("/api/watchlist/symbols")
+    def api_watchlist_symbols():
+        """Return the set of all symbols currently on the watchlist."""
+        symbols = db_get_watchlist_symbols()
+        return {"symbols": sorted(symbols)}
 
     # --- Candle/Chart endpoints ---
 

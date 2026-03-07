@@ -515,3 +515,154 @@ def test_api_prices_invalid_exchange_rejected(client):
     """GET /api/prices?exchange=invalid returns 422."""
     response = client.get("/api/prices?exchange=invalid")
     assert response.status_code == 422
+
+
+# ---- Watchlist API tests ----
+
+
+def test_api_watchlist_get_empty(client, portfolio_db):
+    """GET /api/watchlist returns empty list when no entries exist."""
+    with patch("crypto_price_tracker.web.get_top_coins_with_fallback", return_value=([], "Bitvavo")):
+        response = client.get("/api/watchlist")
+    assert response.status_code == 200
+    assert response.json() == []
+
+
+def test_api_watchlist_add(client, portfolio_db):
+    """POST /api/watchlist creates a watchlist entry."""
+    response = client.post("/api/watchlist", json={
+        "symbol": "ETH",
+        "tags": ["DeFi"],
+    })
+    assert response.status_code == 201
+    data = response.json()
+    assert "id" in data
+    assert data["status"] == "created"
+
+
+def test_api_watchlist_add_then_get(client, portfolio_db, mock_coins):
+    """POST then GET /api/watchlist returns the new entry with live price data."""
+    client.post("/api/watchlist", json={
+        "symbol": "ETH",
+        "tags": ["DeFi", "Layer1"],
+    })
+
+    with patch("crypto_price_tracker.web.get_top_coins_with_fallback", return_value=(mock_coins, "Bitvavo")):
+        response = client.get("/api/watchlist")
+
+    assert response.status_code == 200
+    data = response.json()
+    assert len(data) == 1
+    assert data[0]["symbol"] == "ETH"
+    assert data[0]["tags"] == "DeFi,Layer1"
+    assert data[0]["price"] == 2345.50
+    assert data[0]["change_24h"] == -3.21
+    assert data[0]["name"] == "Ethereum"
+
+
+def test_api_watchlist_add_duplicate_returns_409(client, portfolio_db):
+    """POST /api/watchlist with duplicate symbol returns 409."""
+    client.post("/api/watchlist", json={"symbol": "ETH", "tags": []})
+    response = client.post("/api/watchlist", json={"symbol": "ETH", "tags": []})
+    assert response.status_code == 409
+
+
+def test_api_watchlist_add_invalid_tag(client, portfolio_db):
+    """POST /api/watchlist with invalid tag returns 400."""
+    response = client.post("/api/watchlist", json={
+        "symbol": "ETH",
+        "tags": ["InvalidTag"],
+    })
+    assert response.status_code == 400
+    assert "Invalid tag" in response.json()["detail"]
+
+
+def test_api_watchlist_delete(client, portfolio_db):
+    """POST then DELETE /api/watchlist/{symbol} removes the entry."""
+    client.post("/api/watchlist", json={"symbol": "ETH", "tags": []})
+    response = client.delete("/api/watchlist/ETH")
+    assert response.status_code == 200
+    assert response.json()["status"] == "deleted"
+
+
+def test_api_watchlist_delete_not_found(client, portfolio_db):
+    """DELETE /api/watchlist/NOPE returns 404."""
+    response = client.delete("/api/watchlist/NOPE")
+    assert response.status_code == 404
+
+
+def test_api_watchlist_update_tags(client, portfolio_db):
+    """POST entry then PUT /api/watchlist/{symbol}/tags updates tags."""
+    client.post("/api/watchlist", json={"symbol": "ETH", "tags": ["DeFi"]})
+    response = client.put("/api/watchlist/ETH/tags", json={"tags": ["Layer1", "Layer2"]})
+    assert response.status_code == 200
+    assert response.json()["status"] == "updated"
+
+
+def test_api_watchlist_update_tags_not_found(client, portfolio_db):
+    """PUT /api/watchlist/NOPE/tags returns 404."""
+    response = client.put("/api/watchlist/NOPE/tags", json={"tags": ["DeFi"]})
+    assert response.status_code == 404
+
+
+def test_api_watchlist_update_tags_invalid(client, portfolio_db):
+    """PUT /api/watchlist/{symbol}/tags with invalid tag returns 400."""
+    client.post("/api/watchlist", json={"symbol": "ETH", "tags": []})
+    response = client.put("/api/watchlist/ETH/tags", json={"tags": ["BadTag"]})
+    assert response.status_code == 400
+
+
+def test_api_watchlist_tags_list(client):
+    """GET /api/watchlist/tags returns the pre-defined tag list."""
+    response = client.get("/api/watchlist/tags")
+    assert response.status_code == 200
+    data = response.json()
+    assert "tags" in data
+    assert "DeFi" in data["tags"]
+    assert "Layer1" in data["tags"]
+    assert len(data["tags"]) == 6
+
+
+def test_api_watchlist_symbols(client, portfolio_db):
+    """GET /api/watchlist/symbols returns set of watched symbols."""
+    client.post("/api/watchlist", json={"symbol": "ETH", "tags": []})
+    client.post("/api/watchlist", json={"symbol": "BTC", "tags": []})
+    response = client.get("/api/watchlist/symbols")
+    assert response.status_code == 200
+    data = response.json()
+    assert set(data["symbols"]) == {"BTC", "ETH"}
+
+
+def test_api_watchlist_filter_by_tag(client, portfolio_db, mock_coins):
+    """GET /api/watchlist?tag=DeFi returns only entries with that tag."""
+    client.post("/api/watchlist", json={"symbol": "ETH", "tags": ["DeFi"]})
+    client.post("/api/watchlist", json={"symbol": "BTC", "tags": ["Layer1"]})
+
+    with patch("crypto_price_tracker.web.get_top_coins_with_fallback", return_value=(mock_coins, "Bitvavo")):
+        response = client.get("/api/watchlist?tag=DeFi")
+
+    assert response.status_code == 200
+    data = response.json()
+    assert len(data) == 1
+    assert data[0]["symbol"] == "ETH"
+
+
+def test_api_watchlist_price_not_found(client, portfolio_db):
+    """GET /api/watchlist returns null prices for coins not in top 100."""
+    client.post("/api/watchlist", json={"symbol": "OBSCURE", "tags": []})
+
+    with patch("crypto_price_tracker.web.get_top_coins_with_fallback", return_value=([], "Bitvavo")):
+        response = client.get("/api/watchlist")
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data[0]["price"] is None
+    assert data[0]["change_24h"] is None
+
+
+def test_index_spa_watchlist_route(client):
+    """GET /watchlist returns the React SPA (catch-all for client-side routing)."""
+    response = client.get("/watchlist")
+    assert response.status_code == 200
+    assert "text/html" in response.headers.get("content-type", "")
+    assert '<div id="root">' in response.text
