@@ -40,6 +40,10 @@ class BitvavoClient:
             headers={"User-Agent": "crypto-price-tracker/0.1.0"},
         )
 
+    @property
+    def name(self) -> str:
+        return "Bitvavo"
+
     def __enter__(self) -> "BitvavoClient":
         self._client.__enter__()
         return self
@@ -167,20 +171,27 @@ class BitvavoClient:
         return candles
 
 
-def get_top_coins(top_n: int = 20) -> list[CoinData]:
-    """Fetch top N coins by 24h EUR trading volume from Bitvavo.
+def get_top_coins(top_n: int = 20, exchange: str = "bitvavo") -> list[CoinData]:
+    """Fetch top N coins by 24h EUR trading volume.
 
     Convenience function that opens a client, fetches data, and closes the
     connection automatically.
 
     Args:
         top_n: Number of coins to return (default 20).
+        exchange: Exchange to fetch from ('bitvavo' or 'binance', default 'bitvavo').
 
     Returns:
         List of CoinData instances sorted by volume_eur descending.
     """
-    with BitvavoClient(top_n=top_n) as client:
-        return client.get_top_coins()
+    if exchange == "bitvavo":
+        with BitvavoClient(top_n=top_n) as client:
+            return client.get_top_coins()
+    else:
+        from crypto_price_tracker.exchange import get_exchange_client
+
+        with get_exchange_client(exchange, top_n=top_n) as client:
+            return client.get_top_coins(top_n)
 
 
 def get_candles(market: str, interval: str = "4h", limit: int = 42) -> list[Candle]:
