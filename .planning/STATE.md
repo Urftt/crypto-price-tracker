@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: in_progress
-last_updated: "2026-03-07T08:57:00Z"
+last_updated: "2026-03-07T13:27:00Z"
 progress:
   total_phases: 13
   completed_phases: 6
-  total_plans: 12
-  completed_plans: 12
+  total_plans: 13
+  completed_plans: 13
 ---
 
 # Project State
@@ -18,23 +18,23 @@ progress:
 See: .planning/PROJECT.md (updated 2026-02-28)
 
 **Core value:** Instant, glanceable crypto prices in the terminal — one command, no browser needed.
-**Current focus:** Phase 9 complete -- React Frontend fully built. Ready for Phase 10.
+**Current focus:** Phase 10 in progress -- Exchange abstraction layer built, Plan 10-01 complete. Plan 10-02 (web integration) next.
 
 ## Current Position
 
-Phase: 9 of 13 (React Frontend) -- COMPLETE
-Plan: 2 of 2 complete
-Status: Phase 9 complete -- PortfolioPage, AlertsPage, toast notifications all working, 152 tests passing
-Last activity: 2026-03-07 -- Plan 09-02 verified, all 152 tests passing
+Phase: 10 of 13 (Multi-Exchange Support) -- IN PROGRESS
+Plan: 1 of 2 complete
+Status: Plan 10-01 complete -- ExchangeClient protocol, BinanceClient, auto-fallback, CLI --exchange flag, 168 tests passing
+Last activity: 2026-03-07 -- Plan 10-01 verified, all 168 tests passing
 
-Progress: [██████████] 100% (Phase 9)
+Progress: [█████-----] 50% (Phase 10)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 12
+- Total plans completed: 13
 - Average duration: 3 min
-- Total execution time: ~35 min
+- Total execution time: ~42 min
 
 **By Phase:**
 
@@ -48,9 +48,10 @@ Progress: [██████████] 100% (Phase 9)
 | 7. Price Alerts | 1 | 2 min | 2 min |
 | 8. Historical Charts | 2 | 8 min | 4 min |
 | 9. React Frontend | 2 | 8 min | 4 min |
+| 10. Multi-Exchange | 1 | 7 min | 7 min |
 
 **Recent Trend:**
-- Last 5 plans: 3 min, 5 min, 3 min, 5 min, 3 min
+- Last 5 plans: 5 min, 3 min, 5 min, 3 min, 7 min
 - Trend: Fast execution
 
 *Updated after each plan completion*
@@ -110,6 +111,12 @@ Recent decisions affecting current work:
 - 09-02: PortfolioTable uses inline lots expansion (click row to toggle) rather than separate modal
 - 09-02: Toast notifications use module-level counter for unique IDs, seenAlertIds ref prevents duplicates
 - 09-02: AlertsPage reads and immediately clears URL symbol param for clean browser history
+- 10-01: ExchangeClient protocol with name property, get_top_coins, context manager
+- 10-01: BinanceClient USDT-to-EUR via Binance EURUSDT inverse rate, FX cached 5 min with time.monotonic
+- 10-01: get_top_coins_with_fallback returns (coins, source_name) tuple for source labeling
+- 10-01: Stablecoins filtered from Binance: USDC, BUSD, DAI, TUSD, FDUSD, USDD, USDP
+- 10-01: render_price_table shows "via {source}" as Rich table caption with dim style
+- 10-01: CLI --exchange flag on prices, watch, info, web, chart subcommands (default: bitvavo)
 
 ### Pending Todos
 
@@ -133,5 +140,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-07
-Stopped at: Completed 09-02-PLAN.md -- PortfolioPage, AlertsPage, toast notifications, Phase 9 complete, 152 tests passing
+Stopped at: Completed 10-01-PLAN.md -- Exchange abstraction layer, BinanceClient, auto-fallback, CLI --exchange flag, 168 tests passing
 Resume file: None

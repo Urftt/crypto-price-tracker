@@ -86,7 +86,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 7. Price Alerts | 1/2 | In Progress | — |
 | 8. Historical Charts | 2/2 | Complete | 2026-03-06 |
 | 9. React Frontend | 2/2 | Complete | 2026-03-07 |
-| 10. Multi-Exchange Support | 0/0 | Planned | — |
+| 10. Multi-Exchange Support | 1/2 | In Progress | — |
 | 11. Watchlist & Tags | 0/0 | Planned | — |
 | 12. Export & Reporting | 0/0 | Planned | — |
 | 13. Mobile PWA | 0/0 | Planned | — |
@@ -211,11 +211,21 @@ Plans:
 
 **Goal:** Abstract the exchange layer. Add Binance as second source alongside Bitvavo. Auto-fallback if one is down. CLI flag `--exchange binance`.
 **Depends on:** Phase 9
-**Requirements**: TBD
-**Plans:** 0 plans
+**Requirements**: EXCH-01, EXCH-02, EXCH-03, EXCH-04, EXCH-05, EXCH-06, EXCH-07, EXCH-08, EXCH-09
+**Success Criteria** (what must be TRUE):
+  1. ExchangeClient protocol with BitvavoClient and BinanceClient implementations
+  2. BinanceClient fetches USDT pairs and converts to EUR via Binance USDT-EUR rate (cached 5 min)
+  3. `get_top_coins_with_fallback()` tries primary exchange, falls back to other on failure
+  4. CLI `--exchange bitvavo|binance` flag on prices, watch, info, web, chart subcommands
+  5. Web API endpoints accept `?exchange=bitvavo|binance` query param
+  6. React nav has exchange dropdown; changing it reconnects SSE with new exchange
+  7. Source label ("via Bitvavo" / "via Binance") shown on CLI and web
+  8. Candle/chart data always from Bitvavo regardless of exchange selection
+**Plans**: 2 plans
 
 Plans:
-- [ ] TBD (run /gsd:plan-phase 10 to break down)
+- [x] 10-01-PLAN.md — Exchange abstraction layer, BinanceClient, auto-fallback, CLI --exchange flag, unit tests
+- [ ] 10-02-PLAN.md — Web API ?exchange= param, React exchange dropdown, SSE reconnect, web tests
 
 ### Phase 11: Watchlist & Tags
 
