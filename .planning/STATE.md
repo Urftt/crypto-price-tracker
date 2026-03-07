@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: in_progress
-last_updated: "2026-03-06T23:16:54Z"
+last_updated: "2026-03-07T08:49:22Z"
 progress:
   total_phases: 13
   completed_phases: 5
-  total_plans: 10
-  completed_plans: 10
+  total_plans: 11
+  completed_plans: 11
 ---
 
 # Project State
@@ -18,23 +18,23 @@ progress:
 See: .planning/PROJECT.md (updated 2026-02-28)
 
 **Core value:** Instant, glanceable crypto prices in the terminal — one command, no browser needed.
-**Current focus:** Phase 7: Price Alerts -- Plan 1 complete, Plan 2 pending
+**Current focus:** Phase 9: React Frontend -- Plan 1 complete, Plan 2 pending
 
 ## Current Position
 
-Phase: 7 of 13 (Price Alerts)
+Phase: 9 of 13 (React Frontend)
 Plan: 1 of 2 complete
-Status: Plan 07-01 complete -- PriceAlert model, alerts_db.py CRUD, alerts.py pure checking, 31 tests
-Last activity: 2026-03-06 -- Plan 07-01 verified, all 161 tests passing (20 alerts DB + 11 alerts checking + 130 existing)
+Status: Plan 09-01 complete -- SSE endpoint, Vite+React+Tailwind scaffold, PricesPage with SSE/countdown/refresh, CoinModal with Recharts chart
+Last activity: 2026-03-07 -- Plan 09-01 verified, all 152 tests passing
 
-Progress: [█████-----] 50% (Phase 7)
+Progress: [█████-----] 50% (Phase 9)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 9
-- Average duration: 2 min
-- Total execution time: ~22 min
+- Total plans completed: 10
+- Average duration: 3 min
+- Total execution time: ~27 min
 
 **By Phase:**
 
@@ -47,9 +47,10 @@ Progress: [█████-----] 50% (Phase 7)
 | 6. Portfolio Tracking | 1 | 3 min | 3 min |
 | 7. Price Alerts | 1 | 2 min | 2 min |
 | 8. Historical Charts | 2 | 8 min | 4 min |
+| 9. React Frontend | 1 | 5 min | 5 min |
 
 **Recent Trend:**
-- Last 5 plans: 2 min, 0 min, 3 min, 5 min, 3 min
+- Last 5 plans: 0 min, 3 min, 5 min, 3 min, 5 min
 - Trend: Fast execution
 
 *Updated after each plan completion*
@@ -100,6 +101,11 @@ Recent decisions affecting current work:
 - 07-01: Race condition guard: UPDATE WHERE status='active' prevents double-triggering
 - 07-01: Direction validated in Python (ValueError) AND via SQLite CHECK constraint
 - 07-01: get_all_alerts orders active-first then triggered for display readiness
+- 09-01: FastAPI EventSourceResponse for SSE (built-in since 0.135.0, no extra dependency)
+- 09-01: SPA catch-all replaces both old @app.get("/") and app.mount("/static")
+- 09-01: Import from 'react-router' not 'react-router-dom' (React Router v7)
+- 09-01: Tailwind v4 CSS-first @theme config (no tailwind.config.js)
+- 09-01: Updated 13 old HTML-content tests to 4 new SPA-appropriate tests
 
 ### Pending Todos
 
@@ -122,6 +128,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-06
-Stopped at: Completed 07-01-PLAN.md -- PriceAlert model, alerts_db CRUD, pure check_alerts, 31 new tests (161 total)
+Last session: 2026-03-07
+Stopped at: Completed 09-01-PLAN.md -- SSE endpoint, React frontend shell, PricesPage with SSE/charts, 152 tests passing
 Resume file: None

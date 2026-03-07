@@ -85,7 +85,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 6. Portfolio Tracking | 1/2 | In Progress | — |
 | 7. Price Alerts | 1/2 | In Progress | — |
 | 8. Historical Charts | 2/2 | Complete | 2026-03-06 |
-| 9. React Frontend | 0/2 | Planned | — |
+| 9. React Frontend | 1/2 | In Progress | — |
 | 10. Multi-Exchange Support | 0/0 | Planned | — |
 | 11. Watchlist & Tags | 0/0 | Planned | — |
 | 12. Export & Reporting | 0/0 | Planned | — |
@@ -204,7 +204,7 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 09-01-PLAN.md — Backend SSE endpoint + SPA catch-all, Vite scaffold, core React shell (Router, layout, PricesPage with SSE, CoinModal with Recharts chart)
+- [x] 09-01-PLAN.md — Backend SSE endpoint + SPA catch-all, Vite scaffold, core React shell (Router, layout, PricesPage with SSE, CoinModal with Recharts chart)
 - [ ] 09-02-PLAN.md — PortfolioPage + AlertsPage with full CRUD, toast notifications, build integration, test updates
 
 ### Phase 10: Multi-Exchange Support

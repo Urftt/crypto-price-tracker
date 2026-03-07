@@ -52,6 +52,21 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **ALERT-06**: Web HTML has alerts tab, toast notifications, coin dropdown, Set Alert modal button
 - [ ] **ALERT-07**: `crypto alert check` exit code 1 on trigger, exit 0 on none (scriptable)
 
+### React Frontend
+
+- [x] **REACT-01**: Vite + React + Tailwind project in `frontend/` builds successfully with `npm run build`
+- [x] **REACT-02**: SSE endpoint at `/api/prices/stream` pushes price + triggered alert data every 10 seconds
+- [x] **REACT-03**: React Router provides URL-based navigation at `/`, `/portfolio`, `/alerts` with top tab bar
+- [x] **REACT-04**: Prices tab auto-updates via SSE with countdown timer and manual refresh button
+- [x] **REACT-05**: Clicking a coin row opens a modal with coin details and Recharts line chart (7D/30D toggle)
+- [ ] **REACT-06**: Portfolio tab has add holding form, aggregated table, lots toggle, delete, and summary footer
+- [ ] **REACT-07**: Alerts tab has add alert form, active/triggered sections, remove individual and clear all
+- [ ] **REACT-08**: Set Alert button in coin modal navigates to alerts tab with symbol pre-filled
+- [ ] **REACT-09**: Toast notifications appear when SSE reports triggered alerts (auto-dismiss ~10s)
+- [x] **REACT-10**: GitHub-dark theme applied: #0d1117 bg, #161b22 cards, monospace font, nl-NL EUR formatting
+- [ ] **REACT-11**: Vite build output replaces `src/crypto_price_tracker/static/index.html`
+- [x] **REACT-12**: FastAPI SPA catch-all route serves React app at all non-API paths
+
 ## v2 Requirements
 
 Deferred to future release. Tracked but not in current roadmap.
@@ -103,9 +118,22 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ALERT-06 | Phase 7 | Planned |
 | ALERT-07 | Phase 7 | Planned |
 
+| REACT-01 | Phase 9 | Complete |
+| REACT-02 | Phase 9 | Complete |
+| REACT-03 | Phase 9 | Complete |
+| REACT-04 | Phase 9 | Complete |
+| REACT-05 | Phase 9 | Complete |
+| REACT-06 | Phase 9 | Planned |
+| REACT-07 | Phase 9 | Planned |
+| REACT-08 | Phase 9 | Planned |
+| REACT-09 | Phase 9 | Planned |
+| REACT-10 | Phase 9 | Complete |
+| REACT-11 | Phase 9 | Planned |
+| REACT-12 | Phase 9 | Complete |
+
 **Coverage:**
-- v1 requirements: 24 total
-- Mapped to phases: 24
+- v1 requirements: 36 total
+- Mapped to phases: 36
 - Unmapped: 0
 
 ---
