@@ -37,13 +37,20 @@ def sparkline(values: list[float]) -> str:
     )
 
 
-def render_price_table(coins: list[CoinData], console: Console | None = None, triggered_symbols: set[str] | None = None) -> None:
+def render_price_table(
+    coins: list[CoinData],
+    console: Console | None = None,
+    triggered_symbols: set[str] | None = None,
+    source: str | None = None,
+) -> None:
     """Render a list of CoinData objects as a formatted terminal price table.
 
     Args:
         coins:   List of CoinData objects to display.
         console: Optional Rich Console instance for output capture (e.g. in tests).
                  Defaults to a standard Console() if not provided.
+        triggered_symbols: Set of symbols with triggered alerts (highlighted in table).
+        source: Optional exchange source label (e.g. "Bitvavo", "Binance").
     """
     if console is None:
         console = Console()
@@ -51,6 +58,9 @@ def render_price_table(coins: list[CoinData], console: Console | None = None, tr
         triggered_symbols = set()
 
     table = Table(title="Crypto Prices (EUR)", show_lines=False)
+    if source:
+        table.caption = f"via {source}"
+        table.caption_style = "dim"
 
     table.add_column("#", justify="right", style="dim")
     table.add_column("Symbol", justify="left", style="bold")

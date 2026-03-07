@@ -24,7 +24,8 @@ from crypto_price_tracker.alerts_db import (
     mark_triggered,
     remove_alert as remove_alert_db,
 )
-from crypto_price_tracker.api import get_candles, get_top_coins
+from crypto_price_tracker.api import get_candles
+from crypto_price_tracker.exchange import get_top_coins_with_fallback
 from crypto_price_tracker.display import (
     render_alert_banner,
     render_alert_list,
@@ -50,7 +51,7 @@ from crypto_price_tracker.portfolio_db import (
 def cmd_prices(args: argparse.Namespace) -> None:
     """Fetch top coins and render a price table, then exit."""
     try:
-        coins = get_top_coins(top_n=args.top)
+        coins, source = get_top_coins_with_fallback(exchange=args.exchange, top_n=args.top)
     except (httpx.HTTPStatusError, httpx.ConnectError) as e:
         print(f"Error fetching data: {e}", file=sys.stderr)
         sys.exit(1)
@@ -62,7 +63,7 @@ def cmd_prices(args: argparse.Namespace) -> None:
     triggered_symbols = {a.symbol for a in triggered}
     if triggered:
         render_alert_banner(triggered)
-    render_price_table(coins, triggered_symbols=triggered_symbols)
+    render_price_table(coins, triggered_symbols=triggered_symbols, source=source)
 
 
 def cmd_watch(args: argparse.Namespace) -> None:
@@ -72,7 +73,7 @@ def cmd_watch(args: argparse.Namespace) -> None:
         while True:
             print("\033[2J\033[H", end="")
             try:
-                coins = get_top_coins(top_n=args.top)
+                coins, source = get_top_coins_with_fallback(exchange=args.exchange, top_n=args.top)
                 # Passive alert checking (flash once — mark_triggered prevents repeats)
                 active = get_active_alerts()
                 triggered = check_alerts(coins, active)
@@ -81,7 +82,7 @@ def cmd_watch(args: argparse.Namespace) -> None:
                 triggered_symbols = {a.symbol for a in triggered}
                 if triggered:
                     render_alert_banner(triggered)
-                render_price_table(coins, triggered_symbols=triggered_symbols)
+                render_price_table(coins, triggered_symbols=triggered_symbols, source=source)
             except (httpx.HTTPStatusError, httpx.ConnectError) as e:
                 print(f"Error fetching data: {e}", file=sys.stderr)
             print(f"\nRefreshing every {args.interval}s \u2014 Ctrl+C to stop")
@@ -92,8 +93,9 @@ def cmd_watch(args: argparse.Namespace) -> None:
 
 def cmd_web(args: argparse.Namespace) -> None:
     """Start the web dashboard server."""
-    from crypto_price_tracker.web import run_server
+    from crypto_price_tracker.web import app, run_server
 
+    app.state.default_exchange = getattr(args, "exchange", "bitvavo")
     print(f"Starting web dashboard at http://localhost:{args.port}")
     run_server(host=args.host, port=args.port)
 
@@ -102,17 +104,18 @@ def cmd_info(args: argparse.Namespace) -> None:
     """Fetch coins and display detailed info for the requested symbol."""
     symbol = args.symbol.upper()
     try:
-        coins = get_top_coins(top_n=100)
+        coins, source = get_top_coins_with_fallback(exchange=args.exchange, top_n=100)
     except (httpx.HTTPStatusError, httpx.ConnectError) as e:
         print(f"Error fetching data: {e}", file=sys.stderr)
         sys.exit(1)
     match = next((c for c in coins if c.symbol == symbol), None)
     if match is None:
         print(
-            f"Coin '{symbol}' not found in top 100 EUR pairs on Bitvavo.",
+            f"Coin '{symbol}' not found in top 100 pairs on {source}.",
             file=sys.stderr,
         )
         sys.exit(1)
+    print(f"via {source}")
     render_coin_detail(match)
 
 
@@ -165,8 +168,8 @@ def cmd_portfolio_list(args: argparse.Namespace) -> None:
     # Fetch live prices (best-effort)
     prices: dict = {}
     try:
-        coins = get_top_coins(top_n=100)
-        prices = {c.symbol: c for c in coins}
+        coins_list, _ = get_top_coins_with_fallback(top_n=100)
+        prices = {c.symbol: c for c in coins_list}
     except (httpx.HTTPStatusError, httpx.ConnectError) as e:
         print(f"Warning: could not fetch live prices: {e}", file=sys.stderr)
     summary = aggregate_portfolio(holdings, prices)
@@ -229,7 +232,7 @@ def cmd_alert_remove(args: argparse.Namespace) -> None:
 def cmd_alert_check(args: argparse.Namespace) -> None:
     """Check alerts against current prices."""
     try:
-        coins = get_top_coins(top_n=100)
+        coins, _ = get_top_coins_with_fallback(top_n=100)
     except (httpx.HTTPStatusError, httpx.ConnectError) as e:
         print(f"Error fetching data: {e}", file=sys.stderr)
         sys.exit(1)
@@ -260,7 +263,9 @@ def cmd_chart(args: argparse.Namespace) -> None:
         # Single coin detail mode
         symbol = args.symbol.upper()
         try:
-            coins = get_top_coins(top_n=100)
+            coins, source = get_top_coins_with_fallback(
+                exchange=getattr(args, "exchange", "bitvavo"), top_n=100,
+            )
         except (httpx.HTTPStatusError, httpx.ConnectError) as e:
             print(f"Error fetching data: {e}", file=sys.stderr)
             sys.exit(1)
@@ -268,7 +273,7 @@ def cmd_chart(args: argparse.Namespace) -> None:
         match = next((c for c in coins if c.symbol == symbol), None)
         if match is None:
             print(
-                f"Coin '{symbol}' not found in top 100 EUR pairs on Bitvavo.",
+                f"Coin '{symbol}' not found in top 100 pairs on {source}.",
                 file=sys.stderr,
             )
             sys.exit(1)
@@ -287,7 +292,9 @@ def cmd_chart(args: argparse.Namespace) -> None:
     else:
         # All coins overview mode
         try:
-            coins = get_top_coins(top_n=args.top)
+            coins, _ = get_top_coins_with_fallback(
+                exchange=getattr(args, "exchange", "bitvavo"), top_n=args.top,
+            )
         except (httpx.HTTPStatusError, httpx.ConnectError) as e:
             print(f"Error fetching data: {e}", file=sys.stderr)
             sys.exit(1)
@@ -331,6 +338,13 @@ def main() -> None:
         default=20,
         help="Number of top coins to display (default: 20)",
     )
+    prices_parser.add_argument(
+        "--exchange",
+        type=str,
+        choices=["bitvavo", "binance"],
+        default="bitvavo",
+        help="Exchange to fetch prices from (default: bitvavo)",
+    )
 
     # watch subcommand
     watch_parser = subparsers.add_parser("watch", help="Auto-refresh cryptocurrency prices")
@@ -348,6 +362,13 @@ def main() -> None:
         default=30,
         help="Refresh interval in seconds (default: 30)",
     )
+    watch_parser.add_argument(
+        "--exchange",
+        type=str,
+        choices=["bitvavo", "binance"],
+        default="bitvavo",
+        help="Exchange to fetch prices from (default: bitvavo)",
+    )
 
     # info subcommand
     info_parser = subparsers.add_parser("info", help="Show detailed info for a single coin")
@@ -355,6 +376,13 @@ def main() -> None:
         "symbol",
         type=str,
         help="Coin symbol (e.g., BTC, ETH)",
+    )
+    info_parser.add_argument(
+        "--exchange",
+        type=str,
+        choices=["bitvavo", "binance"],
+        default="bitvavo",
+        help="Exchange to fetch prices from (default: bitvavo)",
     )
 
     # web subcommand
@@ -371,6 +399,13 @@ def main() -> None:
         type=str,
         default="0.0.0.0",
         help="Host to bind to (default: 0.0.0.0)",
+    )
+    web_parser.add_argument(
+        "--exchange",
+        type=str,
+        choices=["bitvavo", "binance"],
+        default="bitvavo",
+        help="Default exchange for the web dashboard (default: bitvavo)",
     )
 
     # portfolio subcommand group
@@ -471,6 +506,13 @@ def main() -> None:
         type=int,
         default=20,
         help="Number of top coins to chart (default: 20, ignored if symbol given)",
+    )
+    chart_parser.add_argument(
+        "--exchange",
+        type=str,
+        choices=["bitvavo", "binance"],
+        default="bitvavo",
+        help="Exchange to fetch prices from (default: bitvavo)",
     )
 
     args = parser.parse_args()
