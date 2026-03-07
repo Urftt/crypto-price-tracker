@@ -8,8 +8,9 @@ import Toast from '../components/Toast';
 
 let toastIdCounter = 0;
 
-function PricesPage() {
-  const { data: sseData } = useSSE('/api/prices/stream');
+function PricesPage({ exchange }) {
+  const sseUrl = `/api/prices/stream?exchange=${exchange}`;
+  const { data: sseData } = useSSE(sseUrl);
   const [prices, setPrices] = useState(null);
   const [lastUpdate, setLastUpdate] = useState(null);
   const [selectedCoin, setSelectedCoin] = useState(null);
@@ -48,7 +49,7 @@ function PricesPage() {
 
   // Manual refresh
   const handleRefresh = async () => {
-    const res = await fetch('/api/prices');
+    const res = await fetch(`/api/prices?exchange=${exchange}`);
     const data = await res.json();
     setPrices(data);
     setLastUpdate(new Date());
@@ -64,6 +65,9 @@ function PricesPage() {
         >
           Refresh
         </button>
+        {prices?.exchange && (
+          <span className="text-text-muted">via {prices.exchange}</span>
+        )}
       </div>
       {prices && <PriceTable coins={prices.coins} onSelectCoin={setSelectedCoin} />}
       {selectedCoin && <CoinModal coin={selectedCoin} onClose={() => setSelectedCoin(null)} />}
