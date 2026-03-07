@@ -38,9 +38,9 @@ def mock_coins() -> list[CoinData]:
 
 
 def test_prices_command_calls_api_and_renders(mock_coins):
-    """prices command should call get_top_coins(top_n=20) and render the table."""
+    """prices command should call get_top_coins_with_fallback and render the table."""
     with (
-        patch("crypto_price_tracker.cli.get_top_coins", return_value=mock_coins) as mock_api,
+        patch("crypto_price_tracker.cli.get_top_coins_with_fallback", return_value=(mock_coins, "Bitvavo")) as mock_api,
         patch("crypto_price_tracker.cli.get_active_alerts", return_value=[]),
         patch("crypto_price_tracker.cli.check_alerts", return_value=[]),
         patch("crypto_price_tracker.cli.render_price_table") as mock_render,
@@ -48,14 +48,14 @@ def test_prices_command_calls_api_and_renders(mock_coins):
         sys.argv = ["crypto", "prices"]
         main()
 
-    mock_api.assert_called_once_with(top_n=20)
-    mock_render.assert_called_once_with(mock_coins, triggered_symbols=set())
+    mock_api.assert_called_once_with(exchange="bitvavo", top_n=20)
+    mock_render.assert_called_once_with(mock_coins, triggered_symbols=set(), source="Bitvavo")
 
 
 def test_prices_command_respects_top_n_flag(mock_coins):
-    """prices -n 10 should call get_top_coins(top_n=10)."""
+    """prices -n 10 should call get_top_coins_with_fallback(exchange='bitvavo', top_n=10)."""
     with (
-        patch("crypto_price_tracker.cli.get_top_coins", return_value=mock_coins) as mock_api,
+        patch("crypto_price_tracker.cli.get_top_coins_with_fallback", return_value=(mock_coins, "Bitvavo")) as mock_api,
         patch("crypto_price_tracker.cli.get_active_alerts", return_value=[]),
         patch("crypto_price_tracker.cli.check_alerts", return_value=[]),
         patch("crypto_price_tracker.cli.render_price_table"),
@@ -63,14 +63,29 @@ def test_prices_command_respects_top_n_flag(mock_coins):
         sys.argv = ["crypto", "prices", "-n", "10"]
         main()
 
-    mock_api.assert_called_once_with(top_n=10)
+    mock_api.assert_called_once_with(exchange="bitvavo", top_n=10)
+
+
+def test_prices_command_with_exchange_flag(mock_coins):
+    """prices --exchange binance should pass exchange='binance'."""
+    with (
+        patch("crypto_price_tracker.cli.get_top_coins_with_fallback", return_value=(mock_coins, "Binance")) as mock_api,
+        patch("crypto_price_tracker.cli.get_active_alerts", return_value=[]),
+        patch("crypto_price_tracker.cli.check_alerts", return_value=[]),
+        patch("crypto_price_tracker.cli.render_price_table") as mock_render,
+    ):
+        sys.argv = ["crypto", "prices", "--exchange", "binance"]
+        main()
+
+    mock_api.assert_called_once_with(exchange="binance", top_n=20)
+    mock_render.assert_called_once_with(mock_coins, triggered_symbols=set(), source="Binance")
 
 
 def test_info_command_renders_matching_coin(mock_coins):
     """info BTC should call render_coin_detail with the BTC CoinData object."""
     btc = mock_coins[0]
     with (
-        patch("crypto_price_tracker.cli.get_top_coins", return_value=mock_coins),
+        patch("crypto_price_tracker.cli.get_top_coins_with_fallback", return_value=(mock_coins, "Bitvavo")),
         patch("crypto_price_tracker.cli.render_coin_detail") as mock_detail,
     ):
         sys.argv = ["crypto", "info", "BTC"]
@@ -82,7 +97,7 @@ def test_info_command_renders_matching_coin(mock_coins):
 def test_info_command_case_insensitive(mock_coins):
     """info btc (lowercase) should normalise the symbol and find BTC."""
     with (
-        patch("crypto_price_tracker.cli.get_top_coins", return_value=mock_coins),
+        patch("crypto_price_tracker.cli.get_top_coins_with_fallback", return_value=(mock_coins, "Bitvavo")),
         patch("crypto_price_tracker.cli.render_coin_detail") as mock_detail,
     ):
         sys.argv = ["crypto", "info", "btc"]
@@ -94,7 +109,7 @@ def test_info_command_case_insensitive(mock_coins):
 def test_info_command_not_found_exits_with_error(mock_coins):
     """info DOESNOTEXIST should exit with code 1 when symbol not in results."""
     with (
-        patch("crypto_price_tracker.cli.get_top_coins", return_value=mock_coins),
+        patch("crypto_price_tracker.cli.get_top_coins_with_fallback", return_value=(mock_coins, "Bitvavo")),
         pytest.raises(SystemExit) as exc_info,
     ):
         sys.argv = ["crypto", "info", "DOESNOTEXIST"]
@@ -113,9 +128,9 @@ def test_no_command_shows_help(capsys):
 
 
 def test_watch_command_parses_interval(mock_coins):
-    """watch --interval 10 should call get_top_coins and render, then exit on KeyboardInterrupt."""
+    """watch --interval 10 should call get_top_coins_with_fallback and render, then exit on KeyboardInterrupt."""
     with (
-        patch("crypto_price_tracker.cli.get_top_coins", return_value=mock_coins) as mock_api,
+        patch("crypto_price_tracker.cli.get_top_coins_with_fallback", return_value=(mock_coins, "Bitvavo")) as mock_api,
         patch("crypto_price_tracker.cli.get_active_alerts", return_value=[]),
         patch("crypto_price_tracker.cli.check_alerts", return_value=[]),
         patch("crypto_price_tracker.cli.render_price_table") as mock_render,
@@ -154,7 +169,7 @@ def test_portfolio_list_command(mock_coins):
     holdings = [Holding(1, "BTC", 0.5, 45000.0, "2026-01-15")]
     with (
         patch("crypto_price_tracker.cli.get_all_holdings", return_value=holdings),
-        patch("crypto_price_tracker.cli.get_top_coins", return_value=mock_coins),
+        patch("crypto_price_tracker.cli.get_top_coins_with_fallback", return_value=(mock_coins, "Bitvavo")),
         patch("crypto_price_tracker.cli.render_portfolio_table") as mock_render,
     ):
         sys.argv = ["crypto", "portfolio", "list"]
@@ -249,7 +264,7 @@ def test_alert_check_no_triggers(mock_coins):
     """alert check with no triggers should exit 0."""
     alert = PriceAlert(1, "BTC", 200000.0, "above", "active", "2026-03-01T10:00:00", None)
     with (
-        patch("crypto_price_tracker.cli.get_top_coins", return_value=mock_coins),
+        patch("crypto_price_tracker.cli.get_top_coins_with_fallback", return_value=(mock_coins, "Bitvavo")),
         patch("crypto_price_tracker.cli.get_active_alerts", return_value=[alert]),
         pytest.raises(SystemExit) as exc_info,
     ):
@@ -263,7 +278,7 @@ def test_alert_check_with_triggers(mock_coins):
     """alert check with triggers should mark triggered and exit 1."""
     alert = PriceAlert(1, "BTC", 50000.0, "above", "active", "2026-03-01T10:00:00", None)
     with (
-        patch("crypto_price_tracker.cli.get_top_coins", return_value=mock_coins),
+        patch("crypto_price_tracker.cli.get_top_coins_with_fallback", return_value=(mock_coins, "Bitvavo")),
         patch("crypto_price_tracker.cli.get_active_alerts", return_value=[alert]),
         patch("crypto_price_tracker.cli.mark_triggered") as mock_mark,
         patch("crypto_price_tracker.cli.render_alert_banner") as mock_banner,
@@ -290,7 +305,7 @@ def test_alert_no_subcommand(capsys):
 def test_prices_command_with_alert_checking(mock_coins):
     """prices command should check alerts and pass triggered_symbols."""
     with (
-        patch("crypto_price_tracker.cli.get_top_coins", return_value=mock_coins),
+        patch("crypto_price_tracker.cli.get_top_coins_with_fallback", return_value=(mock_coins, "Bitvavo")),
         patch("crypto_price_tracker.cli.get_active_alerts", return_value=[]),
         patch("crypto_price_tracker.cli.check_alerts", return_value=[]),
         patch("crypto_price_tracker.cli.render_price_table") as mock_render,
@@ -298,7 +313,7 @@ def test_prices_command_with_alert_checking(mock_coins):
         sys.argv = ["crypto", "prices"]
         main()
 
-    mock_render.assert_called_once_with(mock_coins, triggered_symbols=set())
+    mock_render.assert_called_once_with(mock_coins, triggered_symbols=set(), source="Bitvavo")
 
 
 # ---- Chart subcommand tests ----
@@ -307,7 +322,7 @@ def test_prices_command_with_alert_checking(mock_coins):
 def test_chart_command_all_coins(mock_coins):
     """chart with no symbol should fetch candles for all coins and render chart table."""
     with (
-        patch("crypto_price_tracker.cli.get_top_coins", return_value=mock_coins),
+        patch("crypto_price_tracker.cli.get_top_coins_with_fallback", return_value=(mock_coins, "Bitvavo")),
         patch("crypto_price_tracker.cli.get_candles", return_value=[]),
         patch("crypto_price_tracker.cli.render_chart_table") as mock_render,
     ):
@@ -321,7 +336,7 @@ def test_chart_command_all_coins(mock_coins):
 def test_chart_command_single_coin(mock_coins):
     """chart BTC should show detailed view for BTC."""
     with (
-        patch("crypto_price_tracker.cli.get_top_coins", return_value=mock_coins),
+        patch("crypto_price_tracker.cli.get_top_coins_with_fallback", return_value=(mock_coins, "Bitvavo")),
         patch("crypto_price_tracker.cli.get_candles", return_value=[]),
         patch("crypto_price_tracker.cli.render_chart_detail") as mock_render,
     ):
@@ -335,7 +350,7 @@ def test_chart_command_single_coin(mock_coins):
 def test_chart_command_single_coin_case_insensitive(mock_coins):
     """chart btc (lowercase) should normalise to BTC and render detail."""
     with (
-        patch("crypto_price_tracker.cli.get_top_coins", return_value=mock_coins),
+        patch("crypto_price_tracker.cli.get_top_coins_with_fallback", return_value=(mock_coins, "Bitvavo")),
         patch("crypto_price_tracker.cli.get_candles", return_value=[]),
         patch("crypto_price_tracker.cli.render_chart_detail") as mock_render,
     ):
@@ -349,7 +364,7 @@ def test_chart_command_single_coin_case_insensitive(mock_coins):
 def test_chart_command_coin_not_found(mock_coins):
     """chart DOESNOTEXIST should exit with code 1."""
     with (
-        patch("crypto_price_tracker.cli.get_top_coins", return_value=mock_coins),
+        patch("crypto_price_tracker.cli.get_top_coins_with_fallback", return_value=(mock_coins, "Bitvavo")),
         pytest.raises(SystemExit) as exc_info,
     ):
         sys.argv = ["crypto", "chart", "DOESNOTEXIST"]
@@ -359,13 +374,13 @@ def test_chart_command_coin_not_found(mock_coins):
 
 
 def test_chart_command_respects_top_n(mock_coins):
-    """chart -n 10 should call get_top_coins(top_n=10)."""
+    """chart -n 10 should call get_top_coins_with_fallback with top_n=10."""
     with (
-        patch("crypto_price_tracker.cli.get_top_coins", return_value=mock_coins) as mock_api,
+        patch("crypto_price_tracker.cli.get_top_coins_with_fallback", return_value=(mock_coins, "Bitvavo")) as mock_api,
         patch("crypto_price_tracker.cli.get_candles", return_value=[]),
         patch("crypto_price_tracker.cli.render_chart_table"),
     ):
         sys.argv = ["crypto", "chart", "-n", "10"]
         main()
 
-    mock_api.assert_called_once_with(top_n=10)
+    mock_api.assert_called_once_with(exchange="bitvavo", top_n=10)
