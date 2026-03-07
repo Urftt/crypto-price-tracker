@@ -12,7 +12,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from crypto_price_tracker.cli import main
-from crypto_price_tracker.models import Candle, CoinData, Holding, PriceAlert
+from crypto_price_tracker.models import Candle, CoinData, Holding, PriceAlert, WatchlistEntry
 
 
 @pytest.fixture
@@ -384,3 +384,120 @@ def test_chart_command_respects_top_n(mock_coins):
         main()
 
     mock_api.assert_called_once_with(exchange="bitvavo", top_n=10)
+
+
+# ---- Watchlist subcommand tests ----
+
+
+def test_watchlist_add_command():
+    """watchlist add should call add_watchlist_entry with symbol and tags."""
+    with patch("crypto_price_tracker.cli.add_watchlist_entry", return_value=1) as mock_add:
+        sys.argv = ["crypto", "watchlist", "add", "ETH", "--tag", "DeFi"]
+        main()
+
+    mock_add.assert_called_once_with("ETH", ["DeFi"])
+
+
+def test_watchlist_add_no_tags():
+    """watchlist add without --tag should pass empty tags list."""
+    with patch("crypto_price_tracker.cli.add_watchlist_entry", return_value=1) as mock_add:
+        sys.argv = ["crypto", "watchlist", "add", "BTC"]
+        main()
+
+    mock_add.assert_called_once_with("BTC", [])
+
+
+def test_watchlist_add_multiple_tags():
+    """watchlist add with multiple --tag flags should pass all tags."""
+    with patch("crypto_price_tracker.cli.add_watchlist_entry", return_value=1) as mock_add:
+        sys.argv = ["crypto", "watchlist", "add", "ETH", "--tag", "DeFi", "--tag", "Layer1"]
+        main()
+
+    mock_add.assert_called_once_with("ETH", ["DeFi", "Layer1"])
+
+
+def test_watchlist_remove_command():
+    """watchlist remove should call remove_watchlist_entry with symbol."""
+    with patch("crypto_price_tracker.cli.remove_watchlist_entry", return_value=True) as mock_rm:
+        sys.argv = ["crypto", "watchlist", "remove", "ETH"]
+        main()
+
+    mock_rm.assert_called_once_with("ETH")
+
+
+def test_watchlist_remove_not_found():
+    """watchlist remove for non-existent symbol should exit 1."""
+    with (
+        patch("crypto_price_tracker.cli.remove_watchlist_entry", return_value=False),
+        pytest.raises(SystemExit) as exc_info,
+    ):
+        sys.argv = ["crypto", "watchlist", "remove", "NOPE"]
+        main()
+
+    assert exc_info.value.code == 1
+
+
+def test_watchlist_list_command(mock_coins):
+    """watchlist list should fetch entries and render watchlist table."""
+    entries = [WatchlistEntry(1, "ETH", "DeFi", "2026-03-07T10:00:00")]
+    with (
+        patch("crypto_price_tracker.cli.get_all_watchlist_entries", return_value=entries),
+        patch("crypto_price_tracker.cli.get_top_coins_with_fallback", return_value=(mock_coins, "Bitvavo")),
+        patch("crypto_price_tracker.cli.render_watchlist_table") as mock_render,
+    ):
+        sys.argv = ["crypto", "watchlist", "list"]
+        main()
+
+    mock_render.assert_called_once()
+
+
+def test_watchlist_list_with_tag_filter(mock_coins):
+    """watchlist list --tag DeFi should pass tag filter."""
+    entries = [WatchlistEntry(1, "ETH", "DeFi", "2026-03-07T10:00:00")]
+    with (
+        patch("crypto_price_tracker.cli.get_all_watchlist_entries", return_value=entries) as mock_get,
+        patch("crypto_price_tracker.cli.get_top_coins_with_fallback", return_value=(mock_coins, "Bitvavo")),
+        patch("crypto_price_tracker.cli.render_watchlist_table"),
+    ):
+        sys.argv = ["crypto", "watchlist", "list", "--tag", "DeFi"]
+        main()
+
+    mock_get.assert_called_once_with(tag="DeFi")
+
+
+def test_watchlist_tag_command():
+    """watchlist tag should call update_watchlist_tags."""
+    with patch("crypto_price_tracker.cli.update_watchlist_tags", return_value=True) as mock_update:
+        sys.argv = ["crypto", "watchlist", "tag", "ETH", "--tag", "Layer1"]
+        main()
+
+    mock_update.assert_called_once_with("ETH", ["Layer1"])
+
+
+def test_watchlist_no_subcommand(capsys):
+    """watchlist with no subcommand should print help text."""
+    sys.argv = ["crypto", "watchlist"]
+    main()
+
+    captured = capsys.readouterr()
+    output = captured.out + captured.err
+    assert "watchlist" in output.lower() or "add" in output.lower()
+
+
+def test_prices_with_watchlist_flag(mock_coins):
+    """prices --watchlist should filter coins to watchlist symbols only."""
+    with (
+        patch("crypto_price_tracker.cli.get_top_coins_with_fallback", return_value=(mock_coins, "Bitvavo")),
+        patch("crypto_price_tracker.cli.get_watchlist_symbols", return_value={"BTC"}) as mock_wl,
+        patch("crypto_price_tracker.cli.get_active_alerts", return_value=[]),
+        patch("crypto_price_tracker.cli.check_alerts", return_value=[]),
+        patch("crypto_price_tracker.cli.render_price_table") as mock_render,
+    ):
+        sys.argv = ["crypto", "prices", "--watchlist"]
+        main()
+
+    mock_wl.assert_called_once()
+    # Should only pass BTC (filtered from mock_coins which has BTC and ETH)
+    rendered_coins = mock_render.call_args[0][0]
+    assert len(rendered_coins) == 1
+    assert rendered_coins[0].symbol == "BTC"

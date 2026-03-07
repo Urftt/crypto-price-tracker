@@ -7,7 +7,7 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
-from crypto_price_tracker.models import Candle, CoinData, Holding, PriceAlert
+from crypto_price_tracker.models import Candle, CoinData, Holding, PriceAlert, WatchlistEntry
 from crypto_price_tracker.portfolio import PortfolioRow, PortfolioSummary
 
 SPARK_CHARS = "\u2581\u2582\u2583\u2584\u2585\u2586\u2587\u2588"
@@ -353,3 +353,56 @@ def render_chart_detail(
         )
 
     console.print()
+
+
+def render_watchlist_table(
+    entries: list[WatchlistEntry],
+    prices: dict[str, CoinData],
+    console: Console | None = None,
+) -> None:
+    """Render watchlist entries with live price data as a Rich table.
+
+    Args:
+        entries:  List of WatchlistEntry objects to display.
+        prices:   Dict mapping symbol -> CoinData for live price lookup.
+        console:  Optional Rich Console instance for output capture.
+    """
+    if console is None:
+        console = Console()
+
+    if not entries:
+        console.print("Watchlist is empty.")
+        return
+
+    table = Table(title="Watchlist (EUR)", show_lines=False)
+    table.add_column("Symbol", justify="left", style="bold")
+    table.add_column("Tags", justify="left")
+    table.add_column("Price (EUR)", justify="right")
+    table.add_column("24h %", justify="right")
+    table.add_column("Volume (EUR)", justify="right")
+    table.add_column("Added", justify="left")
+
+    for entry in entries:
+        coin = prices.get(entry.symbol)
+
+        tags_str = entry.tags.replace(",", ", ") if entry.tags else "-"
+
+        if coin:
+            price_str = f"EUR {coin.price:,.2f}"
+            change_str = f"{coin.change_24h:+.2f}%"
+            if coin.change_24h >= 0:
+                change_colored = f"[green]{change_str}[/green]"
+            else:
+                change_colored = f"[red]{change_str}[/red]"
+            volume_str = f"EUR {coin.volume_eur:,.0f}"
+        else:
+            price_str = "N/A"
+            change_colored = "N/A"
+            volume_str = "N/A"
+
+        # Show date portion only from ISO timestamp
+        added_date = entry.added_at[:10] if len(entry.added_at) >= 10 else entry.added_at
+
+        table.add_row(entry.symbol, tags_str, price_str, change_colored, volume_str, added_date)
+
+    console.print(table)

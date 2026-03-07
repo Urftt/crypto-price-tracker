@@ -25,6 +25,14 @@ from crypto_price_tracker.alerts_db import (
     remove_alert as remove_alert_db,
 )
 from crypto_price_tracker.api import get_candles
+from crypto_price_tracker.watchlist_db import (
+    add_watchlist_entry,
+    get_all_watchlist_entries,
+    get_watchlist_symbols,
+    remove_watchlist_entry,
+    update_watchlist_tags,
+    VALID_TAGS,
+)
 from crypto_price_tracker.exchange import get_top_coins_with_fallback
 from crypto_price_tracker.display import (
     render_alert_banner,
@@ -35,6 +43,7 @@ from crypto_price_tracker.display import (
     render_portfolio_lots,
     render_portfolio_table,
     render_price_table,
+    render_watchlist_table,
     sparkline,
 )
 from rich.console import Console
@@ -55,6 +64,13 @@ def cmd_prices(args: argparse.Namespace) -> None:
     except (httpx.HTTPStatusError, httpx.ConnectError) as e:
         print(f"Error fetching data: {e}", file=sys.stderr)
         sys.exit(1)
+    # Filter to watchlist if flag set
+    if args.watchlist:
+        wl_symbols = get_watchlist_symbols()
+        coins = [c for c in coins if c.symbol in wl_symbols]
+        if not coins:
+            print("No watchlist coins found in top results. Add coins with: crypto watchlist add <SYMBOL>")
+            return
     # Passive alert checking
     active = get_active_alerts()
     triggered = check_alerts(coins, active)
@@ -74,6 +90,10 @@ def cmd_watch(args: argparse.Namespace) -> None:
             print("\033[2J\033[H", end="")
             try:
                 coins, source = get_top_coins_with_fallback(exchange=args.exchange, top_n=args.top)
+                # Filter to watchlist if flag set
+                if args.watchlist:
+                    wl_symbols = get_watchlist_symbols()
+                    coins = [c for c in coins if c.symbol in wl_symbols]
                 # Passive alert checking (flash once — mark_triggered prevents repeats)
                 active = get_active_alerts()
                 triggered = check_alerts(coins, active)
@@ -251,6 +271,66 @@ def cmd_alert_check(args: argparse.Namespace) -> None:
         sys.exit(0)
 
 
+def cmd_watchlist_add(args: argparse.Namespace) -> None:
+    """Add a coin to the watchlist."""
+    tags = args.tag or []
+    try:
+        row_id = add_watchlist_entry(args.symbol, tags)
+    except ValueError as e:
+        print(f"Invalid tag: {e}", file=sys.stderr)
+        sys.exit(1)
+    except sqlite3.IntegrityError:
+        print(f"{args.symbol.upper()} is already on the watchlist.", file=sys.stderr)
+        sys.exit(1)
+    tag_info = f" (tags: {', '.join(tags)})" if tags else ""
+    print(f"Added {args.symbol.upper()} to watchlist{tag_info}")
+
+
+def cmd_watchlist_list(args: argparse.Namespace) -> None:
+    """List watchlist entries with live prices."""
+    tag_filter = getattr(args, "tag_filter", None)
+    entries = get_all_watchlist_entries(tag=tag_filter)
+    if not entries:
+        if tag_filter:
+            print(f"No watchlist entries with tag '{tag_filter}'.")
+        else:
+            print("Watchlist is empty.")
+        return
+    # Fetch live prices (best-effort)
+    prices: dict = {}
+    try:
+        coins_list, _ = get_top_coins_with_fallback(top_n=100)
+        prices = {c.symbol: c for c in coins_list}
+    except (httpx.HTTPStatusError, httpx.ConnectError) as e:
+        print(f"Warning: could not fetch live prices: {e}", file=sys.stderr)
+    render_watchlist_table(entries, prices)
+
+
+def cmd_watchlist_remove(args: argparse.Namespace) -> None:
+    """Remove a coin from the watchlist."""
+    if remove_watchlist_entry(args.symbol):
+        print(f"Removed {args.symbol.upper()} from watchlist")
+    else:
+        print(f"{args.symbol.upper()} not found on watchlist.", file=sys.stderr)
+        sys.exit(1)
+
+
+def cmd_watchlist_tag(args: argparse.Namespace) -> None:
+    """Update tags on a watchlist entry."""
+    tags = args.tag or []
+    try:
+        if not update_watchlist_tags(args.symbol, tags):
+            print(f"{args.symbol.upper()} not found on watchlist.", file=sys.stderr)
+            sys.exit(1)
+    except ValueError as e:
+        print(f"Invalid tag: {e}", file=sys.stderr)
+        sys.exit(1)
+    if tags:
+        print(f"Updated {args.symbol.upper()} tags: {', '.join(tags)}")
+    else:
+        print(f"Cleared tags for {args.symbol.upper()}")
+
+
 def cmd_chart(args: argparse.Namespace) -> None:
     """Show price history charts with sparklines.
 
@@ -345,6 +425,10 @@ def main() -> None:
         default="bitvavo",
         help="Exchange to fetch prices from (default: bitvavo)",
     )
+    prices_parser.add_argument(
+        "--watchlist", action="store_true", default=False,
+        help="Show only coins on your watchlist",
+    )
 
     # watch subcommand
     watch_parser = subparsers.add_parser("watch", help="Auto-refresh cryptocurrency prices")
@@ -368,6 +452,10 @@ def main() -> None:
         choices=["bitvavo", "binance"],
         default="bitvavo",
         help="Exchange to fetch prices from (default: bitvavo)",
+    )
+    watch_parser.add_argument(
+        "--watchlist", action="store_true", default=False,
+        help="Show only coins on your watchlist",
     )
 
     # info subcommand
@@ -491,6 +579,37 @@ def main() -> None:
     # alert check
     alert_sub.add_parser("check", help="Check alerts against current prices")
 
+    # watchlist subcommand group
+    watchlist_parser = subparsers.add_parser("watchlist", help="Manage watchlist")
+    watchlist_sub = watchlist_parser.add_subparsers(dest="watchlist_command")
+
+    # watchlist add
+    wl_add_parser = watchlist_sub.add_parser("add", help="Add a coin to the watchlist")
+    wl_add_parser.add_argument("symbol", type=str, help="Coin symbol (e.g. ETH)")
+    wl_add_parser.add_argument(
+        "--tag", type=str, action="append", default=None,
+        help=f"Tag to assign (can repeat). Valid: {', '.join(sorted(VALID_TAGS))}",
+    )
+
+    # watchlist list
+    wl_list_parser = watchlist_sub.add_parser("list", help="Show watchlist with live prices")
+    wl_list_parser.add_argument(
+        "--tag", type=str, default=None, dest="tag_filter",
+        help="Filter by tag",
+    )
+
+    # watchlist remove
+    wl_remove_parser = watchlist_sub.add_parser("remove", help="Remove a coin from the watchlist")
+    wl_remove_parser.add_argument("symbol", type=str, help="Coin symbol (e.g. ETH)")
+
+    # watchlist tag
+    wl_tag_parser = watchlist_sub.add_parser("tag", help="Update tags on a watchlist entry")
+    wl_tag_parser.add_argument("symbol", type=str, help="Coin symbol (e.g. ETH)")
+    wl_tag_parser.add_argument(
+        "--tag", type=str, action="append", default=None,
+        help=f"Tag to set (can repeat, replaces existing). Valid: {', '.join(sorted(VALID_TAGS))}",
+    )
+
     # chart subcommand
     chart_parser = subparsers.add_parser("chart", help="Show price history charts")
     chart_parser.add_argument(
@@ -551,6 +670,17 @@ def main() -> None:
             cmd_alert_list(args)
         elif args.alert_command == "check":
             cmd_alert_check(args)
+    elif args.command == "watchlist":
+        if not hasattr(args, "watchlist_command") or args.watchlist_command is None:
+            watchlist_parser.print_help()
+        elif args.watchlist_command == "add":
+            cmd_watchlist_add(args)
+        elif args.watchlist_command == "remove":
+            cmd_watchlist_remove(args)
+        elif args.watchlist_command == "list":
+            cmd_watchlist_list(args)
+        elif args.watchlist_command == "tag":
+            cmd_watchlist_tag(args)
     elif args.command == "chart":
         cmd_chart(args)
     else:
