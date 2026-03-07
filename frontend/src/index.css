@@ -1,0 +1,17 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg: #0d1117;
+  --color-card: #161b22;
+  --color-border: #21262d;
+  --color-border-light: #30363d;
+  --color-accent: #58a6ff;
+  --color-text: #c9d1d9;
+  --color-text-muted: #8b949e;
+  --color-text-dim: #6e7681;
+  --color-up: #3fb950;
+  --color-down: #f85149;
+
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
+    "Liberation Mono", "Courier New", monospace;
+}
