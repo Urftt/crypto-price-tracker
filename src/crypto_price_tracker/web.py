@@ -1,24 +1,28 @@
 """FastAPI web server for the crypto price tracker dashboard.
 
 Exposes JSON API endpoints that serve cryptocurrency price data from the
-Bitvavo API.  The frontend (Plan 04-02) consumes these endpoints from the
-same origin so no CORS middleware is needed.
+Bitvavo API.  The React SPA frontend (built by Vite) is served via a
+catch-all route.  Real-time price updates are pushed via SSE.
 
 Endpoints:
-    GET /               -- Serve static index.html or JSON fallback
-    GET /api/prices     -- Top-N coins as JSON array (?top=N, default 20)
-    GET /api/coin/{sym} -- Single coin detail; 404 if not in top 100
+    GET /api/prices          -- Top-N coins as JSON (?top=N, default 20)
+    GET /api/prices/stream   -- SSE stream pushing prices every 10s
+    GET /api/coin/{sym}      -- Single coin detail; 404 if not in top 100
+    GET /{path:path}         -- SPA catch-all (static files + index.html)
 """
 
 from __future__ import annotations
 
+import asyncio
 import dataclasses
+import json
+from collections.abc import AsyncIterable
 from pathlib import Path
 
 import httpx
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.responses import FileResponse
-from fastapi.staticfiles import StaticFiles
+from fastapi.sse import EventSourceResponse, ServerSentEvent
 from pydantic import BaseModel, Field
 
 from crypto_price_tracker.alerts import check_alerts
@@ -211,17 +215,45 @@ def create_app() -> FastAPI:
             raise
         return [dataclasses.asdict(c) for c in candles]
 
-    @app.get("/")
-    def index():
-        """Serve the static index.html, or a JSON fallback if not yet built."""
+    # --- SSE endpoint ---
+
+    @app.get("/api/prices/stream", response_class=EventSourceResponse)
+    async def stream_prices(
+        top: int = Query(default=20, ge=1, le=100),
+    ) -> AsyncIterable[ServerSentEvent]:
+        """Push price updates every 10 seconds via SSE."""
+        event_id = 0
+        while True:
+            coins = get_top_coins(top_n=top)
+            active = db_get_active_alerts()
+            triggered_alerts = check_alerts(coins, active)
+            for alert in triggered_alerts:
+                db_mark_triggered(alert.id)
+            data = {
+                "coins": [dataclasses.asdict(c) for c in coins],
+                "triggered_alerts": [dataclasses.asdict(a) for a in triggered_alerts],
+            }
+            yield ServerSentEvent(
+                data=json.dumps(data),
+                event="prices",
+                id=str(event_id),
+                retry=10000,
+            )
+            event_id += 1
+            await asyncio.sleep(10)
+
+    # --- SPA catch-all (must be LAST route) ---
+
+    @app.get("/{path:path}")
+    def spa_catch_all(path: str):
+        """Serve index.html for all non-API paths (SPA routing)."""
+        file_path = STATIC_DIR / path
+        if file_path.exists() and file_path.is_file():
+            return FileResponse(file_path)
         index_path = STATIC_DIR / "index.html"
         if index_path.exists():
             return FileResponse(index_path)
         return {"message": "Crypto Price Tracker API", "docs": "/docs"}
-
-    # Mount static directory for CSS/JS assets once the frontend is built
-    if STATIC_DIR.exists():
-        app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 
     return app
 
