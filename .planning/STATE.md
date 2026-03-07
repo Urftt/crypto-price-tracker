@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: in_progress
-last_updated: "2026-03-07T08:49:22Z"
+last_updated: "2026-03-07T08:57:00Z"
 progress:
   total_phases: 13
-  completed_phases: 5
-  total_plans: 11
-  completed_plans: 11
+  completed_phases: 6
+  total_plans: 12
+  completed_plans: 12
 ---
 
 # Project State
@@ -18,23 +18,23 @@ progress:
 See: .planning/PROJECT.md (updated 2026-02-28)
 
 **Core value:** Instant, glanceable crypto prices in the terminal — one command, no browser needed.
-**Current focus:** Phase 9: React Frontend -- Plan 1 complete, Plan 2 pending
+**Current focus:** Phase 9 complete -- React Frontend fully built. Ready for Phase 10.
 
 ## Current Position
 
-Phase: 9 of 13 (React Frontend)
-Plan: 1 of 2 complete
-Status: Plan 09-01 complete -- SSE endpoint, Vite+React+Tailwind scaffold, PricesPage with SSE/countdown/refresh, CoinModal with Recharts chart
-Last activity: 2026-03-07 -- Plan 09-01 verified, all 152 tests passing
+Phase: 9 of 13 (React Frontend) -- COMPLETE
+Plan: 2 of 2 complete
+Status: Phase 9 complete -- PortfolioPage, AlertsPage, toast notifications all working, 152 tests passing
+Last activity: 2026-03-07 -- Plan 09-02 verified, all 152 tests passing
 
-Progress: [█████-----] 50% (Phase 9)
+Progress: [██████████] 100% (Phase 9)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 10
+- Total plans completed: 12
 - Average duration: 3 min
-- Total execution time: ~27 min
+- Total execution time: ~35 min
 
 **By Phase:**
 
@@ -47,10 +47,10 @@ Progress: [█████-----] 50% (Phase 9)
 | 6. Portfolio Tracking | 1 | 3 min | 3 min |
 | 7. Price Alerts | 1 | 2 min | 2 min |
 | 8. Historical Charts | 2 | 8 min | 4 min |
-| 9. React Frontend | 1 | 5 min | 5 min |
+| 9. React Frontend | 2 | 8 min | 4 min |
 
 **Recent Trend:**
-- Last 5 plans: 0 min, 3 min, 5 min, 3 min, 5 min
+- Last 5 plans: 3 min, 5 min, 3 min, 5 min, 3 min
 - Trend: Fast execution
 
 *Updated after each plan completion*
@@ -106,6 +106,10 @@ Recent decisions affecting current work:
 - 09-01: Import from 'react-router' not 'react-router-dom' (React Router v7)
 - 09-01: Tailwind v4 CSS-first @theme config (no tailwind.config.js)
 - 09-01: Updated 13 old HTML-content tests to 4 new SPA-appropriate tests
+- 09-02: useApi hook shared across all CRUD forms for consistent fetch wrapper usage
+- 09-02: PortfolioTable uses inline lots expansion (click row to toggle) rather than separate modal
+- 09-02: Toast notifications use module-level counter for unique IDs, seenAlertIds ref prevents duplicates
+- 09-02: AlertsPage reads and immediately clears URL symbol param for clean browser history
 
 ### Pending Todos
 
@@ -129,5 +133,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-07
-Stopped at: Completed 09-01-PLAN.md -- SSE endpoint, React frontend shell, PricesPage with SSE/charts, 152 tests passing
+Stopped at: Completed 09-02-PLAN.md -- PortfolioPage, AlertsPage, toast notifications, Phase 9 complete, 152 tests passing
 Resume file: None

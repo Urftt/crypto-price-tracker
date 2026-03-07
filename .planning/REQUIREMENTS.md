@@ -59,12 +59,12 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **REACT-03**: React Router provides URL-based navigation at `/`, `/portfolio`, `/alerts` with top tab bar
 - [x] **REACT-04**: Prices tab auto-updates via SSE with countdown timer and manual refresh button
 - [x] **REACT-05**: Clicking a coin row opens a modal with coin details and Recharts line chart (7D/30D toggle)
-- [ ] **REACT-06**: Portfolio tab has add holding form, aggregated table, lots toggle, delete, and summary footer
-- [ ] **REACT-07**: Alerts tab has add alert form, active/triggered sections, remove individual and clear all
-- [ ] **REACT-08**: Set Alert button in coin modal navigates to alerts tab with symbol pre-filled
-- [ ] **REACT-09**: Toast notifications appear when SSE reports triggered alerts (auto-dismiss ~10s)
+- [x] **REACT-06**: Portfolio tab has add holding form, aggregated table, lots toggle, delete, and summary footer
+- [x] **REACT-07**: Alerts tab has add alert form, active/triggered sections, remove individual and clear all
+- [x] **REACT-08**: Set Alert button in coin modal navigates to alerts tab with symbol pre-filled
+- [x] **REACT-09**: Toast notifications appear when SSE reports triggered alerts (auto-dismiss ~10s)
 - [x] **REACT-10**: GitHub-dark theme applied: #0d1117 bg, #161b22 cards, monospace font, nl-NL EUR formatting
-- [ ] **REACT-11**: Vite build output replaces `src/crypto_price_tracker/static/index.html`
+- [x] **REACT-11**: Vite build output replaces `src/crypto_price_tracker/static/index.html`
 - [x] **REACT-12**: FastAPI SPA catch-all route serves React app at all non-API paths
 
 ## v2 Requirements
@@ -123,12 +123,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 | REACT-03 | Phase 9 | Complete |
 | REACT-04 | Phase 9 | Complete |
 | REACT-05 | Phase 9 | Complete |
-| REACT-06 | Phase 9 | Planned |
-| REACT-07 | Phase 9 | Planned |
-| REACT-08 | Phase 9 | Planned |
-| REACT-09 | Phase 9 | Planned |
+| REACT-06 | Phase 9 | Complete |
+| REACT-07 | Phase 9 | Complete |
+| REACT-08 | Phase 9 | Complete |
+| REACT-09 | Phase 9 | Complete |
 | REACT-10 | Phase 9 | Complete |
-| REACT-11 | Phase 9 | Planned |
+| REACT-11 | Phase 9 | Complete |
 | REACT-12 | Phase 9 | Complete |
 
 **Coverage:**
@@ -138,4 +138,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-02-28*
-*Last updated: 2026-03-06 after Phase 7 planning*
+*Last updated: 2026-03-07 after Phase 9 Plan 2 completion*

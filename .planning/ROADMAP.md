@@ -20,7 +20,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [ ] **Phase 6: Portfolio Tracking** - Portfolio tracking for the crypto tracker
 - [ ] **Phase 7: Price Alerts** - Target price notifications via CLI and web alerts panel
 - [x] **Phase 8: Historical Charts** - 7d/30d price history with ASCII sparklines in CLI and Plotly charts in web dashboard (completed 2026-03-06)
-- [ ] **Phase 9: React Frontend** - Replace static HTML/JS dashboard with Vite + React + Tailwind app with real-time updates
+- [x] **Phase 9: React Frontend** - Replace static HTML/JS dashboard with Vite + React + Tailwind app with real-time updates (completed 2026-03-07)
 - [ ] **Phase 10: Multi-Exchange Support** - Abstract the exchange layer with Binance as second source, auto-fallback, and `--exchange` CLI flag
 - [ ] **Phase 11: Watchlist & Tags** - Tag coins (DeFi, Layer1, Meme) and filter by tag; persistent watchlist separate from portfolio
 - [ ] **Phase 12: Export & Reporting** - Export portfolio to CSV/PDF; weekly summary email or Telegram message; `crypto export --format pdf`
@@ -85,7 +85,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 6. Portfolio Tracking | 1/2 | In Progress | — |
 | 7. Price Alerts | 1/2 | In Progress | — |
 | 8. Historical Charts | 2/2 | Complete | 2026-03-06 |
-| 9. React Frontend | 1/2 | In Progress | — |
+| 9. React Frontend | 2/2 | Complete | 2026-03-07 |
 | 10. Multi-Exchange Support | 0/0 | Planned | — |
 | 11. Watchlist & Tags | 0/0 | Planned | — |
 | 12. Export & Reporting | 0/0 | Planned | — |
@@ -205,7 +205,7 @@ Plans:
 
 Plans:
 - [x] 09-01-PLAN.md — Backend SSE endpoint + SPA catch-all, Vite scaffold, core React shell (Router, layout, PricesPage with SSE, CoinModal with Recharts chart)
-- [ ] 09-02-PLAN.md — PortfolioPage + AlertsPage with full CRUD, toast notifications, build integration, test updates
+- [x] 09-02-PLAN.md — PortfolioPage + AlertsPage with full CRUD, toast notifications, build integration, test updates
 
 ### Phase 10: Multi-Exchange Support
 
