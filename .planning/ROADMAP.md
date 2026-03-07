@@ -85,7 +85,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 6. Portfolio Tracking | 1/2 | In Progress | — |
 | 7. Price Alerts | 1/2 | In Progress | — |
 | 8. Historical Charts | 2/2 | Complete | 2026-03-06 |
-| 9. React Frontend | 0/0 | Planned | — |
+| 9. React Frontend | 0/2 | Planned | — |
 | 10. Multi-Exchange Support | 0/0 | Planned | — |
 | 11. Watchlist & Tags | 0/0 | Planned | — |
 | 12. Export & Reporting | 0/0 | Planned | — |
@@ -185,13 +185,27 @@ Plans:
 
 ### Phase 9: React Frontend
 
-**Goal:** Replace the static HTML/JS dashboard with a proper React app. Vite + React + Tailwind. Real-time updates via WebSocket or SSE. Keep FastAPI backend.
+**Goal:** Replace the monolithic 814-line static HTML/JS dashboard with a Vite + React + Tailwind app. SSE for real-time price updates (10s interval). Recharts for charts. React Router for SPA navigation. Same GitHub-dark theme. Keep FastAPI backend unchanged except SSE endpoint and SPA catch-all.
 **Depends on:** Phase 8
-**Requirements**: TBD
-**Plans:** 0 plans
+**Requirements**: REACT-01, REACT-02, REACT-03, REACT-04, REACT-05, REACT-06, REACT-07, REACT-08, REACT-09, REACT-10, REACT-11, REACT-12
+**Success Criteria** (what must be TRUE):
+  1. Vite + React + Tailwind project in `frontend/` builds successfully with `npm run build`
+  2. SSE endpoint at `/api/prices/stream` pushes price + triggered alert data every 10 seconds
+  3. React Router provides URL-based navigation at `/`, `/portfolio`, `/alerts` with top tab bar
+  4. Prices tab auto-updates via SSE with countdown timer and manual refresh button
+  5. Clicking a coin row opens a modal with coin details and Recharts line chart (7D/30D toggle)
+  6. Portfolio tab has add holding form, aggregated table, lots toggle, delete, and summary footer
+  7. Alerts tab has add alert form, active/triggered sections, remove individual and clear all
+  8. Set Alert button in coin modal navigates to alerts tab with symbol pre-filled
+  9. Toast notifications appear when SSE reports triggered alerts (auto-dismiss ~10s)
+  10. GitHub-dark theme applied: #0d1117 bg, #161b22 cards, monospace font, nl-NL EUR formatting
+  11. Vite build output replaces `src/crypto_price_tracker/static/index.html`
+  12. FastAPI SPA catch-all route serves React app at all non-API paths
+**Plans**: 2 plans
 
 Plans:
-- [ ] TBD (run /gsd:plan-phase 9 to break down)
+- [ ] 09-01-PLAN.md — Backend SSE endpoint + SPA catch-all, Vite scaffold, core React shell (Router, layout, PricesPage with SSE, CoinModal with Recharts chart)
+- [ ] 09-02-PLAN.md — PortfolioPage + AlertsPage with full CRUD, toast notifications, build integration, test updates
 
 ### Phase 10: Multi-Exchange Support
 
