@@ -34,7 +34,8 @@ from crypto_price_tracker.alerts_db import (
     mark_triggered as db_mark_triggered,
     remove_alert as db_remove_alert,
 )
-from crypto_price_tracker.api import get_candles, get_top_coins
+from crypto_price_tracker.api import get_candles
+from crypto_price_tracker.exchange import get_top_coins_with_fallback
 from crypto_price_tracker.models import Candle, CoinData  # noqa: F401 – re-exported for type hints
 from crypto_price_tracker.portfolio import aggregate_portfolio
 from crypto_price_tracker.portfolio_db import (
@@ -76,12 +77,16 @@ class AlertCreate(BaseModel):
 def create_app() -> FastAPI:
     """Create and return a configured FastAPI application instance."""
     app = FastAPI(title="Crypto Price Tracker", version="0.1.0")
+    app.state.default_exchange = "bitvavo"
 
     @app.get("/api/prices")
-    def api_prices(top: int = Query(default=20, ge=1, le=100)):
+    def api_prices(
+        top: int = Query(default=20, ge=1, le=100),
+        exchange: str = Query(default=None, pattern="^(bitvavo|binance)$"),
+    ):
         """Return top N coins with triggered alerts flagged."""
-        coins = get_top_coins(top_n=top)
-        # Passive alert checking
+        effective_exchange = exchange or getattr(app.state, "default_exchange", "bitvavo")
+        coins, source = get_top_coins_with_fallback(exchange=effective_exchange, top_n=top)
         active = db_get_active_alerts()
         triggered_alerts = check_alerts(coins, active)
         for alert in triggered_alerts:
@@ -89,20 +94,27 @@ def create_app() -> FastAPI:
         return {
             "coins": [dataclasses.asdict(c) for c in coins],
             "triggered_alerts": [dataclasses.asdict(a) for a in triggered_alerts],
+            "exchange": source,
         }
 
     @app.get("/api/coin/{symbol}")
-    def api_coin(symbol: str):
+    def api_coin(
+        symbol: str,
+        exchange: str = Query(default=None, pattern="^(bitvavo|binance)$"),
+    ):
         """Return detailed data for a single coin; 404 if not found in top 100."""
         symbol = symbol.upper()
-        coins = get_top_coins(top_n=100)
+        effective_exchange = exchange or getattr(app.state, "default_exchange", "bitvavo")
+        coins, source = get_top_coins_with_fallback(exchange=effective_exchange, top_n=100)
         match = next((c for c in coins if c.symbol == symbol), None)
         if match is None:
             raise HTTPException(
                 status_code=404,
-                detail=f"Coin '{symbol}' not found in top 100 EUR pairs",
+                detail=f"Coin '{symbol}' not found in top 100 pairs on {source}",
             )
-        return dataclasses.asdict(match)
+        result = dataclasses.asdict(match)
+        result["exchange"] = source
+        return result
 
     # --- Portfolio endpoints ---
 
@@ -112,9 +124,9 @@ def create_app() -> FastAPI:
         holdings = db_get_all_holdings()
         prices: dict = {}
         try:
-            coins = get_top_coins(top_n=100)
+            coins, _ = get_top_coins_with_fallback(top_n=100)
             prices = {c.symbol: c for c in coins}
-        except (httpx.HTTPStatusError, httpx.ConnectError):
+        except (httpx.HTTPStatusError, httpx.ConnectError, httpx.TimeoutException):
             pass  # best-effort pricing
         summary = aggregate_portfolio(holdings, prices)
         return {
@@ -220,11 +232,13 @@ def create_app() -> FastAPI:
     @app.get("/api/prices/stream", response_class=EventSourceResponse)
     async def stream_prices(
         top: int = Query(default=20, ge=1, le=100),
+        exchange: str = Query(default=None, pattern="^(bitvavo|binance)$"),
     ) -> AsyncIterable[ServerSentEvent]:
         """Push price updates every 10 seconds via SSE."""
+        effective_exchange = exchange or getattr(app.state, "default_exchange", "bitvavo")
         event_id = 0
         while True:
-            coins = get_top_coins(top_n=top)
+            coins, source = get_top_coins_with_fallback(exchange=effective_exchange, top_n=top)
             active = db_get_active_alerts()
             triggered_alerts = check_alerts(coins, active)
             for alert in triggered_alerts:
@@ -232,6 +246,7 @@ def create_app() -> FastAPI:
             data = {
                 "coins": [dataclasses.asdict(c) for c in coins],
                 "triggered_alerts": [dataclasses.asdict(a) for a in triggered_alerts],
+                "exchange": source,
             }
             yield ServerSentEvent(
                 data=json.dumps(data),

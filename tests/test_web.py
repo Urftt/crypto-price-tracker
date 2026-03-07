@@ -1,6 +1,6 @@
 """Unit tests for the web API endpoints using FastAPI TestClient.
 
-All tests mock ``get_top_coins`` so no real HTTP calls are made.
+All tests mock ``get_top_coins_with_fallback`` so no real HTTP calls are made.
 """
 
 from __future__ import annotations
@@ -64,8 +64,8 @@ def mock_coins():
 
 
 def test_api_prices_returns_json_list(client, portfolio_db, mock_coins):
-    """GET /api/prices returns a JSON dict with coins and triggered_alerts."""
-    with patch("crypto_price_tracker.web.get_top_coins", return_value=mock_coins):
+    """GET /api/prices returns a JSON dict with coins, triggered_alerts, and exchange."""
+    with patch("crypto_price_tracker.web.get_top_coins_with_fallback", return_value=(mock_coins, "Bitvavo")):
         response = client.get("/api/prices")
 
     assert response.status_code == 200
@@ -73,6 +73,8 @@ def test_api_prices_returns_json_list(client, portfolio_db, mock_coins):
     assert isinstance(data, dict)
     assert "coins" in data
     assert "triggered_alerts" in data
+    assert "exchange" in data
+    assert data["exchange"] == "Bitvavo"
     assert len(data["coins"]) == 3
 
     first = data["coins"][0]
@@ -81,17 +83,17 @@ def test_api_prices_returns_json_list(client, portfolio_db, mock_coins):
 
 
 def test_api_prices_respects_top_param(client, portfolio_db, mock_coins):
-    """GET /api/prices?top=2 calls get_top_coins with top_n=2."""
-    with patch("crypto_price_tracker.web.get_top_coins", return_value=mock_coins) as mock_fn:
+    """GET /api/prices?top=2 calls get_top_coins_with_fallback with top_n=2."""
+    with patch("crypto_price_tracker.web.get_top_coins_with_fallback", return_value=(mock_coins, "Bitvavo")) as mock_fn:
         response = client.get("/api/prices?top=2")
 
     assert response.status_code == 200
-    mock_fn.assert_called_once_with(top_n=2)
+    mock_fn.assert_called_once_with(exchange="bitvavo", top_n=2)
 
 
 def test_api_coin_returns_single_coin(client, mock_coins):
     """GET /api/coin/BTC returns JSON for Bitcoin with correct fields."""
-    with patch("crypto_price_tracker.web.get_top_coins", return_value=mock_coins):
+    with patch("crypto_price_tracker.web.get_top_coins_with_fallback", return_value=(mock_coins, "Bitvavo")):
         response = client.get("/api/coin/BTC")
 
     assert response.status_code == 200
@@ -102,7 +104,7 @@ def test_api_coin_returns_single_coin(client, mock_coins):
 
 def test_api_coin_case_insensitive(client, mock_coins):
     """GET /api/coin/btc (lowercase) resolves to the BTC coin."""
-    with patch("crypto_price_tracker.web.get_top_coins", return_value=mock_coins):
+    with patch("crypto_price_tracker.web.get_top_coins_with_fallback", return_value=(mock_coins, "Bitvavo")):
         response = client.get("/api/coin/btc")
 
     assert response.status_code == 200
@@ -112,7 +114,7 @@ def test_api_coin_case_insensitive(client, mock_coins):
 
 def test_api_coin_not_found_returns_404(client, mock_coins):
     """GET /api/coin/DOESNOTEXIST returns HTTP 404."""
-    with patch("crypto_price_tracker.web.get_top_coins", return_value=mock_coins):
+    with patch("crypto_price_tracker.web.get_top_coins_with_fallback", return_value=(mock_coins, "Bitvavo")):
         response = client.get("/api/coin/DOESNOTEXIST")
 
     assert response.status_code == 404
@@ -137,8 +139,8 @@ def test_index_serves_react_spa(client):
 
 
 def test_api_coin_detail_fields_complete(client, mock_coins):
-    """GET /api/coin/BTC returns JSON with all 6 CoinData fields matching mock data."""
-    with patch("crypto_price_tracker.web.get_top_coins", return_value=mock_coins):
+    """GET /api/coin/BTC returns JSON with all CoinData fields plus exchange."""
+    with patch("crypto_price_tracker.web.get_top_coins_with_fallback", return_value=(mock_coins, "Bitvavo")):
         response = client.get("/api/coin/BTC")
 
     assert response.status_code == 200
@@ -150,6 +152,7 @@ def test_api_coin_detail_fields_complete(client, mock_coins):
     assert data["change_24h"] == 1.67
     assert data["volume"] == 2186.73
     assert data["volume_eur"] == 120339407.0
+    assert data["exchange"] == "Bitvavo"
 
 
 # ---- Portfolio API tests ----
@@ -157,7 +160,7 @@ def test_api_coin_detail_fields_complete(client, mock_coins):
 
 def test_api_portfolio_get_empty(client, portfolio_db, mock_coins):
     """GET /api/portfolio with empty DB returns empty rows and zero totals."""
-    with patch("crypto_price_tracker.web.get_top_coins", return_value=mock_coins):
+    with patch("crypto_price_tracker.web.get_top_coins_with_fallback", return_value=(mock_coins, "Bitvavo")):
         response = client.get("/api/portfolio")
 
     assert response.status_code == 200
@@ -191,7 +194,7 @@ def test_api_portfolio_add_then_get(client, portfolio_db, mock_coins):
         "buy_date": "2026-01-15",
     })
 
-    with patch("crypto_price_tracker.web.get_top_coins", return_value=mock_coins):
+    with patch("crypto_price_tracker.web.get_top_coins_with_fallback", return_value=(mock_coins, "Bitvavo")):
         response = client.get("/api/portfolio")
 
     assert response.status_code == 200
@@ -272,8 +275,8 @@ def test_index_spa_catch_all(client):
 
 
 def test_api_prices_returns_new_format(client, portfolio_db, mock_coins):
-    """GET /api/prices returns dict with coins and triggered_alerts keys."""
-    with patch("crypto_price_tracker.web.get_top_coins", return_value=mock_coins):
+    """GET /api/prices returns dict with coins, triggered_alerts, and exchange keys."""
+    with patch("crypto_price_tracker.web.get_top_coins_with_fallback", return_value=(mock_coins, "Bitvavo")):
         response = client.get("/api/prices")
 
     assert response.status_code == 200
@@ -281,6 +284,7 @@ def test_api_prices_returns_new_format(client, portfolio_db, mock_coins):
     assert isinstance(data, dict)
     assert "coins" in data
     assert "triggered_alerts" in data
+    assert "exchange" in data
     assert isinstance(data["coins"], list)
     assert len(data["coins"]) == 3
     assert isinstance(data["triggered_alerts"], list)
@@ -292,7 +296,7 @@ def test_api_prices_triggers_alerts(client, portfolio_db, mock_coins):
     # BTC mock price is 56754.0, alert target is 50000.0 above — should trigger
     add_alert("BTC", 50000.0, "above", db_path=portfolio_db)
 
-    with patch("crypto_price_tracker.web.get_top_coins", return_value=mock_coins):
+    with patch("crypto_price_tracker.web.get_top_coins_with_fallback", return_value=(mock_coins, "Bitvavo")):
         response = client.get("/api/prices")
 
     data = response.json()
@@ -473,3 +477,41 @@ def test_index_serves_static_assets(client):
     body = response.text
     # Vite build output includes link/script references to /assets/*
     assert "/assets/" in body
+
+
+# ---- Exchange parameter tests ----
+
+
+def test_api_prices_with_exchange_param(client, portfolio_db, mock_coins):
+    """GET /api/prices?exchange=binance passes exchange to get_top_coins_with_fallback."""
+    with patch("crypto_price_tracker.web.get_top_coins_with_fallback", return_value=(mock_coins, "Binance")):
+        response = client.get("/api/prices?exchange=binance")
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["exchange"] == "Binance"
+
+
+def test_api_prices_default_exchange(client, portfolio_db, mock_coins):
+    """GET /api/prices without exchange param uses default (bitvavo)."""
+    with patch("crypto_price_tracker.web.get_top_coins_with_fallback", return_value=(mock_coins, "Bitvavo")) as mock_fn:
+        response = client.get("/api/prices")
+
+    assert response.status_code == 200
+    mock_fn.assert_called_once()
+
+
+def test_api_coin_with_exchange_param(client, mock_coins):
+    """GET /api/coin/BTC?exchange=binance uses Binance."""
+    with patch("crypto_price_tracker.web.get_top_coins_with_fallback", return_value=(mock_coins, "Binance")):
+        response = client.get("/api/coin/BTC?exchange=binance")
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["exchange"] == "Binance"
+
+
+def test_api_prices_invalid_exchange_rejected(client):
+    """GET /api/prices?exchange=invalid returns 422."""
+    response = client.get("/api/prices?exchange=invalid")
+    assert response.status_code == 422
