@@ -124,68 +124,16 @@ def test_index_returns_response(client):
     assert response.status_code == 200
 
 
-def test_index_serves_html_with_table(client):
-    """GET / returns 200 with text/html containing the price table structure (WEB-01)."""
+def test_index_serves_react_spa(client):
+    """GET / returns 200 with text/html containing the React SPA root element."""
     response = client.get("/")
 
     assert response.status_code == 200
     assert "text/html" in response.headers.get("content-type", "")
 
     body = response.text
-    assert "<table" in body
-    assert "<th>#</th>" in body
-    assert "<th>Symbol</th>" in body
-    assert "<th>Name</th>" in body
-    assert "<th>Price (EUR)</th>" in body
-    assert "<th>24h %</th>" in body
-    assert "<th>Volume (EUR)</th>" in body
-
-
-def test_index_has_auto_refresh(client):
-    """GET / response body contains countdown-based auto-refresh logic (WEB-02)."""
-    response = client.get("/")
-
-    body = response.text
-    assert "setInterval" in body
-    assert "REFRESH_SECONDS" in body
-    assert "tick" in body
-
-
-def test_index_has_countdown_timer(client):
-    """GET / response body contains countdown timer element and tick function."""
-    response = client.get("/")
-
-    body = response.text
-    assert 'id="countdown"' in body
-    assert "secondsLeft" in body
-    assert "tick" in body
-
-
-def test_index_has_refresh_button(client):
-    """GET / response body contains manual refresh button with handler function."""
-    response = client.get("/")
-
-    body = response.text
-    assert 'id="refresh-btn"' in body
-    assert "refreshNow" in body
-
-
-def test_index_has_detail_modal(client):
-    """GET / response body contains the coin detail fetch URL and modal element (WEB-03)."""
-    response = client.get("/")
-
-    body = response.text
-    assert "/api/coin/" in body
-    assert "modal" in body
-
-
-def test_index_has_color_coding(client):
-    """GET / response body contains green and red color codes for 24h change values."""
-    response = client.get("/")
-
-    body = response.text
-    assert "#3fb950" in body
-    assert "#f85149" in body
+    assert '<div id="root">' in body
+    assert "Crypto Prices" in body
 
 
 def test_api_coin_detail_fields_complete(client, mock_coins):
@@ -312,13 +260,12 @@ def test_api_portfolio_add_validation(client, portfolio_db):
     assert response.status_code == 422
 
 
-def test_index_has_portfolio_tab(client):
-    """GET / should contain Portfolio tab, tab-portfolio div, and switchTab function."""
-    response = client.get("/")
-    body = response.text
-    assert "Portfolio" in body
-    assert "tab-portfolio" in body
-    assert "switchTab" in body
+def test_index_spa_catch_all(client):
+    """GET /portfolio returns the React SPA (catch-all route for client-side routing)."""
+    response = client.get("/portfolio")
+    assert response.status_code == 200
+    assert "text/html" in response.headers.get("content-type", "")
+    assert '<div id="root">' in response.text
 
 
 # ---- Alert API tests ----
@@ -439,22 +386,12 @@ def test_api_alerts_add_validation(client, portfolio_db):
     assert response.status_code == 422
 
 
-def test_index_has_alerts_tab(client):
-    """GET / should contain Alerts tab elements."""
-    response = client.get("/")
-    body = response.text
-    assert "Alerts" in body
-    assert "tab-alerts" in body
-    assert "alert-symbol" in body
-    assert "toast-container" in body
-
-
-def test_index_has_set_alert_modal_button(client):
-    """GET / should contain Set Alert button in modal."""
-    response = client.get("/")
-    body = response.text
-    assert "setAlertFromModal" in body
-    assert "Set Alert" in body
+def test_index_spa_alerts_route(client):
+    """GET /alerts returns the React SPA (catch-all for client-side routing)."""
+    response = client.get("/alerts")
+    assert response.status_code == 200
+    assert "text/html" in response.headers.get("content-type", "")
+    assert '<div id="root">' in response.text
 
 
 # ---- Candle/Chart API tests ----
@@ -529,33 +466,10 @@ def test_api_candles_empty_response(client):
     assert response.json() == []
 
 
-def test_index_has_plotly_script(client):
-    """GET / response body contains the Plotly CDN script tag."""
-    response = client.get("/")
-    assert "plotly-3.4.0.min.js" in response.text
-
-
-def test_index_has_chart_elements(client):
-    """GET / response body contains all chart-related elements."""
+def test_index_serves_static_assets(client):
+    """GET /assets/* serves Vite-built static files (JS/CSS chunks)."""
+    # The SPA catch-all should serve static files that exist in the build output
     response = client.get("/")
     body = response.text
-    assert "chart-section" in body
-    assert "chart-container" in body
-    assert "chart-period-btn" in body
-    assert "loadChart" in body
-    assert "switchPeriod" in body
-    assert "/api/candles/" in body
-
-
-def test_index_has_chart_period_buttons(client):
-    """GET / response body contains 7D and 30D toggle button text."""
-    response = client.get("/")
-    body = response.text
-    assert ">7D<" in body
-    assert ">30D<" in body
-
-
-def test_index_modal_width_increased(client):
-    """GET / response body confirms modal card max-width is 600px."""
-    response = client.get("/")
-    assert "max-width: 600px" in response.text
+    # Vite build output includes link/script references to /assets/*
+    assert "/assets/" in body
