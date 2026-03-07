@@ -1,5 +1,6 @@
 import { Routes, Route, NavLink } from 'react-router';
 import PricesPage from './pages/PricesPage';
+import PortfolioPage from './pages/PortfolioPage';
 
 function App() {
   return (
@@ -15,7 +16,7 @@ function App() {
       <main className="px-5">
         <Routes>
           <Route index element={<PricesPage />} />
-          <Route path="portfolio" element={<div className="text-text-muted">Coming soon</div>} />
+          <Route path="portfolio" element={<PortfolioPage />} />
           <Route path="alerts" element={<div className="text-text-muted">Coming soon</div>} />
         </Routes>
       </main>
