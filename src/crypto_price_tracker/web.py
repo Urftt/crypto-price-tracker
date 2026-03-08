@@ -15,13 +15,14 @@ from __future__ import annotations
 
 import asyncio
 import dataclasses
+import io
 import json
 from collections.abc import AsyncIterable
 from pathlib import Path
 
 import httpx
 from fastapi import FastAPI, HTTPException, Query
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.sse import EventSourceResponse, ServerSentEvent
 from pydantic import BaseModel, Field
 
@@ -305,6 +306,44 @@ def create_app() -> FastAPI:
         """Return the set of all symbols currently on the watchlist."""
         symbols = db_get_watchlist_symbols()
         return {"symbols": sorted(symbols)}
+
+    # --- Export endpoints ---
+
+    @app.get("/api/export/pdf")
+    def api_export_pdf():
+        """Generate and return a PDF portfolio report as a download."""
+        from datetime import datetime
+        from crypto_price_tracker.watchlist_db import get_all_watchlist_entries
+        from crypto_price_tracker.alerts_db import get_all_alerts
+        from crypto_price_tracker.report import generate_report_html, html_to_pdf
+
+        # Gather data
+        holdings = db_get_all_holdings()
+        prices: dict = {}
+        coins: list = []
+        try:
+            coins, _ = get_top_coins_with_fallback(top_n=100)
+            prices = {c.symbol: c for c in coins}
+        except (httpx.HTTPStatusError, httpx.ConnectError, httpx.TimeoutException):
+            pass
+        portfolio = aggregate_portfolio(holdings, prices)
+        watchlist = get_all_watchlist_entries()
+        alerts = get_all_alerts()
+
+        # Generate PDF
+        html = generate_report_html(portfolio, coins[:20], watchlist, alerts)
+        pdf_bytes = html_to_pdf(html)
+
+        # Return as streaming download
+        date_str = datetime.now().strftime("%Y-%m-%d")
+        headers = {
+            "Content-Disposition": f'attachment; filename="crypto-report-{date_str}.pdf"'
+        }
+        return StreamingResponse(
+            io.BytesIO(pdf_bytes),
+            media_type="application/pdf",
+            headers=headers,
+        )
 
     # --- Candle/Chart endpoints ---
 

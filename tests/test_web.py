@@ -666,3 +666,65 @@ def test_index_spa_watchlist_route(client):
     assert response.status_code == 200
     assert "text/html" in response.headers.get("content-type", "")
     assert '<div id="root">' in response.text
+
+
+# ---- Export PDF endpoint tests ----
+
+
+def test_api_export_pdf_returns_pdf(client, portfolio_db, mock_coins):
+    """GET /api/export/pdf should return a PDF file with correct headers."""
+    with patch("crypto_price_tracker.web.get_top_coins_with_fallback", return_value=(mock_coins, "Bitvavo")):
+        response = client.get("/api/export/pdf")
+
+    assert response.status_code == 200
+    assert response.headers["content-type"] == "application/pdf"
+    assert "content-disposition" in response.headers
+    assert "crypto-report-" in response.headers["content-disposition"]
+    assert ".pdf" in response.headers["content-disposition"]
+
+
+def test_api_export_pdf_content_is_valid_pdf(client, portfolio_db, mock_coins):
+    """GET /api/export/pdf should return bytes starting with %PDF."""
+    with patch("crypto_price_tracker.web.get_top_coins_with_fallback", return_value=(mock_coins, "Bitvavo")):
+        response = client.get("/api/export/pdf")
+
+    assert response.status_code == 200
+    assert response.content[:5] == b"%PDF-"
+    assert len(response.content) > 100  # Real PDF is at least several KB
+
+
+def test_api_export_pdf_with_portfolio_data(client, portfolio_db, mock_coins):
+    """GET /api/export/pdf with portfolio holdings should return a valid PDF."""
+    # Add a holding first
+    client.post("/api/portfolio", json={
+        "symbol": "BTC",
+        "amount": 0.5,
+        "buy_price": 45000.0,
+    })
+
+    with patch("crypto_price_tracker.web.get_top_coins_with_fallback", return_value=(mock_coins, "Bitvavo")):
+        response = client.get("/api/export/pdf")
+
+    assert response.status_code == 200
+    assert response.content[:5] == b"%PDF-"
+    assert len(response.content) > 200  # Should be larger with data
+
+
+def test_api_export_pdf_with_empty_portfolio(client, portfolio_db):
+    """GET /api/export/pdf with no data should still return a valid PDF."""
+    with patch("crypto_price_tracker.web.get_top_coins_with_fallback", return_value=([], "Bitvavo")):
+        response = client.get("/api/export/pdf")
+
+    assert response.status_code == 200
+    assert response.content[:5] == b"%PDF-"
+
+
+def test_api_export_pdf_content_disposition_has_date(client, portfolio_db, mock_coins):
+    """Content-Disposition header should include today's date."""
+    from datetime import datetime
+    today = datetime.now().strftime("%Y-%m-%d")
+
+    with patch("crypto_price_tracker.web.get_top_coins_with_fallback", return_value=(mock_coins, "Bitvavo")):
+        response = client.get("/api/export/pdf")
+
+    assert today in response.headers["content-disposition"]

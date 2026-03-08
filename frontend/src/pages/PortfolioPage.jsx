@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useApi } from '../hooks/useApi';
 import { formatEUR, formatPct } from '../lib/format';
 import AddHoldingForm from '../components/AddHoldingForm';
+import DownloadReport from '../components/DownloadReport';
 import PortfolioTable from '../components/PortfolioTable';
 
 function PortfolioPage() {
@@ -29,7 +30,10 @@ function PortfolioPage() {
 
   return (
     <div>
-      <h2 className="text-lg font-bold text-text mb-4">Portfolio</h2>
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-lg font-bold text-text">Portfolio</h2>
+        <DownloadReport />
+      </div>
       <AddHoldingForm onAdded={loadPortfolio} />
       <PortfolioTable rows={portfolio.rows} onDelete={loadPortfolio} />
       {portfolio.rows.length > 0 && (
