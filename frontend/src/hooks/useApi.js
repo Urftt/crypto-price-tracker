@@ -1,3 +1,5 @@
+import { useMemo } from 'react';
+
 async function request(url, options = {}) {
   const res = await fetch(url, {
     headers: { 'Content-Type': 'application/json' },
@@ -11,10 +13,10 @@ async function request(url, options = {}) {
 }
 
 export function useApi() {
-  return {
+  return useMemo(() => ({
     get: (url) => request(url),
     post: (url, body) => request(url, { method: 'POST', body: JSON.stringify(body) }),
     put: (url, body) => request(url, { method: 'PUT', body: JSON.stringify(body) }),
     del: (url) => request(url, { method: 'DELETE' }),
-  };
+  }), []);
 }

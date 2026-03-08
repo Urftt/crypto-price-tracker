@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: in_progress
-last_updated: "2026-03-08T01:28:00Z"
+last_updated: "2026-03-08T02:00:00Z"
 progress:
   total_phases: 13
-  completed_phases: 6
-  total_plans: 15
-  completed_plans: 15
+  completed_phases: 7
+  total_plans: 16
+  completed_plans: 16
 ---
 
 # Project State
@@ -18,23 +18,23 @@ progress:
 See: .planning/PROJECT.md (updated 2026-02-28)
 
 **Core value:** Instant, glanceable crypto prices in the terminal — one command, no browser needed.
-**Current focus:** Phase 12 in progress -- Export & Reporting. Plan 12-01 (backend + CLI) complete. Plan 12-02 (web API + React) next.
+**Current focus:** Phase 12 complete -- Export & Reporting. All plans delivered. Ready for Phase 13 (Mobile PWA).
 
 ## Current Position
 
-Phase: 12 of 13 (Export & Reporting) -- IN PROGRESS
-Plan: 1 of 2 complete
-Status: Plan 12-01 complete -- report.py, notify.py, export/summary CLI subcommands, 260 tests passing
-Last activity: 2026-03-08 -- Plan 12-01 verified, all 260 tests passing
+Phase: 12 of 13 (Export & Reporting) -- COMPLETE
+Plan: 2 of 2 complete
+Status: Phase 12 complete -- report.py, notify.py, export/summary CLI, /api/export/pdf endpoint, React Download Report button, 265 tests passing
+Last activity: 2026-03-08 -- Phase 12 fully executed, all 265 tests passing
 
-Progress: [█████-----] 50% (Phase 12)
+Progress: [██████████] 100% (Phase 12)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 15
+- Total plans completed: 16
 - Average duration: 3 min
-- Total execution time: ~51 min
+- Total execution time: ~54 min
 
 **By Phase:**
 
@@ -50,10 +50,10 @@ Progress: [█████-----] 50% (Phase 12)
 | 9. React Frontend | 2 | 8 min | 4 min |
 | 10. Multi-Exchange | 1 | 7 min | 7 min |
 | 11. Watchlist & Tags | 1 | 4 min | 4 min |
-| 12. Export & Reporting | 1 | 5 min | 5 min |
+| 12. Export & Reporting | 2 | 8 min | 4 min |
 
 **Recent Trend:**
-- Last 5 plans: 5 min, 3 min, 7 min, 4 min, 5 min
+- Last 5 plans: 3 min, 7 min, 4 min, 5 min, 3 min
 - Trend: Fast execution
 
 *Updated after each plan completion*
@@ -129,6 +129,9 @@ Recent decisions affecting current work:
 - 12-01: notify.py: Telegram via httpx POST to Bot API, email via smtplib STARTTLS; send_summary catches errors per channel
 - 12-01: build_summary_text uses Telegram HTML tags (<pre>, <b>) and truncates to top-5 holdings (4096 char limit)
 - 12-01: `crypto export` is separate from `crypto portfolio export` (rich PDF vs raw csv/json)
+- 12-02: /api/export/pdf uses StreamingResponse with io.BytesIO(pdf_bytes) wrapper (avoids position bug)
+- 12-02: DownloadReport.jsx uses fetch() directly (not useApi hook) for binary blob response
+- 12-02: Download button placed in PortfolioPage header via flex container (title left, button right)
 
 ### Pending Todos
 
@@ -152,5 +155,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-08
-Stopped at: Completed 12-01-PLAN.md -- report.py, notify.py, export/summary CLI subcommands, 37 new tests, 260 total passing
+Stopped at: Completed Phase 12 -- Export & Reporting fully delivered (2 plans, 265 tests passing)
 Resume file: None

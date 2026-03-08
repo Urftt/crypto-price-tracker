@@ -5,6 +5,7 @@ import PriceTable from '../components/PriceTable';
 import CountdownTimer from '../components/CountdownTimer';
 import CoinModal from '../components/CoinModal';
 import Toast from '../components/Toast';
+import { ErrorBoundary } from '../components/ErrorBoundary';
 
 let toastIdCounter = 0;
 
@@ -69,7 +70,7 @@ function PricesPage({ exchange }) {
           <span className="text-text-muted">via {prices.exchange}</span>
         )}
       </div>
-      {prices && <PriceTable coins={prices.coins} onSelectCoin={setSelectedCoin} />}
+      {prices && <ErrorBoundary><PriceTable coins={prices.coins} onSelectCoin={setSelectedCoin} /></ErrorBoundary>}
       {selectedCoin && <CoinModal coin={selectedCoin} onClose={() => setSelectedCoin(null)} />}
       {toasts.map((toast, index) => (
         <Toast

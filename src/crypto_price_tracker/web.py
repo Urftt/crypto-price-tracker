@@ -389,7 +389,7 @@ def create_app() -> FastAPI:
                 "exchange": source,
             }
             yield ServerSentEvent(
-                data=json.dumps(data),
+                data=data,
                 event="prices",
                 id=str(event_id),
                 retry=10000,

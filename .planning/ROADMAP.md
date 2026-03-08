@@ -89,7 +89,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 10. Multi-Exchange Support | 1/2 | In Progress | — |
 | 11. Watchlist & Tags | 1/2 | In Progress | — |
 | 12. Export & Reporting | 0/0 | Planned | — |
-| 13. Mobile PWA | 0/0 | Planned | — |
+| 13. Mobile PWA | 0/2 | Planned | — |
 
 ### Phase 4: Web Dashboard
 **Goal**: A browser-based dashboard that displays live, auto-refreshing cryptocurrency prices from the Bitvavo API, started with a single `crypto web` command
@@ -263,8 +263,17 @@ Plans:
 
 **Goal:** Make the web dashboard a Progressive Web App. Add manifest, service worker, offline support. Install to home screen on phone.
 **Depends on:** Phase 12
-**Requirements**: TBD
-**Plans:** 0 plans
+**Requirements**: PWA-01, PWA-02, PWA-03, PWA-04, PWA-05, PWA-06, PWA-07, PWA-08, PWA-09, PWA-10
+**Success Criteria** (what must be TRUE):
+  1. `npm run build` generates manifest.json and sw.js in the static output directory
+  2. Chrome DevTools > Application > Manifest shows "Installable" with no errors
+  3. Clicking "Install" button in header triggers the browser install prompt (Chrome/Edge)
+  4. With network offline, app shell loads and shows last-known prices/portfolio from cache
+  5. An offline banner appears when disconnected; disappears when reconnected
+  6. SSE price streaming continues to work normally (not intercepted by service worker)
+  7. All existing 265+ tests continue to pass
+**Plans**: 2 plans
 
 Plans:
-- [ ] TBD (run /gsd:plan-phase 13 to break down)
+- [ ] 13-01-PLAN.md — PWA infrastructure: vite-plugin-pwa, manifest, service worker, icons, meta tags
+- [ ] 13-02-PLAN.md — Offline UX + install button: React hooks, offline banner, install button, tests

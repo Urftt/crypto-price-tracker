@@ -181,12 +181,12 @@ def get_top_coins_with_fallback(
     # Try primary
     try:
         with get_exchange_client(primary, top_n=top_n) as client:
-            coins = client.get_top_coins(top_n)
+            coins = client.get_top_coins()
             return coins, client.name
     except (httpx.HTTPStatusError, httpx.ConnectError, httpx.TimeoutException):
         pass
 
     # Try fallback -- if this also fails, the exception propagates to the caller
     with get_exchange_client(fallback, top_n=top_n) as client:
-        coins = client.get_top_coins(top_n)
+        coins = client.get_top_coins()
         return coins, client.name
