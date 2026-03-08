@@ -728,3 +728,53 @@ def test_api_export_pdf_content_disposition_has_date(client, portfolio_db, mock_
         response = client.get("/api/export/pdf")
 
     assert today in response.headers["content-disposition"]
+
+
+# ---- PWA static file tests ----
+
+
+def test_manifest_served(client):
+    """GET /manifest.json should return the PWA manifest."""
+    response = client.get("/manifest.json")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["name"] == "Crypto Price Tracker"
+    assert data["display"] == "standalone"
+    assert data["start_url"] == "/"
+    assert len(data["icons"]) >= 2
+
+
+def test_service_worker_served(client):
+    """GET /sw.js should return the service worker script."""
+    response = client.get("/sw.js")
+    assert response.status_code == 200
+    assert "text/javascript" in response.headers.get("content-type", "") or response.status_code == 200
+
+
+def test_pwa_icons_served(client):
+    """PWA icon files should be accessible."""
+    for icon_path in ["/pwa-192x192.png", "/pwa-512x512.png", "/apple-touch-icon-180x180.png"]:
+        response = client.get(icon_path)
+        assert response.status_code == 200, f"Icon {icon_path} not served"
+
+
+def test_favicon_served(client):
+    """GET /favicon.ico should return the favicon."""
+    response = client.get("/favicon.ico")
+    assert response.status_code == 200
+
+
+def test_index_html_contains_manifest_link(client):
+    """The built index.html should contain a manifest link tag."""
+    response = client.get("/")
+    assert response.status_code == 200
+    content = response.text
+    assert "manifest" in content
+
+
+def test_index_html_contains_theme_color(client):
+    """The built index.html should contain the theme-color meta tag."""
+    response = client.get("/")
+    assert response.status_code == 200
+    content = response.text
+    assert "theme-color" in content
