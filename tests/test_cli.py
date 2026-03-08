@@ -7,6 +7,7 @@ HTTP calls are made.  Each test verifies a distinct CLI behaviour.
 from __future__ import annotations
 
 import sys
+from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -501,3 +502,76 @@ def test_prices_with_watchlist_flag(mock_coins):
     rendered_coins = mock_render.call_args[0][0]
     assert len(rendered_coins) == 1
     assert rendered_coins[0].symbol == "BTC"
+
+
+# ---- Export subcommand tests ----
+
+
+def test_export_command_generates_pdf(mock_coins, tmp_path):
+    """crypto export --format pdf --output FILE should generate a PDF file."""
+    output_file = str(tmp_path / "report.pdf")
+    with (
+        patch("crypto_price_tracker.cli.get_top_coins_with_fallback", return_value=(mock_coins, "Bitvavo")),
+        patch("crypto_price_tracker.cli.get_all_holdings", return_value=[]),
+        patch("crypto_price_tracker.cli.aggregate_portfolio") as mock_agg,
+        patch("crypto_price_tracker.cli.get_all_watchlist_entries", return_value=[]),
+        patch("crypto_price_tracker.cli.get_all_alerts", return_value=[]),
+        patch("crypto_price_tracker.cli.generate_report_html", return_value="<html>test</html>"),
+        patch("crypto_price_tracker.cli.html_to_pdf", return_value=b"%PDF-test-content"),
+    ):
+        mock_agg.return_value = MagicMock(rows=[], total_value=0, total_cost=0, total_pnl_eur=0, total_pnl_pct=0)
+        sys.argv = ["crypto", "export", "--format", "pdf", "--output", output_file]
+        main()
+
+    assert Path(output_file).exists()
+    assert Path(output_file).read_bytes() == b"%PDF-test-content"
+
+
+def test_export_command_auto_names_file(mock_coins, tmp_path, monkeypatch):
+    """crypto export without --output should auto-name the PDF file."""
+    monkeypatch.chdir(tmp_path)
+    with (
+        patch("crypto_price_tracker.cli.get_top_coins_with_fallback", return_value=(mock_coins, "Bitvavo")),
+        patch("crypto_price_tracker.cli.get_all_holdings", return_value=[]),
+        patch("crypto_price_tracker.cli.aggregate_portfolio") as mock_agg,
+        patch("crypto_price_tracker.cli.get_all_watchlist_entries", return_value=[]),
+        patch("crypto_price_tracker.cli.get_all_alerts", return_value=[]),
+        patch("crypto_price_tracker.cli.generate_report_html", return_value="<html>test</html>"),
+        patch("crypto_price_tracker.cli.html_to_pdf", return_value=b"%PDF-test"),
+    ):
+        mock_agg.return_value = MagicMock(rows=[], total_value=0, total_cost=0, total_pnl_eur=0, total_pnl_pct=0)
+        sys.argv = ["crypto", "export"]
+        main()
+
+    # Should have created a file matching crypto-report-*.pdf
+    pdf_files = list(tmp_path.glob("crypto-report-*.pdf"))
+    assert len(pdf_files) == 1
+
+
+# ---- Summary subcommand tests ----
+
+
+def test_summary_send_command(mock_coins):
+    """crypto summary send should build summary and call send_summary."""
+    with (
+        patch("crypto_price_tracker.cli.get_top_coins_with_fallback", return_value=(mock_coins, "Bitvavo")),
+        patch("crypto_price_tracker.cli.get_all_holdings", return_value=[]),
+        patch("crypto_price_tracker.cli.aggregate_portfolio") as mock_agg,
+        patch("crypto_price_tracker.cli.build_summary_text", return_value="text summary"),
+        patch("crypto_price_tracker.cli.build_summary_html", return_value="<html>summary</html>"),
+        patch("crypto_price_tracker.cli.send_summary", return_value=["telegram"]) as mock_send,
+    ):
+        mock_agg.return_value = MagicMock(rows=[], total_value=0, total_cost=0, total_pnl_eur=0, total_pnl_pct=0)
+        sys.argv = ["crypto", "summary", "send"]
+        main()
+
+    mock_send.assert_called_once_with("text summary", "<html>summary</html>")
+
+
+def test_summary_no_subcommand(capsys):
+    """crypto summary with no subcommand should print help."""
+    sys.argv = ["crypto", "summary"]
+    main()
+    captured = capsys.readouterr()
+    output = captured.out + captured.err
+    assert "summary" in output.lower() or "send" in output.lower()

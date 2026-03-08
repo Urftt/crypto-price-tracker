@@ -12,6 +12,7 @@ import argparse
 import sqlite3
 import sys
 import time
+from datetime import datetime
 
 import httpx
 
@@ -47,6 +48,7 @@ from crypto_price_tracker.display import (
     sparkline,
 )
 from rich.console import Console
+from crypto_price_tracker.notify import send_summary
 from crypto_price_tracker.portfolio import aggregate_portfolio, export_csv, export_json
 from crypto_price_tracker.portfolio_db import (
     add_holding,
@@ -54,6 +56,12 @@ from crypto_price_tracker.portfolio_db import (
     get_holdings_by_symbol,
     remove_holding,
     update_holding,
+)
+from crypto_price_tracker.report import (
+    build_summary_html,
+    build_summary_text,
+    generate_report_html,
+    html_to_pdf,
 )
 
 
@@ -329,6 +337,49 @@ def cmd_watchlist_tag(args: argparse.Namespace) -> None:
         print(f"Updated {args.symbol.upper()} tags: {', '.join(tags)}")
     else:
         print(f"Cleared tags for {args.symbol.upper()}")
+
+
+def cmd_export(args: argparse.Namespace) -> None:
+    """Generate a rich PDF portfolio report."""
+    try:
+        coins, _source = get_top_coins_with_fallback(top_n=100)
+    except (httpx.HTTPStatusError, httpx.ConnectError) as e:
+        print(f"Error fetching data: {e}", file=sys.stderr)
+        sys.exit(1)
+    holdings = get_all_holdings()
+    prices = {c.symbol: c for c in coins}
+    portfolio = aggregate_portfolio(holdings, prices)
+    watchlist = get_all_watchlist_entries()
+    alerts = get_all_alerts()
+    html = generate_report_html(portfolio, coins, watchlist, alerts)
+    pdf_bytes = html_to_pdf(html)
+    if args.output:
+        output_path = args.output
+    else:
+        today = datetime.now().strftime("%Y-%m-%d")
+        output_path = f"crypto-report-{today}.pdf"
+    with open(output_path, "wb") as f:
+        f.write(pdf_bytes)
+    print(f"Report saved to {output_path}")
+
+
+def cmd_summary_send(args: argparse.Namespace) -> None:
+    """Build portfolio summary and send to configured notification channels."""
+    try:
+        coins, _source = get_top_coins_with_fallback(top_n=100)
+    except (httpx.HTTPStatusError, httpx.ConnectError) as e:
+        print(f"Error fetching data: {e}", file=sys.stderr)
+        sys.exit(1)
+    holdings = get_all_holdings()
+    prices = {c.symbol: c for c in coins}
+    portfolio = aggregate_portfolio(holdings, prices)
+    text = build_summary_text(portfolio)
+    html = build_summary_html(portfolio)
+    channels = send_summary(text, html)
+    if channels:
+        print(f"Summary sent to: {', '.join(channels)}")
+    else:
+        print("No notification channels configured. Set CRYPTO_TELEGRAM_TOKEN/CRYPTO_SMTP_HOST environment variables.")
 
 
 def cmd_chart(args: argparse.Namespace) -> None:
@@ -610,6 +661,22 @@ def main() -> None:
         help=f"Tag to set (can repeat, replaces existing). Valid: {', '.join(sorted(VALID_TAGS))}",
     )
 
+    # export subcommand (top-level, separate from portfolio export)
+    export_parser = subparsers.add_parser("export", help="Generate rich PDF report")
+    export_parser.add_argument(
+        "--format", choices=["pdf"], default="pdf",
+        dest="export_format", help="Report format (default: pdf)",
+    )
+    export_parser.add_argument(
+        "--output", "-o", type=str, default=None,
+        help="Output file path (default: auto-named crypto-report-YYYY-MM-DD.pdf)",
+    )
+
+    # summary subcommand group
+    summary_parser = subparsers.add_parser("summary", help="Portfolio summary notifications")
+    summary_sub = summary_parser.add_subparsers(dest="summary_command")
+    summary_sub.add_parser("send", help="Send portfolio summary to configured channels")
+
     # chart subcommand
     chart_parser = subparsers.add_parser("chart", help="Show price history charts")
     chart_parser.add_argument(
@@ -681,6 +748,13 @@ def main() -> None:
             cmd_watchlist_list(args)
         elif args.watchlist_command == "tag":
             cmd_watchlist_tag(args)
+    elif args.command == "export":
+        cmd_export(args)
+    elif args.command == "summary":
+        if not hasattr(args, "summary_command") or args.summary_command is None:
+            summary_parser.print_help()
+        elif args.summary_command == "send":
+            cmd_summary_send(args)
     elif args.command == "chart":
         cmd_chart(args)
     else:
