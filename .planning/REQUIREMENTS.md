@@ -12,8 +12,8 @@
 - [x] **COMP-04**: Shared `<Modal>` component with Escape-to-close, click-outside-to-close, focus trap, and enter/exit animation
 - [x] **COMP-05**: Shared `<Badge>` component for tags, status indicators, and exchange labels
 - [x] **COMP-06**: Shared `<NavTab>` component replacing duplicated NavLink className logic in App.jsx
-- [ ] **COMP-07**: All form fields have visible `<label>` elements (not just placeholder text)
-- [ ] **COMP-08**: Forms show a loading/disabled state during submission (prevent double-submit)
+- [x] **COMP-07**: All form fields have visible `<label>` elements (not just placeholder text)
+- [x] **COMP-08**: Forms show a loading/disabled state during submission (prevent double-submit)
 
 ## Responsive Layout & Mobile Navigation (Phase 16)
 
@@ -58,9 +58,9 @@
 ## Coverage
 
 - **Total requirements:** 28
-- **Complete:** 6
-- **Incomplete:** 22
-- **Coverage:** 21%
+- **Complete:** 8
+- **Incomplete:** 20
+- **Coverage:** 29%
 
 ---
 *Created: 2026-03-09*

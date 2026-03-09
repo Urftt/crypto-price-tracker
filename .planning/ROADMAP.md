@@ -11,7 +11,7 @@
 
 | # | Phase | Goal | Requirements | Status |
 |---|-------|------|--------------|--------|
-| 15 | UI Component Library | Extract shared primitives (Button, Input, Table, Modal, Badge, NavTab) and fix form accessibility | COMP-01 → COMP-08 | Executing (1/2) |
+| 15 | UI Component Library | Extract shared primitives (Button, Input, Table, Modal, Badge, NavTab) and fix form accessibility | COMP-01 → COMP-08 | Complete (2/2) |
 | 16 | Responsive Layout & Mobile Nav | Add responsive breakpoints, mobile bottom nav, full-screen modal, touch targets | RESP-01 → RESP-07 | Planned |
 | 17 | Mobile Data Views | Card-based table layouts on mobile, loading skeletons, empty states | MOB-01 → MOB-06 | Planned |
 | 18 | Visual Polish & Animations | Page transitions, modal/toast animations, typography, spacing, price flash | VIS-01 → VIS-08 | Planned |
@@ -23,7 +23,7 @@
 
 Plans:
 - [x] 15-01-PLAN.md — Create 6 UI primitive components (Button, Input, Table, Modal, Badge, NavTab) + test infrastructure + unit tests
-- [ ] 15-02-PLAN.md — Refactor all existing components to use UI primitives, add visible labels, add form loading states
+- [x] 15-02-PLAN.md — Refactor all existing components to use UI primitives, add visible labels, add form loading states
 
 **Success Criteria**:
   1. `<Button>`, `<Input>`, `<Table>/<Th>/<Td>`, `<Modal>`, `<Badge>`, `<NavTab>` components exist in `src/components/ui/`

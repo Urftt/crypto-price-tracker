@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: "Slick UI"
 status: executing
-last_updated: "2026-03-09T21:15:00Z"
+last_updated: "2026-03-09T21:25:00Z"
 progress:
   total_phases: 4
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 2
-  completed_plans: 1
+  completed_plans: 2
 ---
 
 # Project State
@@ -23,13 +23,13 @@ See: .planning/PROJECT.md (updated 2026-03-09)
 ## Current Position
 
 Milestone v2.0 started on 2026-03-09.
-Phase 15 executing (1/2 plans complete). Next: 15-02 (refactor all components to use UI primitives).
+Phase 15 complete (2/2 plans). Next: Phase 16 (Responsive Layout & Mobile Nav).
 
 ## Phase Progress
 
 | Phase | Name | Status |
 |-------|------|--------|
-| 15 | UI Component Library | Executing (1/2 plans) |
+| 15 | UI Component Library | Complete (2/2 plans) |
 | 16 | Responsive Layout & Mobile Nav | Planned |
 | 17 | Mobile Data Views | Planned |
 | 18 | Visual Polish & Animations | Planned |
@@ -44,7 +44,7 @@ Phase 15 executing (1/2 plans complete). Next: 15-02 (refactor all components to
 ## Session Continuity
 
 Last session: 2026-03-09
-Stopped at: Completed 15-01-PLAN.md (UI primitives + tests). Next: 15-02-PLAN.md.
+Stopped at: Completed 15-02-PLAN.md (refactored all components to use UI primitives). Phase 15 complete. Next: Phase 16.
 Resume file: None
 
 ## Decisions
@@ -53,9 +53,13 @@ Resume file: None
 - Button has no default type attribute; callers control form submission behavior
 - Modal re-queries focusable elements inside Tab handler for React rerender safety
 - Badge uses separate colorScheme (tag) and variant (status) props
+- Kept raw input for PortfolioTable inline edit with aria-label (special sizing)
+- CoinModal always rendered with open prop instead of conditional mount
+- TAG_COLOR_MAP added in WatchlistPage for Badge colorScheme mapping
 
 ## Performance Metrics
 
 | Phase-Plan | Duration | Tasks | Files |
 |------------|----------|-------|-------|
 | 15-01 | 2 min | 2 | 16 |
+| 15-02 | 5 min | 2 | 14 |
