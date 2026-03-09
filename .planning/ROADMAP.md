@@ -24,7 +24,8 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [ ] **Phase 10: Multi-Exchange Support** - Abstract the exchange layer with Binance as second source, auto-fallback, and `--exchange` CLI flag
 - [ ] **Phase 11: Watchlist & Tags** - Tag coins (DeFi, Layer1, Meme) and filter by tag; persistent watchlist separate from portfolio
 - [ ] **Phase 12: Export & Reporting** - Export portfolio to CSV/PDF; weekly summary email or Telegram message; `crypto export --format pdf`
-- [ ] **Phase 13: Mobile PWA** - Progressive Web App with manifest, service worker, offline support, and install-to-home-screen
+- [x] **Phase 13: Mobile PWA** - Progressive Web App with manifest, service worker, offline support, and install-to-home-screen (completed 2026-03-08)
+- [x] **Phase 14: Audit Gap Fixes** - Fix portfolio null crashes, add missing React edit UIs, clean up tech debt from milestone audit (completed 2026-03-09)
 
 ## Phase Details
 
@@ -73,7 +74,7 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9 → 10 → 11 → 12 → 13
+Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9 → 10 → 11 → 12 → 13 → 14
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
@@ -89,7 +90,8 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 10. Multi-Exchange Support | 1/2 | In Progress | — |
 | 11. Watchlist & Tags | 1/2 | In Progress | — |
 | 12. Export & Reporting | 0/0 | Planned | — |
-| 13. Mobile PWA | 0/2 | Planned | — |
+| 13. Mobile PWA | 2/2 | Complete | 2026-03-08 |
+| 14. Audit Gap Fixes | 1/1 | Complete | 2026-03-09 |
 
 ### Phase 4: Web Dashboard
 **Goal**: A browser-based dashboard that displays live, auto-refreshing cryptocurrency prices from the Bitvavo API, started with a single `crypto web` command
@@ -275,5 +277,22 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 13-01-PLAN.md — PWA infrastructure: vite-plugin-pwa, manifest, service worker, icons, meta tags
-- [ ] 13-02-PLAN.md — Offline UX + install button: React hooks, offline banner, install button, tests
+- [x] 13-01-PLAN.md — PWA infrastructure: vite-plugin-pwa, manifest, service worker, icons, meta tags
+- [x] 13-02-PLAN.md — Offline UX + install button: React hooks, offline banner, install button, tests
+
+### Phase 14: Audit Gap Fixes
+
+**Goal:** Close all gaps found during milestone v1.0 audit — fix 2 portfolio bugs, add missing React edit UIs for portfolio and watchlist, and clean up tech debt (protocol mismatch, orphaned function).
+**Depends on:** Phase 13
+**Success Criteria** (what must be TRUE):
+  1. Portfolio table renders correctly when holdings include coins outside the top 100 (no crash, shows "N/A")
+  2. Each portfolio lot row shows number of lots and allocation percentage without errors
+  3. Lot rows have an Edit button that updates the holding amount via `PUT /api/portfolio/{id}`
+  4. Watchlist rows have an Edit Tags button that updates tags via `PUT /api/watchlist/{symbol}/tags`
+  5. `BitvavoClient.get_top_coins()` signature matches `ExchangeClient` protocol
+  6. Orphaned `get_top_coins()` convenience function removed from `api.py`
+  7. All tests pass
+**Plans**: 1 plan
+
+Plans:
+- [x] 14-01-PLAN.md — Fix portfolio null crashes, add num_lots field, add React edit UIs, protocol fix, remove orphaned function

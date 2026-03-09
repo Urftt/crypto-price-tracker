@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: in_progress
-last_updated: "2026-03-08T02:00:00Z"
+last_updated: "2026-03-09T00:00:00Z"
 progress:
-  total_phases: 13
-  completed_phases: 7
-  total_plans: 16
-  completed_plans: 16
+  total_phases: 14
+  completed_phases: 14
+  total_plans: 19
+  completed_plans: 19
 ---
 
 # Project State
@@ -18,23 +18,23 @@ progress:
 See: .planning/PROJECT.md (updated 2026-02-28)
 
 **Core value:** Instant, glanceable crypto prices in the terminal — one command, no browser needed.
-**Current focus:** Phase 12 complete -- Export & Reporting. All plans delivered. Ready for Phase 13 (Mobile PWA).
+**Current focus:** Phase 14 -- Audit Gap Fixes. Fix portfolio bugs, add missing React edit UIs, clean up tech debt.
 
 ## Current Position
 
-Phase: 12 of 13 (Export & Reporting) -- COMPLETE
-Plan: 2 of 2 complete
-Status: Phase 12 complete -- report.py, notify.py, export/summary CLI, /api/export/pdf endpoint, React Download Report button, 265 tests passing
-Last activity: 2026-03-08 -- Phase 12 fully executed, all 265 tests passing
+Phase: 14 of 14 (Audit Gap Fixes) -- COMPLETE
+Plan: 1 of 1 complete
+Status: All 14 phases complete. Milestone v1.0 delivered.
+Last activity: 2026-03-09 -- Phase 14 executed: portfolio bugs fixed, React edit UIs added, tech debt cleaned
 
-Progress: [██████████] 100% (Phase 12)
+Progress: [██████████████] 100% (14/14 phases)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 16
+- Total plans completed: 18
 - Average duration: 3 min
-- Total execution time: ~54 min
+- Total execution time: ~64 min
 
 **By Phase:**
 
@@ -51,9 +51,11 @@ Progress: [██████████] 100% (Phase 12)
 | 10. Multi-Exchange | 1 | 7 min | 7 min |
 | 11. Watchlist & Tags | 1 | 4 min | 4 min |
 | 12. Export & Reporting | 2 | 8 min | 4 min |
+| 13. Mobile PWA | 2 | 5 min | 3 min |
+| 14. Audit Gap Fixes | 1 | 3 min | 3 min |
 
 **Recent Trend:**
-- Last 5 plans: 3 min, 7 min, 4 min, 5 min, 3 min
+- Last 5 plans: 4 min, 5 min, 3 min, 2 min, 3 min
 - Trend: Fast execution
 
 *Updated after each plan completion*
@@ -132,6 +134,12 @@ Recent decisions affecting current work:
 - 12-02: /api/export/pdf uses StreamingResponse with io.BytesIO(pdf_bytes) wrapper (avoids position bug)
 - 12-02: DownloadReport.jsx uses fetch() directly (not useApi hook) for binary blob response
 - 12-02: Download button placed in PortfolioPage header via flex container (title left, button right)
+- 13-01: vite-plugin-pwa with registerType: 'autoUpdate' and generateSW mode; manifestFilename: 'manifest.json' (not .webmanifest) for correct MIME type
+- 13-01: SSE NetworkOnly rule ordered before general /api/ NetworkFirst rule; navigateFallbackDenylist excludes /api/
+- 13-01: Solid-color PNG icons generated via Python struct+zlib (no external image tools needed)
+- 13-02: useOffline hook uses navigator.onLine + online/offline events for reactive offline detection
+- 13-02: useInstallPrompt hook captures beforeinstallprompt event; isInstallable stays false on Safari/Firefox
+- 13-02: OfflineBanner renders above header only when offline; InstallButton renders in header only when installable
 
 ### Pending Todos
 
@@ -154,6 +162,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-08
-Stopped at: Completed Phase 12 -- Export & Reporting fully delivered (2 plans, 265 tests passing)
+Last session: 2026-03-09
+Stopped at: Completed Phase 14 -- Audit gap fixes delivered (1 plan, 271 tests passing). ALL 14 PHASES COMPLETE. Milestone v1.0 done.
 Resume file: None

@@ -7,6 +7,8 @@ function PortfolioTable({ rows, onDelete }) {
   const [expandedSymbol, setExpandedSymbol] = useState(null);
   const [lots, setLots] = useState([]);
   const [lotsLoading, setLotsLoading] = useState(false);
+  const [editingLotId, setEditingLotId] = useState(null);
+  const [editAmount, setEditAmount] = useState('');
 
   const toggleLots = async (symbol) => {
     if (expandedSymbol === symbol) {
@@ -39,6 +41,23 @@ function PortfolioTable({ rows, onDelete }) {
       }
     } catch {
       // Ignore delete errors silently
+    }
+  };
+
+  const handleEditLot = async (lotId) => {
+    const amount = parseFloat(editAmount);
+    if (isNaN(amount) || amount <= 0) return;
+    try {
+      await api.put(`/api/portfolio/${lotId}`, { amount });
+      setEditingLotId(null);
+      setEditAmount('');
+      onDelete(); // refresh portfolio
+      if (expandedSymbol) {
+        const data = await api.get(`/api/portfolio/lots/${expandedSymbol}`);
+        setLots(data);
+      }
+    } catch {
+      // Ignore edit errors
     }
   };
 
@@ -77,11 +96,11 @@ function PortfolioTable({ rows, onDelete }) {
                 </td>
                 <td className="py-1.5 px-3 text-right text-sm">{row.total_amount}</td>
                 <td className="py-1.5 px-3 text-right text-sm">{formatEUR(row.avg_buy_price)}</td>
-                <td className="py-1.5 px-3 text-right text-sm">{formatEUR(row.current_price)}</td>
-                <td className="py-1.5 px-3 text-right text-sm">{formatEUR(row.current_value)}</td>
-                <td className={`py-1.5 px-3 text-right text-sm ${pnlColor(row.pnl_eur)}`}>{formatEUR(row.pnl_eur)}</td>
-                <td className={`py-1.5 px-3 text-right text-sm ${pnlColor(row.pnl_pct)}`}>{formatPct(row.pnl_pct)}</td>
-                <td className="py-1.5 px-3 text-right text-sm">{row.allocation_pct.toFixed(1)}%</td>
+                <td className="py-1.5 px-3 text-right text-sm">{row.current_price != null ? formatEUR(row.current_price) : 'N/A'}</td>
+                <td className="py-1.5 px-3 text-right text-sm">{row.current_value != null ? formatEUR(row.current_value) : 'N/A'}</td>
+                <td className={`py-1.5 px-3 text-right text-sm ${row.pnl_eur != null ? pnlColor(row.pnl_eur) : 'text-text-dim'}`}>{row.pnl_eur != null ? formatEUR(row.pnl_eur) : 'N/A'}</td>
+                <td className={`py-1.5 px-3 text-right text-sm ${row.pnl_pct != null ? pnlColor(row.pnl_pct) : 'text-text-dim'}`}>{row.pnl_pct != null ? formatPct(row.pnl_pct) : 'N/A'}</td>
+                <td className="py-1.5 px-3 text-right text-sm">{row.allocation_pct != null ? `${row.allocation_pct.toFixed(1)}%` : 'N/A'}</td>
               </tr>
               {expandedSymbol === row.symbol && (
                 lotsLoading ? (
@@ -92,17 +111,57 @@ function PortfolioTable({ rows, onDelete }) {
                   lots.map((lot) => (
                     <tr key={`lot-${lot.id}`} className="bg-bg/50 border-b border-border/30">
                       <td className="py-1 px-6 text-text-dim text-xs">Lot #{lot.id}</td>
-                      <td className="py-1 px-3 text-right text-text-muted text-xs">{lot.amount}</td>
+                      <td className="py-1 px-3 text-right text-text-muted text-xs">
+                        {editingLotId === lot.id ? (
+                          <input
+                            type="number"
+                            step="any"
+                            value={editAmount}
+                            onChange={(e) => setEditAmount(e.target.value)}
+                            onKeyDown={(e) => { if (e.key === 'Enter') handleEditLot(lot.id); if (e.key === 'Escape') { setEditingLotId(null); setEditAmount(''); } }}
+                            onClick={(e) => e.stopPropagation()}
+                            className="bg-bg border border-border rounded px-1 py-0.5 text-text text-xs w-20 focus:border-accent focus:outline-none"
+                            autoFocus
+                          />
+                        ) : lot.amount}
+                      </td>
                       <td className="py-1 px-3 text-right text-text-muted text-xs">{formatEUR(lot.buy_price)}</td>
                       <td className="py-1 px-3 text-right text-text-muted text-xs">{lot.buy_date || '--'}</td>
                       <td colSpan={3}></td>
                       <td className="py-1 px-3 text-right">
-                        <button
-                          onClick={(e) => { e.stopPropagation(); handleDeleteLot(lot.id); }}
-                          className="text-down hover:text-down/80 text-xs cursor-pointer"
-                        >
-                          Delete
-                        </button>
+                        <div className="flex gap-2 justify-end">
+                          {editingLotId === lot.id ? (
+                            <>
+                              <button
+                                onClick={(e) => { e.stopPropagation(); handleEditLot(lot.id); }}
+                                className="text-up hover:text-up/80 text-xs cursor-pointer"
+                              >
+                                Save
+                              </button>
+                              <button
+                                onClick={(e) => { e.stopPropagation(); setEditingLotId(null); setEditAmount(''); }}
+                                className="text-text-muted hover:text-text text-xs cursor-pointer"
+                              >
+                                Cancel
+                              </button>
+                            </>
+                          ) : (
+                            <>
+                              <button
+                                onClick={(e) => { e.stopPropagation(); setEditingLotId(lot.id); setEditAmount(String(lot.amount)); }}
+                                className="text-accent hover:text-accent/80 text-xs cursor-pointer"
+                              >
+                                Edit
+                              </button>
+                              <button
+                                onClick={(e) => { e.stopPropagation(); handleDeleteLot(lot.id); }}
+                                className="text-down hover:text-down/80 text-xs cursor-pointer"
+                              >
+                                Delete
+                              </button>
+                            </>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ))

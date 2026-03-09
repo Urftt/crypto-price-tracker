@@ -25,6 +25,7 @@ class PortfolioRow:
     """Aggregated view of one coin across all lots."""
 
     symbol: str
+    num_lots: int
     total_amount: float
     avg_buy_price: float
     current_price: float | None
@@ -85,6 +86,7 @@ def aggregate_portfolio(
             priced_rows.append(
                 PortfolioRow(
                     symbol=symbol,
+                    num_lots=len(lots),
                     total_amount=round(total_amount, 2),
                     avg_buy_price=round(avg_buy, 2),
                     current_price=coin.price,
@@ -101,6 +103,7 @@ def aggregate_portfolio(
             unpriced_rows.append(
                 PortfolioRow(
                     symbol=symbol,
+                    num_lots=len(lots),
                     total_amount=round(total_amount, 2),
                     avg_buy_price=round(avg_buy, 2),
                     current_price=None,

@@ -25,6 +25,7 @@ def sample_portfolio() -> PortfolioSummary:
         rows=[
             PortfolioRow(
                 symbol="BTC",
+                num_lots=1,
                 total_amount=0.5,
                 avg_buy_price=45000.0,
                 current_price=60000.0,
@@ -37,6 +38,7 @@ def sample_portfolio() -> PortfolioSummary:
             ),
             PortfolioRow(
                 symbol="ETH",
+                num_lots=1,
                 total_amount=2.0,
                 avg_buy_price=3000.0,
                 current_price=2500.0,

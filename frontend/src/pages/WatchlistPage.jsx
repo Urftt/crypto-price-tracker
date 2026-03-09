@@ -20,6 +20,8 @@ function WatchlistPage() {
   const [symbol, setSymbol] = useState('');
   const [selectedTags, setSelectedTags] = useState([]);
   const [error, setError] = useState(null);
+  const [editingSymbol, setEditingSymbol] = useState(null);
+  const [editTags, setEditTags] = useState([]);
 
   const loadWatchlist = useCallback(async () => {
     try {
@@ -76,6 +78,28 @@ function WatchlistPage() {
     setActiveTags((prev) =>
       prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
     );
+  };
+
+  const handleStartEditTags = (entry) => {
+    setEditingSymbol(entry.symbol);
+    setEditTags(entry.tags ? entry.tags.split(',') : []);
+  };
+
+  const handleEditTagToggle = (tag) => {
+    setEditTags((prev) =>
+      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
+    );
+  };
+
+  const handleSaveTags = async (sym) => {
+    try {
+      await api.put(`/api/watchlist/${sym}/tags`, { tags: editTags });
+      setEditingSymbol(null);
+      setEditTags([]);
+      loadWatchlist();
+    } catch {
+      // Ignore
+    }
   };
 
   const handleFormTagToggle = (tag) => {
@@ -189,20 +213,49 @@ function WatchlistPage() {
                 <td className="py-1.5 px-3 text-accent font-bold">{entry.symbol}</td>
                 <td className="py-1.5 px-3 text-text-muted text-sm">{entry.name || '-'}</td>
                 <td className="py-1.5 px-3">
-                  <div className="flex gap-1 flex-wrap">
-                    {entry.tags
-                      ? entry.tags.split(',').map((tag) => (
-                          <span
-                            key={tag}
-                            className={`px-1.5 py-0.5 rounded text-xs border ${
-                              TAG_COLORS[tag] || 'bg-border text-text-muted border-border'
-                            }`}
-                          >
-                            {tag}
-                          </span>
-                        ))
-                      : <span className="text-text-dim text-xs">-</span>}
-                  </div>
+                  {editingSymbol === entry.symbol ? (
+                    <div className="flex gap-1 flex-wrap items-center">
+                      {allTags.map((tag) => (
+                        <button
+                          key={tag}
+                          type="button"
+                          onClick={() => handleEditTagToggle(tag)}
+                          className={`px-1.5 py-0.5 rounded text-xs border cursor-pointer transition-opacity ${
+                            TAG_COLORS[tag] || 'bg-border text-text-muted border-border'
+                          } ${editTags.includes(tag) ? 'opacity-100 ring-1 ring-accent' : 'opacity-40'}`}
+                        >
+                          {tag}
+                        </button>
+                      ))}
+                      <button
+                        onClick={() => handleSaveTags(entry.symbol)}
+                        className="text-up hover:text-up/80 text-xs cursor-pointer ml-1"
+                      >
+                        Save
+                      </button>
+                      <button
+                        onClick={() => { setEditingSymbol(null); setEditTags([]); }}
+                        className="text-text-muted hover:text-text text-xs cursor-pointer"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex gap-1 flex-wrap">
+                      {entry.tags
+                        ? entry.tags.split(',').map((tag) => (
+                            <span
+                              key={tag}
+                              className={`px-1.5 py-0.5 rounded text-xs border ${
+                                TAG_COLORS[tag] || 'bg-border text-text-muted border-border'
+                              }`}
+                            >
+                              {tag}
+                            </span>
+                          ))
+                        : <span className="text-text-dim text-xs">-</span>}
+                    </div>
+                  )}
                 </td>
                 <td className="py-1.5 px-3 text-right">
                   {entry.price != null ? formatEUR(entry.price) : <span className="text-text-dim">N/A</span>}
@@ -216,13 +269,22 @@ function WatchlistPage() {
                   {entry.volume_eur != null ? formatEURCompact(entry.volume_eur) : <span className="text-text-dim">N/A</span>}
                 </td>
                 <td className="py-1.5 px-3 text-center">
-                  <button
-                    onClick={() => handleRemove(entry.symbol)}
-                    className="text-down text-xs hover:text-down/80 cursor-pointer"
-                    title={`Remove ${entry.symbol} from watchlist`}
-                  >
-                    Remove
-                  </button>
+                  <div className="flex gap-2 justify-center">
+                    <button
+                      onClick={() => handleStartEditTags(entry)}
+                      className="text-accent text-xs hover:text-accent/80 cursor-pointer"
+                      title={`Edit tags for ${entry.symbol}`}
+                    >
+                      Edit Tags
+                    </button>
+                    <button
+                      onClick={() => handleRemove(entry.symbol)}
+                      className="text-down text-xs hover:text-down/80 cursor-pointer"
+                      title={`Remove ${entry.symbol} from watchlist`}
+                    >
+                      Remove
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}
