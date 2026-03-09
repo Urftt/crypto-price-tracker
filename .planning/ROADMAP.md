@@ -19,6 +19,12 @@
 ### Phase 15: UI Component Library
 **Goal**: A set of shared, accessible UI primitives that eliminate style duplication and improve form UX
 **Requirements**: COMP-01 through COMP-08
+**Plans:** 2 plans
+
+Plans:
+- [ ] 15-01-PLAN.md — Create 6 UI primitive components (Button, Input, Table, Modal, Badge, NavTab) + test infrastructure + unit tests
+- [ ] 15-02-PLAN.md — Refactor all existing components to use UI primitives, add visible labels, add form loading states
+
 **Success Criteria**:
   1. `<Button>`, `<Input>`, `<Table>/<Th>/<Td>`, `<Modal>`, `<Badge>`, `<NavTab>` components exist in `src/components/ui/`
   2. All forms use `<Input>` with visible labels (not just placeholders)
@@ -28,7 +34,7 @@
   6. All 271+ existing tests still pass
 
 ### Phase 16: Responsive Layout & Mobile Navigation
-**Goal**: The app looks good and is fully usable on mobile screens (320px–768px)
+**Goal**: The app looks good and is fully usable on mobile screens (320px-768px)
 **Requirements**: RESP-01 through RESP-07
 **Success Criteria**:
   1. Mobile bottom tab bar appears below 768px, top tabs remain on desktop
