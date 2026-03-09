@@ -10,9 +10,11 @@ Instant, glanceable crypto prices in the terminal — one command, no browser ne
 
 ## Current State
 
-**Shipped: v1.0** (2026-03-09)
+**Active: v2.0 — Slick UI** (started 2026-03-09)
 
-The v1.0 milestone delivered a complete crypto tracking platform:
+Mobile-first UI redesign: shared component library, responsive layouts, mobile card views, and visual polish. Frontend-only — no backend changes.
+
+**v1.0 delivered** (2026-03-09):
 - **CLI**: 10 subcommands — prices, watch, info, chart, portfolio, alert, watchlist, export, summary, web
 - **Web**: React SPA with SSE real-time updates, Recharts charts, GitHub-dark theme
 - **Data**: SQLite persistence for portfolio holdings, price alerts, and watchlist
@@ -40,7 +42,11 @@ The v1.0 milestone delivered a complete crypto tracking platform:
 
 ## Next Milestone
 
-None planned — run `/gsd:new-milestone` to start v2.0
+**v2.0 — Slick UI** (4 phases: 15–18)
+- Phase 15: UI Component Library (Button, Input, Table, Modal, Badge, NavTab)
+- Phase 16: Responsive Layout & Mobile Navigation
+- Phase 17: Mobile-Optimized Data Views (card layouts)
+- Phase 18: Visual Polish & Animations
 
 ## Key Decisions
 
@@ -58,4 +64,4 @@ None planned — run `/gsd:new-milestone` to start v2.0
 | vite-plugin-pwa | Workbox integration, auto-update | Validated |
 
 ---
-*Last updated: 2026-03-09 after v1.0 milestone completion*
+*Last updated: 2026-03-09 — v2.0 milestone started*

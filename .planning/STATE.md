@@ -1,11 +1,11 @@
 ---
 gsd_state_version: 1.0
-milestone: none
-milestone_name: none
-status: milestone_complete
-last_updated: "2026-03-09T12:00:00Z"
+milestone: v2.0
+milestone_name: "Slick UI"
+status: planning_complete
+last_updated: "2026-03-09T14:00:00Z"
 progress:
-  total_phases: 0
+  total_phases: 4
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -18,12 +18,21 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-09)
 
 **Core value:** Instant, glanceable crypto prices in the terminal — one command, no browser needed.
-**Current focus:** None — v1.0 milestone archived. Ready for v2.0.
+**Current focus:** v2.0 — Slick UI. Mobile-first responsive redesign with shared components and visual polish.
 
 ## Current Position
 
-Milestone v1.0 archived on 2026-03-09.
-No active milestone — run `/gsd:new-milestone` to start v2.0.
+Milestone v2.0 started on 2026-03-09.
+Next action: `/gsd:plan-phase 15` to plan the UI Component Library phase.
+
+## Phase Progress
+
+| Phase | Name | Status |
+|-------|------|--------|
+| 15 | UI Component Library | Planned |
+| 16 | Responsive Layout & Mobile Nav | Planned |
+| 17 | Mobile Data Views | Planned |
+| 18 | Visual Polish & Animations | Planned |
 
 ## Completed Milestones
 
@@ -35,5 +44,5 @@ No active milestone — run `/gsd:new-milestone` to start v2.0.
 ## Session Continuity
 
 Last session: 2026-03-09
-Stopped at: Archived milestone v1.0.
+Stopped at: v2.0 milestone planning complete.
 Resume file: None
