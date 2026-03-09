@@ -2,76 +2,60 @@
 
 ## What This Is
 
-A lightweight Python CLI tool that displays current cryptocurrency prices from the Bitvavo API. It shows the top 20 crypto assets in a clean terminal table with color-coded price direction (green/red), and supports subcommands for one-shot viewing, live watching, and individual coin info. All prices in EUR.
+A full-featured cryptocurrency tracking tool with both CLI and web interfaces. Displays live crypto prices from Bitvavo and Binance APIs, manages portfolios with P&L tracking, supports price alerts, watchlists with tags, historical charts, PDF reports, and works as a Progressive Web App.
 
 ## Core Value
 
 Instant, glanceable crypto prices in the terminal — one command, no browser needed.
 
-## Requirements
+## Current State
 
-### Validated
+**Shipped: v1.0** (2026-03-09)
 
-(None yet — ship to validate)
+The v1.0 milestone delivered a complete crypto tracking platform:
+- **CLI**: 10 subcommands — prices, watch, info, chart, portfolio, alert, watchlist, export, summary, web
+- **Web**: React SPA with SSE real-time updates, Recharts charts, GitHub-dark theme
+- **Data**: SQLite persistence for portfolio holdings, price alerts, and watchlist
+- **Exchanges**: Bitvavo + Binance with auto-fallback
+- **PWA**: Offline support, install-to-home-screen
+- **Export**: PDF reports, CSV/JSON, Telegram/email notifications
+- **Tests**: 271 passing | **LOC**: ~34,600 | **Commits**: 96
 
-### Active
+## Tech Stack
 
-- [ ] Display top 20 crypto prices in a formatted terminal table
-- [ ] Show price, 24h change %, market cap, and volume per coin
-- [ ] Green/red coloring for positive/negative 24h change
-- [ ] `crypto prices` subcommand for one-shot price table
-- [ ] `crypto watch` subcommand with auto-refresh (default 30s, configurable via `--interval` flag)
-- [ ] `crypto info <SYMBOL>` subcommand for single-coin detail view
-- [ ] All prices displayed in EUR
-- [ ] Dynamic top N coins from Bitvavo API, sorted by market cap (default top 20)
-- [ ] Public Bitvavo API (no auth required)
-- [ ] uv-managed project with pyproject.toml
-
-### Out of Scope
-
-- Authentication / private Bitvavo endpoints — public data only
-- Extended stats (ATH, supply, 24h high/low) — keep info view simple
-- Custom coin lists / watchlists — dynamic ranking is sufficient
-- Portfolio tracking / balance management — this is a viewer only
-- USD or multi-currency support — EUR only
-- Mobile or web interface — CLI only
+- **Runtime**: Python 3.12+ with uv
+- **Backend**: FastAPI + uvicorn
+- **Frontend**: Vite + React + Tailwind CSS + Recharts
+- **Storage**: SQLite (WAL mode, XDG_DATA_HOME)
+- **APIs**: Bitvavo (primary), Binance (secondary)
+- **Export**: xhtml2pdf for PDF generation
+- **PWA**: vite-plugin-pwa + Workbox
 
 ## Context
 
 - Bitvavo is a European crypto exchange with a public REST API for market data
-- Public endpoints include ticker price, 24h stats, and market info — no API key needed
-- The top N coins are fetched dynamically from Bitvavo and sorted by market cap
-- EUR trading pairs are native to Bitvavo (e.g., BTC-EUR)
+- Binance used as secondary source with USDT→EUR conversion
+- All prices in EUR via native trading pairs
+- No authentication required — public data only
 
-## Constraints
+## Next Milestone
 
-- **Runtime**: Python 3.12+
-- **Project tooling**: uv with pyproject.toml (no setup.py, no requirements.txt)
-- **API**: Bitvavo public REST API only, no websockets
-- **Dependencies**: Minimal — CLI framework, HTTP client, table renderer, that's it
-- **Design**: Clean and minimal terminal output, no unnecessary decoration
-
-## Current Milestone: v1.0 Core CLI
-
-**Goal:** Build the core CLI tool that fetches and displays crypto prices from the Bitvavo API in the terminal.
-
-**Target features:**
-- Top 20 crypto price table with color-coded 24h changes
-- `crypto prices` one-shot subcommand
-- `crypto watch` with configurable auto-refresh
-- `crypto info <SYMBOL>` single-coin detail view
-- EUR prices via public Bitvavo API
-- uv-managed Python project
+None planned — run `/gsd:new-milestone` to start v2.0
 
 ## Key Decisions
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Bitvavo API over CoinGecko/CMC | User preference, EUR-native exchange | — Pending |
-| Dynamic top N from API | More accurate ranking, stays current as market shifts | — Pending |
-| Configurable refresh interval | Default 30s, --interval flag for override, balances freshness and API politeness | — Pending |
-| Public endpoints only | No auth complexity, market data is freely available | — Pending |
-| uv for project management | Modern Python tooling, fast dependency resolution | — Pending |
+| Bitvavo API over CoinGecko/CMC | EUR-native exchange, no API key | Validated |
+| Dynamic top N from API | Accurate ranking, stays current | Validated |
+| Configurable refresh interval | 30s default, --interval override | Validated |
+| Public endpoints only | No auth complexity | Validated |
+| uv for project management | Fast dependency resolution | Validated |
+| SQLite for persistence | No external DB server needed | Validated |
+| React + Vite SPA | Modern frontend, SSE for real-time | Validated |
+| Binance as fallback exchange | USDT→EUR conversion, broader coverage | Validated |
+| xhtml2pdf for reports | Pure Python, no system dependencies | Validated |
+| vite-plugin-pwa | Workbox integration, auto-update | Validated |
 
 ---
-*Last updated: 2026-02-28 after milestone v1.0 started*
+*Last updated: 2026-03-09 after v1.0 milestone completion*
