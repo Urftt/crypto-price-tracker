@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: "Slick UI"
-status: planning_complete
-last_updated: "2026-03-09T14:00:00Z"
+status: executing
+last_updated: "2026-03-09T21:15:00Z"
 progress:
   total_phases: 4
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  total_plans: 2
+  completed_plans: 1
 ---
 
 # Project State
@@ -23,13 +23,13 @@ See: .planning/PROJECT.md (updated 2026-03-09)
 ## Current Position
 
 Milestone v2.0 started on 2026-03-09.
-Next action: `/gsd:plan-phase 15` to plan the UI Component Library phase.
+Phase 15 executing (1/2 plans complete). Next: 15-02 (refactor all components to use UI primitives).
 
 ## Phase Progress
 
 | Phase | Name | Status |
 |-------|------|--------|
-| 15 | UI Component Library | Planned |
+| 15 | UI Component Library | Executing (1/2 plans) |
 | 16 | Responsive Layout & Mobile Nav | Planned |
 | 17 | Mobile Data Views | Planned |
 | 18 | Visual Polish & Animations | Planned |
@@ -44,5 +44,18 @@ Next action: `/gsd:plan-phase 15` to plan the UI Component Library phase.
 ## Session Continuity
 
 Last session: 2026-03-09
-Stopped at: v2.0 milestone planning complete.
+Stopped at: Completed 15-01-PLAN.md (UI primitives + tests). Next: 15-02-PLAN.md.
 Resume file: None
+
+## Decisions
+
+- Explicit alignMap in Table/Th/Td instead of dynamic Tailwind class construction
+- Button has no default type attribute; callers control form submission behavior
+- Modal re-queries focusable elements inside Tab handler for React rerender safety
+- Badge uses separate colorScheme (tag) and variant (status) props
+
+## Performance Metrics
+
+| Phase-Plan | Duration | Tasks | Files |
+|------------|----------|-------|-------|
+| 15-01 | 2 min | 2 | 16 |
