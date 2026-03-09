@@ -3,6 +3,7 @@ import {
   LineChart, Line, XAxis, YAxis, Tooltip,
   ResponsiveContainer, CartesianGrid,
 } from 'recharts';
+import { Button } from './ui/Button';
 
 function PriceChart({ symbol }) {
   const [candles, setCandles] = useState([]);
@@ -35,26 +36,24 @@ function PriceChart({ symbol }) {
   return (
     <div>
       <div className="flex gap-1 mb-3">
-        <button
+        <Button
           onClick={() => setPeriod('7d')}
-          className={`px-2.5 py-0.5 rounded text-xs cursor-pointer ${
-            period === '7d'
-              ? 'bg-accent text-bg'
-              : 'bg-border text-text-muted hover:text-text'
-          }`}
+          variant={period === '7d' ? 'primary' : 'ghost'}
+          size="sm"
+          type="button"
+          className={period !== '7d' ? 'bg-border' : ''}
         >
           7D
-        </button>
-        <button
+        </Button>
+        <Button
           onClick={() => setPeriod('30d')}
-          className={`px-2.5 py-0.5 rounded text-xs cursor-pointer ${
-            period === '30d'
-              ? 'bg-accent text-bg'
-              : 'bg-border text-text-muted hover:text-text'
-          }`}
+          variant={period === '30d' ? 'primary' : 'ghost'}
+          size="sm"
+          type="button"
+          className={period !== '30d' ? 'bg-border' : ''}
         >
           30D
-        </button>
+        </Button>
       </div>
 
       {loading ? (

@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router';
 import { useApi } from '../hooks/useApi';
 import AddAlertForm from '../components/AddAlertForm';
 import AlertList from '../components/AlertList';
+import { Button } from '../components/ui/Button';
 
 function AlertsPage() {
   const api = useApi();
@@ -71,12 +72,9 @@ function AlertsPage() {
         <div className="flex items-center justify-between mb-2 max-w-4xl">
           <h3 className="text-sm font-bold text-text-muted uppercase">Triggered Alerts</h3>
           {triggeredAlerts.length > 0 && (
-            <button
-              onClick={handleClearTriggered}
-              className="text-down text-xs hover:text-down/80 cursor-pointer"
-            >
+            <Button variant="danger" size="sm" onClick={handleClearTriggered} type="button">
               Clear All
-            </button>
+            </Button>
           )}
         </div>
         <AlertList alerts={triggeredAlerts} title="Triggered alerts" onRemove={handleRemove} />

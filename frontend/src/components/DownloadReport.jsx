@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Button } from './ui/Button';
 
 function DownloadReport() {
   const [loading, setLoading] = useState(false);
@@ -22,13 +23,14 @@ function DownloadReport() {
   };
 
   return (
-    <button
+    <Button
       onClick={handleDownload}
       disabled={loading}
-      className="px-3 py-1.5 bg-card border border-border rounded text-sm text-text hover:border-border-light disabled:opacity-50 cursor-pointer"
+      variant="secondary"
+      size="md"
     >
       {loading ? 'Generating...' : 'Download Report'}
-    </button>
+    </Button>
   );
 }
 

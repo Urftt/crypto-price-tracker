@@ -1,4 +1,5 @@
 import { useInstallPrompt } from '../hooks/useInstallPrompt';
+import { Button } from './ui/Button';
 
 function InstallButton() {
   const { isInstallable, install } = useInstallPrompt();
@@ -6,12 +7,14 @@ function InstallButton() {
   if (!isInstallable) return null;
 
   return (
-    <button
+    <Button
       onClick={install}
-      className="px-3 py-1.5 bg-accent/20 border border-accent/40 rounded text-sm text-accent hover:bg-accent/30 cursor-pointer"
+      variant="ghost"
+      size="md"
+      className="bg-accent/20 border border-accent/40 text-accent hover:bg-accent/30"
     >
       Install App
-    </button>
+    </Button>
   );
 }
 

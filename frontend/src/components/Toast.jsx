@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { Button } from './ui/Button';
 
 function Toast({ message, type = 'info', duration = 10000, onClose, style }) {
   useEffect(() => {
@@ -18,9 +19,9 @@ function Toast({ message, type = 'info', duration = 10000, onClose, style }) {
       style={style}
     >
       {message}
-      <button onClick={onClose} className="ml-3 text-text-muted hover:text-text cursor-pointer">
+      <Button variant="ghost" size="xs" onClick={onClose} type="button" className="ml-3">
         x
-      </button>
+      </Button>
     </div>
   );
 }

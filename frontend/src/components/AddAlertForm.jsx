@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useApi } from '../hooks/useApi';
+import { Button } from './ui/Button';
+import { Input } from './ui/Input';
 
 function AddAlertForm({ defaultSymbol, onAdded }) {
   const api = useApi();
@@ -7,6 +9,7 @@ function AddAlertForm({ defaultSymbol, onAdded }) {
   const [targetPrice, setTargetPrice] = useState('');
   const [direction, setDirection] = useState('above');
   const [error, setError] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     if (defaultSymbol) {
@@ -17,6 +20,7 @@ function AddAlertForm({ defaultSymbol, onAdded }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
+    setSubmitting(true);
     try {
       await api.post('/api/alerts', {
         symbol: symbol.toUpperCase(),
@@ -29,46 +33,50 @@ function AddAlertForm({ defaultSymbol, onAdded }) {
       onAdded();
     } catch (err) {
       setError(err.message);
+    } finally {
+      setSubmitting(false);
     }
   };
-
-  const inputClass = 'bg-bg border border-border rounded px-3 py-1.5 text-text text-sm focus:border-accent focus:outline-none';
 
   return (
     <form onSubmit={handleSubmit} className="max-w-4xl mb-4">
       <div className="flex flex-wrap items-end gap-2">
-        <input
+        <Input
+          label="Symbol"
           type="text"
-          placeholder="Symbol"
+          placeholder="BTC"
           value={symbol}
           onChange={(e) => setSymbol(e.target.value)}
-          className={`${inputClass} w-24 uppercase`}
+          className="w-24"
+          style={{ textTransform: 'uppercase' }}
           required
         />
-        <input
+        <Input
+          label="Target Price EUR"
           type="number"
-          placeholder="Target Price EUR"
+          placeholder="50000"
           value={targetPrice}
           onChange={(e) => setTargetPrice(e.target.value)}
-          className={`${inputClass} w-36`}
+          className="w-36"
           step="any"
           min="0"
           required
         />
-        <select
-          value={direction}
-          onChange={(e) => setDirection(e.target.value)}
-          className={`${inputClass}`}
-        >
-          <option value="above">above</option>
-          <option value="below">below</option>
-        </select>
-        <button
-          type="submit"
-          className="bg-accent text-bg font-bold rounded px-4 py-1.5 text-sm hover:bg-accent/80 cursor-pointer"
-        >
+        <div>
+          <label htmlFor="alert-direction" className="text-text-muted text-xs mb-0.5 block">Direction</label>
+          <select
+            id="alert-direction"
+            value={direction}
+            onChange={(e) => setDirection(e.target.value)}
+            className="bg-bg border border-border rounded px-3 py-1.5 text-text text-sm focus:border-accent focus:outline-none"
+          >
+            <option value="above">above</option>
+            <option value="below">below</option>
+          </select>
+        </div>
+        <Button type="submit" loading={submitting}>
           Add Alert
-        </button>
+        </Button>
       </div>
       {error && <p className="text-down text-xs mt-1">{error}</p>}
     </form>

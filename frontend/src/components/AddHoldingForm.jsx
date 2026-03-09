@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { useApi } from '../hooks/useApi';
+import { Button } from './ui/Button';
+import { Input } from './ui/Input';
 
 function AddHoldingForm({ onAdded }) {
   const api = useApi();
@@ -8,10 +10,12 @@ function AddHoldingForm({ onAdded }) {
   const [buyPrice, setBuyPrice] = useState('');
   const [buyDate, setBuyDate] = useState('');
   const [error, setError] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
+    setSubmitting(true);
     try {
       await api.post('/api/portfolio', {
         symbol: symbol.toUpperCase(),
@@ -26,54 +30,56 @@ function AddHoldingForm({ onAdded }) {
       onAdded();
     } catch (err) {
       setError(err.message);
+    } finally {
+      setSubmitting(false);
     }
   };
-
-  const inputClass = 'bg-bg border border-border rounded px-3 py-1.5 text-text text-sm focus:border-accent focus:outline-none';
 
   return (
     <form onSubmit={handleSubmit} className="max-w-4xl mb-4">
       <div className="flex flex-wrap items-end gap-2">
-        <input
+        <Input
+          label="Symbol"
           type="text"
-          placeholder="Symbol"
+          placeholder="BTC"
           value={symbol}
           onChange={(e) => setSymbol(e.target.value)}
-          className={`${inputClass} w-24 uppercase`}
+          className="w-24"
+          style={{ textTransform: 'uppercase' }}
           required
         />
-        <input
+        <Input
+          label="Amount"
           type="number"
-          placeholder="Amount"
+          placeholder="0.5"
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
-          className={`${inputClass} w-28`}
+          className="w-28"
           step="any"
           min="0"
           required
         />
-        <input
+        <Input
+          label="Buy Price EUR"
           type="number"
-          placeholder="Buy Price EUR"
+          placeholder="50000"
           value={buyPrice}
           onChange={(e) => setBuyPrice(e.target.value)}
-          className={`${inputClass} w-32`}
+          className="w-32"
           step="any"
           min="0"
           required
         />
-        <input
+        <Input
+          label="Buy Date"
           type="date"
           value={buyDate}
           onChange={(e) => setBuyDate(e.target.value)}
-          className={`${inputClass} w-36`}
+          className="w-36"
         />
-        <button
-          type="submit"
-          className="bg-accent text-bg font-bold rounded px-4 py-1.5 text-sm hover:bg-accent/80 cursor-pointer"
-        >
+        <Button type="submit" loading={submitting}>
           Add Holding
-        </button>
+        </Button>
       </div>
       {error && <p className="text-down text-xs mt-1">{error}</p>}
     </form>

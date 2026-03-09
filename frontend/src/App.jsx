@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Routes, Route, NavLink } from 'react-router';
+import { Routes, Route } from 'react-router';
 import PricesPage from './pages/PricesPage';
 import WatchlistPage from './pages/WatchlistPage';
 import PortfolioPage from './pages/PortfolioPage';
@@ -7,6 +7,7 @@ import AlertsPage from './pages/AlertsPage';
 import ExchangeDropdown from './components/ExchangeDropdown';
 import OfflineBanner from './components/OfflineBanner';
 import InstallButton from './components/InstallButton';
+import { NavTab } from './components/ui/NavTab';
 
 function App() {
   const [exchange, setExchange] = useState('bitvavo');
@@ -22,10 +23,10 @@ function App() {
         </div>
       </header>
       <nav className="flex gap-1 px-5 mb-4">
-        <NavLink to="/" end className={({isActive}) => `px-4 py-1.5 rounded-t border text-sm ${isActive ? 'bg-card border-border-light text-text' : 'bg-border border-border text-text-muted hover:text-text'}`}>Prices</NavLink>
-        <NavLink to="/watchlist" className={({isActive}) => `px-4 py-1.5 rounded-t border text-sm ${isActive ? 'bg-card border-border-light text-text' : 'bg-border border-border text-text-muted hover:text-text'}`}>Watchlist</NavLink>
-        <NavLink to="/portfolio" className={({isActive}) => `px-4 py-1.5 rounded-t border text-sm ${isActive ? 'bg-card border-border-light text-text' : 'bg-border border-border text-text-muted hover:text-text'}`}>Portfolio</NavLink>
-        <NavLink to="/alerts" className={({isActive}) => `px-4 py-1.5 rounded-t border text-sm ${isActive ? 'bg-card border-border-light text-text' : 'bg-border border-border text-text-muted hover:text-text'}`}>Alerts</NavLink>
+        <NavTab to="/" end>Prices</NavTab>
+        <NavTab to="/watchlist">Watchlist</NavTab>
+        <NavTab to="/portfolio">Portfolio</NavTab>
+        <NavTab to="/alerts">Alerts</NavTab>
       </nav>
       <main className="px-5">
         <Routes>

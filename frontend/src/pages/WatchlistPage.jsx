@@ -1,6 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useApi } from '../hooks/useApi';
 import { formatEUR, formatEURCompact, formatPct } from '../lib/format';
+import { Table, Th, Td } from '../components/ui/Table';
+import { Button } from '../components/ui/Button';
+import { Input } from '../components/ui/Input';
+import { Badge } from '../components/ui/Badge';
 
 const TAG_COLORS = {
   Layer1: 'bg-blue-900/50 text-blue-300 border-blue-700',
@@ -9,6 +13,15 @@ const TAG_COLORS = {
   Meme: 'bg-yellow-900/50 text-yellow-300 border-yellow-700',
   Exchange: 'bg-orange-900/50 text-orange-300 border-orange-700',
   Privacy: 'bg-red-900/50 text-red-300 border-red-700',
+};
+
+const TAG_COLOR_MAP = {
+  Layer1: 'blue',
+  Layer2: 'purple',
+  DeFi: 'green',
+  Meme: 'yellow',
+  Exchange: 'orange',
+  Privacy: 'red',
 };
 
 function WatchlistPage() {
@@ -22,6 +35,7 @@ function WatchlistPage() {
   const [error, setError] = useState(null);
   const [editingSymbol, setEditingSymbol] = useState(null);
   const [editTags, setEditTags] = useState([]);
+  const [submitting, setSubmitting] = useState(false);
 
   const loadWatchlist = useCallback(async () => {
     try {
@@ -52,6 +66,7 @@ function WatchlistPage() {
   const handleAdd = async (e) => {
     e.preventDefault();
     setError(null);
+    setSubmitting(true);
     try {
       await api.post('/api/watchlist', {
         symbol: symbol.toUpperCase(),
@@ -62,6 +77,8 @@ function WatchlistPage() {
       loadWatchlist();
     } catch (err) {
       setError(err.message);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -116,8 +133,6 @@ function WatchlistPage() {
         return activeTags.some((t) => entryTags.includes(t));
       });
 
-  const inputClass = 'bg-bg border border-border rounded px-3 py-1.5 text-text text-sm focus:border-accent focus:outline-none';
-
   if (loading) {
     return <p className="text-text-muted text-sm">Loading watchlist...</p>;
   }
@@ -129,12 +144,14 @@ function WatchlistPage() {
       {/* Add to watchlist form */}
       <form onSubmit={handleAdd} className="max-w-4xl mb-4">
         <div className="flex flex-wrap items-end gap-2">
-          <input
+          <Input
+            label="Symbol"
             type="text"
-            placeholder="Symbol"
+            placeholder="BTC"
             value={symbol}
             onChange={(e) => setSymbol(e.target.value)}
-            className={`${inputClass} w-24 uppercase`}
+            className="w-24"
+            style={{ textTransform: 'uppercase' }}
             required
           />
           <div className="flex gap-1 items-center">
@@ -151,12 +168,9 @@ function WatchlistPage() {
               </button>
             ))}
           </div>
-          <button
-            type="submit"
-            className="bg-accent text-bg font-bold rounded px-4 py-1.5 text-sm hover:bg-accent/80 cursor-pointer"
-          >
+          <Button type="submit" variant="primary" size="md" loading={submitting}>
             Add to Watchlist
-          </button>
+          </Button>
         </div>
         {error && <p className="text-down text-xs mt-1">{error}</p>}
       </form>
@@ -177,12 +191,9 @@ function WatchlistPage() {
             </button>
           ))}
           {activeTags.length > 0 && (
-            <button
-              onClick={() => setActiveTags([])}
-              className="text-text-muted text-xs hover:text-text cursor-pointer px-2 py-1"
-            >
+            <Button variant="ghost" size="sm" onClick={() => setActiveTags([])} type="button" className="px-2 py-1">
               Clear
-            </button>
+            </Button>
           )}
         </div>
       )}
@@ -195,24 +206,24 @@ function WatchlistPage() {
             : 'Watchlist is empty. Add coins using the form above or star them on the Prices tab.'}
         </p>
       ) : (
-        <table className="w-full max-w-4xl">
+        <Table className="max-w-4xl">
           <thead>
             <tr>
-              <th className="text-text-muted text-left text-xs uppercase py-1.5 px-3 border-b border-border">Symbol</th>
-              <th className="text-text-muted text-left text-xs uppercase py-1.5 px-3 border-b border-border">Name</th>
-              <th className="text-text-muted text-left text-xs uppercase py-1.5 px-3 border-b border-border">Tags</th>
-              <th className="text-text-muted text-right text-xs uppercase py-1.5 px-3 border-b border-border">Price (EUR)</th>
-              <th className="text-text-muted text-right text-xs uppercase py-1.5 px-3 border-b border-border">24h %</th>
-              <th className="text-text-muted text-right text-xs uppercase py-1.5 px-3 border-b border-border">Volume (EUR)</th>
-              <th className="text-text-muted text-center text-xs uppercase py-1.5 px-3 border-b border-border"></th>
+              <Th>Symbol</Th>
+              <Th>Name</Th>
+              <Th>Tags</Th>
+              <Th align="right">Price (EUR)</Th>
+              <Th align="right">24h %</Th>
+              <Th align="right">Volume (EUR)</Th>
+              <Th align="center"></Th>
             </tr>
           </thead>
           <tbody>
             {filteredEntries.map((entry) => (
               <tr key={entry.symbol} className="border-b border-border/50">
-                <td className="py-1.5 px-3 text-accent font-bold">{entry.symbol}</td>
-                <td className="py-1.5 px-3 text-text-muted text-sm">{entry.name || '-'}</td>
-                <td className="py-1.5 px-3">
+                <Td className="text-accent font-bold">{entry.symbol}</Td>
+                <Td className="text-text-muted text-sm">{entry.name || '-'}</Td>
+                <Td>
                   {editingSymbol === entry.symbol ? (
                     <div className="flex gap-1 flex-wrap items-center">
                       {allTags.map((tag) => (
@@ -227,69 +238,63 @@ function WatchlistPage() {
                           {tag}
                         </button>
                       ))}
-                      <button
-                        onClick={() => handleSaveTags(entry.symbol)}
-                        className="text-up hover:text-up/80 text-xs cursor-pointer ml-1"
-                      >
+                      <Button variant="ghost" size="sm" className="text-up hover:text-up/80 ml-1" onClick={() => handleSaveTags(entry.symbol)} type="button">
                         Save
-                      </button>
-                      <button
-                        onClick={() => { setEditingSymbol(null); setEditTags([]); }}
-                        className="text-text-muted hover:text-text text-xs cursor-pointer"
-                      >
+                      </Button>
+                      <Button variant="ghost" size="sm" onClick={() => { setEditingSymbol(null); setEditTags([]); }} type="button">
                         Cancel
-                      </button>
+                      </Button>
                     </div>
                   ) : (
                     <div className="flex gap-1 flex-wrap">
                       {entry.tags
                         ? entry.tags.split(',').map((tag) => (
-                            <span
-                              key={tag}
-                              className={`px-1.5 py-0.5 rounded text-xs border ${
-                                TAG_COLORS[tag] || 'bg-border text-text-muted border-border'
-                              }`}
-                            >
+                            <Badge key={tag} colorScheme={TAG_COLOR_MAP[tag] || 'gray'} className="px-1.5 py-0.5">
                               {tag}
-                            </span>
+                            </Badge>
                           ))
                         : <span className="text-text-dim text-xs">-</span>}
                     </div>
                   )}
-                </td>
-                <td className="py-1.5 px-3 text-right">
+                </Td>
+                <Td align="right">
                   {entry.price != null ? formatEUR(entry.price) : <span className="text-text-dim">N/A</span>}
-                </td>
-                <td className={`py-1.5 px-3 text-right ${
+                </Td>
+                <Td align="right" className={
                   entry.change_24h > 0 ? 'text-up' : entry.change_24h < 0 ? 'text-down' : 'text-text-muted'
-                }`}>
+                }>
                   {entry.change_24h != null ? formatPct(entry.change_24h) : <span className="text-text-dim">N/A</span>}
-                </td>
-                <td className="py-1.5 px-3 text-right text-text-muted">
+                </Td>
+                <Td align="right" className="text-text-muted">
                   {entry.volume_eur != null ? formatEURCompact(entry.volume_eur) : <span className="text-text-dim">N/A</span>}
-                </td>
-                <td className="py-1.5 px-3 text-center">
+                </Td>
+                <Td align="center">
                   <div className="flex gap-2 justify-center">
-                    <button
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-accent hover:text-accent/80"
                       onClick={() => handleStartEditTags(entry)}
-                      className="text-accent text-xs hover:text-accent/80 cursor-pointer"
+                      type="button"
                       title={`Edit tags for ${entry.symbol}`}
                     >
                       Edit Tags
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                      variant="danger"
+                      size="sm"
                       onClick={() => handleRemove(entry.symbol)}
-                      className="text-down text-xs hover:text-down/80 cursor-pointer"
+                      type="button"
                       title={`Remove ${entry.symbol} from watchlist`}
                     >
                       Remove
-                    </button>
+                    </Button>
                   </div>
-                </td>
+                </Td>
               </tr>
             ))}
           </tbody>
-        </table>
+        </Table>
       )}
     </div>
   );
