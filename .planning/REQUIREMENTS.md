@@ -36,14 +36,14 @@
 
 ## Visual Polish & Animations (Phase 18)
 
-- [ ] **VIS-01**: Page transition animations when switching tabs (subtle fade or slide)
-- [ ] **VIS-02**: Modal open/close animations (fade + scale)
-- [ ] **VIS-03**: Toast enter/exit animations (slide in from top-right, fade out)
-- [ ] **VIS-04**: Button hover and active state transitions (smooth color shifts)
-- [ ] **VIS-05**: Improved typography hierarchy — section headers, subheaders, body text sizes standardized
-- [ ] **VIS-06**: Consistent spacing scale applied across all pages (no ad-hoc padding/margin values)
-- [ ] **VIS-07**: Price change flash animation — brief highlight when a price updates via SSE
-- [ ] **VIS-08**: PriceChart uses CSS custom property values instead of hardcoded hex colors
+- [x] **VIS-01**: Page transition animations when switching tabs (subtle fade or slide)
+- [x] **VIS-02**: Modal open/close animations (fade + scale)
+- [x] **VIS-03**: Toast enter/exit animations (slide in from top-right, fade out)
+- [x] **VIS-04**: Button hover and active state transitions (smooth color shifts)
+- [x] **VIS-05**: Improved typography hierarchy — section headers, subheaders, body text sizes standardized
+- [x] **VIS-06**: Consistent spacing scale applied across all pages (no ad-hoc padding/margin values)
+- [x] **VIS-07**: Price change flash animation — brief highlight when a price updates via SSE
+- [x] **VIS-08**: PriceChart uses CSS custom property values instead of hardcoded hex colors
 
 ## Out of Scope (v2.0)
 
@@ -58,9 +58,9 @@
 ## Coverage
 
 - **Total requirements:** 28
-- **Complete:** 21
-- **Incomplete:** 7
-- **Coverage:** 75%
+- **Complete:** 28
+- **Incomplete:** 0
+- **Coverage:** 100%
 
 ---
 *Created: 2026-03-09*

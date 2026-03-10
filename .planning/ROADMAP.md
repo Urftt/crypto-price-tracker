@@ -14,7 +14,7 @@
 | 15 | UI Component Library | Extract shared primitives (Button, Input, Table, Modal, Badge, NavTab) and fix form accessibility | COMP-01 → COMP-08 | Complete (2/2) |
 | 16 | Responsive Layout & Mobile Nav | Add responsive breakpoints, mobile bottom nav, full-screen modal, touch targets | RESP-01 → RESP-07 | Complete (2/2) |
 | 17 | Mobile Data Views | Card-based table layouts on mobile, loading skeletons, empty states | MOB-01 → MOB-06 | Complete (2/2) |
-| 18 | Visual Polish & Animations | Page transitions, modal/toast animations, typography, spacing, price flash | VIS-01 → VIS-08 | Planned |
+| 18 | Visual Polish & Animations | Page transitions, modal/toast animations, typography, spacing, price flash | VIS-01 → VIS-08 | Complete (2/2) |
 
 ### Phase 15: UI Component Library
 **Goal**: A set of shared, accessible UI primitives that eliminate style duplication and improve form UX
@@ -70,6 +70,12 @@ Plans:
 ### Phase 18: Visual Polish & Animations
 **Goal**: Smooth transitions and consistent visual hierarchy make the app feel polished and professional
 **Requirements**: VIS-01 through VIS-08
+**Plans:** 2 plans
+
+Plans:
+- [x] 18-01-PLAN.md — CSS animation foundation, page transitions, modal enter/exit, toast animations, button press feedback, price flash (VIS-01, VIS-02, VIS-03, VIS-04, VIS-07)
+- [x] 18-02-PLAN.md — Typography/spacing standardization, PriceChart CSS custom properties (VIS-05, VIS-06, VIS-08)
+
 **Success Criteria**:
   1. Tab switching has a subtle transition animation
   2. Modal opens with fade+scale, closes with reverse
