@@ -17,12 +17,12 @@
 
 ## Responsive Layout & Mobile Navigation (Phase 16)
 
-- [ ] **RESP-01**: Bottom tab bar navigation on mobile (< 768px) replacing the top tab bar
-- [ ] **RESP-02**: Responsive header that stacks title and controls vertically on narrow screens
-- [ ] **RESP-03**: All tables wrapped in `overflow-x-auto` containers to prevent horizontal overflow
-- [ ] **RESP-04**: Responsive breakpoints (`sm:`, `md:`, `lg:`) applied to page layouts, forms, and grid areas
+- [x] **RESP-01**: Bottom tab bar navigation on mobile (< 768px) replacing the top tab bar
+- [x] **RESP-02**: Responsive header that stacks title and controls vertically on narrow screens
+- [x] **RESP-03**: All tables wrapped in `overflow-x-auto` containers to prevent horizontal overflow
+- [x] **RESP-04**: Responsive breakpoints (`sm:`, `md:`, `lg:`) applied to page layouts, forms, and grid areas
 - [ ] **RESP-05**: Form inputs stack vertically on mobile, expand horizontally on desktop
-- [ ] **RESP-06**: Modal is full-screen on mobile (< 640px), centered card on desktop
+- [x] **RESP-06**: Modal is full-screen on mobile (< 640px), centered card on desktop
 - [ ] **RESP-07**: Touch-friendly tap targets — all interactive elements are at least 44x44px on mobile
 
 ## Mobile-Optimized Data Views (Phase 17)
@@ -58,9 +58,9 @@
 ## Coverage
 
 - **Total requirements:** 28
-- **Complete:** 8
-- **Incomplete:** 20
-- **Coverage:** 29%
+- **Complete:** 13
+- **Incomplete:** 15
+- **Coverage:** 46%
 
 ---
 *Created: 2026-03-09*
