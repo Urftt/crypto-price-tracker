@@ -6,12 +6,12 @@ const variants = {
 };
 
 const sizes = {
-  xs: 'px-1 py-0.5 text-xs',
-  sm: 'px-2.5 py-0.5 text-xs',
-  md: 'px-4 py-1.5 text-sm',
+  xs: 'px-1 py-0.5 text-xs min-h-11 min-w-11 md:min-h-0 md:min-w-0',
+  sm: 'px-2.5 py-0.5 text-xs min-h-11 md:min-h-0',
+  md: 'px-4 py-1.5 text-sm min-h-11 md:min-h-0',
 };
 
-const base = 'rounded cursor-pointer transition-colors disabled:opacity-50 disabled:cursor-not-allowed';
+const base = 'rounded cursor-pointer transition-colors disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center justify-center';
 
 export function Button({
   variant = 'primary',

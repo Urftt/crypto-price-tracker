@@ -142,15 +142,15 @@ function WatchlistPage() {
       <h2 className="text-lg font-bold text-text mb-4">Watchlist</h2>
 
       {/* Add to watchlist form */}
-      <form onSubmit={handleAdd} className="max-w-4xl mb-4">
-        <div className="flex flex-wrap items-end gap-2">
+      <form onSubmit={handleAdd} className="mb-4 md:max-w-4xl">
+        <div className="flex flex-col gap-3 md:flex-row md:flex-wrap md:items-end md:gap-2">
           <Input
             label="Symbol"
             type="text"
             placeholder="BTC"
             value={symbol}
             onChange={(e) => setSymbol(e.target.value)}
-            className="w-24"
+            className="w-full md:w-24"
             style={{ textTransform: 'uppercase' }}
             required
           />
@@ -160,7 +160,7 @@ function WatchlistPage() {
                 key={tag}
                 type="button"
                 onClick={() => handleFormTagToggle(tag)}
-                className={`px-2 py-0.5 rounded text-xs border cursor-pointer transition-opacity ${
+                className={`px-2 py-0.5 rounded text-xs border cursor-pointer transition-opacity min-h-11 md:min-h-0 ${
                   TAG_COLORS[tag] || 'bg-border text-text-muted border-border'
                 } ${selectedTags.includes(tag) ? 'opacity-100 ring-1 ring-accent' : 'opacity-50'}`}
               >
@@ -168,7 +168,7 @@ function WatchlistPage() {
               </button>
             ))}
           </div>
-          <Button type="submit" variant="primary" size="md" loading={submitting}>
+          <Button type="submit" variant="primary" size="md" loading={submitting} className="w-full md:w-auto">
             Add to Watchlist
           </Button>
         </div>
@@ -183,7 +183,7 @@ function WatchlistPage() {
             <button
               key={tag}
               onClick={() => handleTagToggle(tag)}
-              className={`px-2.5 py-1 rounded-full text-xs border cursor-pointer transition-all ${
+              className={`px-2.5 py-1 rounded-full text-xs border cursor-pointer transition-all min-h-11 md:min-h-0 ${
                 TAG_COLORS[tag] || 'bg-border text-text-muted border-border'
               } ${activeTags.includes(tag) ? 'opacity-100 ring-1 ring-accent' : 'opacity-40 hover:opacity-70'}`}
             >
@@ -232,7 +232,7 @@ function WatchlistPage() {
                           key={tag}
                           type="button"
                           onClick={() => handleEditTagToggle(tag)}
-                          className={`px-1.5 py-0.5 rounded text-xs border cursor-pointer transition-opacity ${
+                          className={`px-1.5 py-0.5 rounded text-xs border cursor-pointer transition-opacity min-h-11 md:min-h-0 ${
                             TAG_COLORS[tag] || 'bg-border text-text-muted border-border'
                           } ${editTags.includes(tag) ? 'opacity-100 ring-1 ring-accent' : 'opacity-40'}`}
                         >

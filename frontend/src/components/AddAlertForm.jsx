@@ -39,15 +39,15 @@ function AddAlertForm({ defaultSymbol, onAdded }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-4xl mb-4">
-      <div className="flex flex-wrap items-end gap-2">
+    <form onSubmit={handleSubmit} className="mb-4 md:max-w-4xl">
+      <div className="flex flex-col gap-3 md:flex-row md:flex-wrap md:items-end md:gap-2">
         <Input
           label="Symbol"
           type="text"
           placeholder="BTC"
           value={symbol}
           onChange={(e) => setSymbol(e.target.value)}
-          className="w-24"
+          className="w-full md:w-24"
           style={{ textTransform: 'uppercase' }}
           required
         />
@@ -57,24 +57,24 @@ function AddAlertForm({ defaultSymbol, onAdded }) {
           placeholder="50000"
           value={targetPrice}
           onChange={(e) => setTargetPrice(e.target.value)}
-          className="w-36"
+          className="w-full md:w-36"
           step="any"
           min="0"
           required
         />
-        <div>
+        <div className="w-full md:w-auto">
           <label htmlFor="alert-direction" className="text-text-muted text-xs mb-0.5 block">Direction</label>
           <select
             id="alert-direction"
             value={direction}
             onChange={(e) => setDirection(e.target.value)}
-            className="bg-bg border border-border rounded px-3 py-1.5 text-text text-sm focus:border-accent focus:outline-none"
+            className="bg-bg border border-border rounded px-3 py-1.5 text-text text-sm focus:border-accent focus:outline-none w-full md:w-auto min-h-11 md:min-h-0"
           >
             <option value="above">above</option>
             <option value="below">below</option>
           </select>
         </div>
-        <Button type="submit" loading={submitting}>
+        <Button type="submit" loading={submitting} className="w-full md:w-auto">
           Add Alert
         </Button>
       </div>

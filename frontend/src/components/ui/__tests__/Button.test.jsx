@@ -40,6 +40,7 @@ describe('Button', () => {
     expect(button.className).toContain('px-4');
     expect(button.className).toContain('py-1.5');
     expect(button.className).toContain('text-sm');
+    expect(button.className).toContain('min-h-11');
   });
 
   it('applies sm size classes when size="sm"', () => {
@@ -48,6 +49,7 @@ describe('Button', () => {
     expect(button.className).toContain('px-2.5');
     expect(button.className).toContain('py-0.5');
     expect(button.className).toContain('text-xs');
+    expect(button.className).toContain('min-h-11');
   });
 
   it('applies xs size classes when size="xs"', () => {
@@ -56,6 +58,8 @@ describe('Button', () => {
     expect(button.className).toContain('px-1');
     expect(button.className).toContain('py-0.5');
     expect(button.className).toContain('text-xs');
+    expect(button.className).toContain('min-h-11');
+    expect(button.className).toContain('min-w-11');
   });
 
   it('shows "Submitting..." and is disabled when loading=true', () => {
@@ -94,5 +98,13 @@ describe('Button', () => {
     const button = screen.getByText('Disabled');
     expect(button.className).toContain('disabled:opacity-50');
     expect(button).toBeDisabled();
+  });
+
+  it('has inline-flex centering classes in base', () => {
+    render(<Button>Centered</Button>);
+    const button = screen.getByText('Centered');
+    expect(button.className).toContain('inline-flex');
+    expect(button.className).toContain('items-center');
+    expect(button.className).toContain('justify-center');
   });
 });
