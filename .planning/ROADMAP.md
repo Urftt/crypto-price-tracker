@@ -12,7 +12,7 @@
 | # | Phase | Goal | Requirements | Status |
 |---|-------|------|--------------|--------|
 | 15 | UI Component Library | Extract shared primitives (Button, Input, Table, Modal, Badge, NavTab) and fix form accessibility | COMP-01 → COMP-08 | Complete (2/2) |
-| 16 | Responsive Layout & Mobile Nav | Add responsive breakpoints, mobile bottom nav, full-screen modal, touch targets | RESP-01 → RESP-07 | In Progress (1/2) |
+| 16 | Responsive Layout & Mobile Nav | Add responsive breakpoints, mobile bottom nav, full-screen modal, touch targets | RESP-01 → RESP-07 | Complete (2/2) |
 | 17 | Mobile Data Views | Card-based table layouts on mobile, loading skeletons, empty states | MOB-01 → MOB-06 | Planned |
 | 18 | Visual Polish & Animations | Page transitions, modal/toast animations, typography, spacing, price flash | VIS-01 → VIS-08 | Planned |
 
@@ -40,7 +40,7 @@ Plans:
 
 Plans:
 - [x] 16-01-PLAN.md — Mobile bottom nav, responsive header, table overflow, responsive breakpoints, full-screen mobile modal (RESP-01, RESP-02, RESP-03, RESP-04, RESP-06)
-- [ ] 16-02-PLAN.md — Responsive forms, touch targets for all interactive elements (RESP-05, RESP-07)
+- [x] 16-02-PLAN.md — Responsive forms, touch targets for all interactive elements (RESP-05, RESP-07)
 
 **Success Criteria**:
   1. Mobile bottom tab bar appears below 768px, top tabs remain on desktop
