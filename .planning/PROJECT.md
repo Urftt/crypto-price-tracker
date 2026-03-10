@@ -10,11 +10,17 @@ Instant, glanceable crypto prices in the terminal — one command, no browser ne
 
 ## Current State
 
-**Active: v2.0 — Slick UI** (started 2026-03-09)
+**v2.0 shipped** (2026-03-10):
+- Everything in v1.0, plus:
+- **UI Components**: Shared Button, Input, Table, Modal, Badge, NavTab primitives
+- **Responsive**: Mobile bottom nav, responsive forms, full-screen modal, 44px touch targets
+- **Mobile Views**: Card layouts for all tables on mobile, loading skeletons, empty states
+- **Animations**: Page transitions, modal/toast animations, price flash, button press feedback
+- **Tests**: 332 passing (61 frontend + 271 backend) | **Commits**: 117
 
-Mobile-first UI redesign: shared component library, responsive layouts, mobile card views, and visual polish. Frontend-only — no backend changes.
+<details>
+<summary>v1.0 (2026-03-09)</summary>
 
-**v1.0 delivered** (2026-03-09):
 - **CLI**: 10 subcommands — prices, watch, info, chart, portfolio, alert, watchlist, export, summary, web
 - **Web**: React SPA with SSE real-time updates, Recharts charts, GitHub-dark theme
 - **Data**: SQLite persistence for portfolio holdings, price alerts, and watchlist
@@ -22,6 +28,7 @@ Mobile-first UI redesign: shared component library, responsive layouts, mobile c
 - **PWA**: Offline support, install-to-home-screen
 - **Export**: PDF reports, CSV/JSON, Telegram/email notifications
 - **Tests**: 271 passing | **LOC**: ~34,600 | **Commits**: 96
+</details>
 
 ## Tech Stack
 
@@ -42,11 +49,7 @@ Mobile-first UI redesign: shared component library, responsive layouts, mobile c
 
 ## Next Milestone
 
-**v2.0 — Slick UI** (4 phases: 15–18)
-- Phase 15: UI Component Library (Button, Input, Table, Modal, Badge, NavTab)
-- Phase 16: Responsive Layout & Mobile Navigation
-- Phase 17: Mobile-Optimized Data Views (card layouts)
-- Phase 18: Visual Polish & Animations
+Not yet defined. Run `/gsd:new-milestone` to start planning the next version.
 
 ## Key Decisions
 
@@ -62,6 +65,9 @@ Mobile-first UI redesign: shared component library, responsive layouts, mobile c
 | Binance as fallback exchange | USDT→EUR conversion, broader coverage | Validated |
 | xhtml2pdf for reports | Pure Python, no system dependencies | Validated |
 | vite-plugin-pwa | Workbox integration, auto-update | Validated |
+| Shared UI primitives | Eliminated style duplication, improved consistency | Validated |
+| CSS-only animations | No third-party library, Tailwind v4 theme vars | Validated |
+| CSS card/table toggle | sm:hidden/hidden sm:block, no JS media queries | Validated |
 
 ---
-*Last updated: 2026-03-09 — v2.0 milestone started*
+*Last updated: 2026-03-10 — v2.0 milestone completed*
