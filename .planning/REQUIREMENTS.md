@@ -27,10 +27,10 @@
 
 ## Mobile-Optimized Data Views (Phase 17)
 
-- [ ] **MOB-01**: Price table switches to a card-based layout on mobile (< 640px) — one card per coin with key stats
-- [ ] **MOB-02**: Portfolio table switches to a card layout on mobile with expandable lot details
-- [ ] **MOB-03**: Watchlist table switches to a card layout on mobile with tag pills
-- [ ] **MOB-04**: Alerts display as stacked cards on mobile (already card-based, ensure proper spacing)
+- [x] **MOB-01**: Price table switches to a card-based layout on mobile (< 640px) — one card per coin with key stats
+- [x] **MOB-02**: Portfolio table switches to a card layout on mobile with expandable lot details
+- [x] **MOB-03**: Watchlist table switches to a card layout on mobile with tag pills
+- [x] **MOB-04**: Alerts display as stacked cards on mobile (already card-based, ensure proper spacing)
 - [ ] **MOB-05**: Loading skeleton placeholders shown while data is fetching (matching card/table layout)
 - [ ] **MOB-06**: Empty state illustrations/messages for tables with no data (portfolio, watchlist, alerts)
 
@@ -58,9 +58,9 @@
 ## Coverage
 
 - **Total requirements:** 28
-- **Complete:** 15
-- **Incomplete:** 13
-- **Coverage:** 54%
+- **Complete:** 19
+- **Incomplete:** 9
+- **Coverage:** 68%
 
 ---
 *Created: 2026-03-09*

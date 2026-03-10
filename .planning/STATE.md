@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: "Slick UI"
 status: executing
-last_updated: "2026-03-10T07:44:00Z"
+last_updated: "2026-03-10T10:17:00Z"
 progress:
   total_phases: 4
   completed_phases: 2
   total_plans: 4
-  completed_plans: 4
+  completed_plans: 5
 ---
 
 # Project State
@@ -23,7 +23,7 @@ See: .planning/PROJECT.md (updated 2026-03-09)
 ## Current Position
 
 Milestone v2.0 started on 2026-03-09.
-Phase 15 complete (2/2 plans). Phase 16 complete (2/2 plans). Next: Phase 17.
+Phase 15 complete (2/2 plans). Phase 16 complete (2/2 plans). Phase 17 executing (1/2 plans). Wave 2: 17-02 next.
 
 ## Phase Progress
 
@@ -31,7 +31,7 @@ Phase 15 complete (2/2 plans). Phase 16 complete (2/2 plans). Next: Phase 17.
 |-------|------|--------|
 | 15 | UI Component Library | Complete (2/2 plans) |
 | 16 | Responsive Layout & Mobile Nav | Complete (2/2 plans) |
-| 17 | Mobile Data Views | Planned |
+| 17 | Mobile Data Views | Executing (1/2 plans) |
 | 18 | Visual Polish & Animations | Planned |
 
 ## Completed Milestones
@@ -44,7 +44,7 @@ Phase 15 complete (2/2 plans). Phase 16 complete (2/2 plans). Next: Phase 17.
 ## Session Continuity
 
 Last session: 2026-03-10
-Stopped at: Completed 16-02-PLAN.md (responsive forms, touch targets). Phase 16 complete. Next: Phase 17.
+Stopped at: Completed 17-01-PLAN.md. Phase 17 plan 02 next.
 Resume file: None
 
 ## Decisions
@@ -62,6 +62,9 @@ Resume file: None
 - min-h-11 (44px) on mobile with md:min-h-0 to restore desktop sizing
 - Button xs also gets min-w-11 for small icon-like buttons
 - inline-flex items-center justify-center on Button base for vertical centering with min-height
+- CSS-only sm:hidden / hidden sm:block toggle for card vs table layout switching
+- Fragment wrapper pattern for dual mobile card + desktop table views
+- Parent space-y-3 on AlertList instead of per-card mb-2 for spacing
 
 ## Performance Metrics
 
@@ -71,3 +74,4 @@ Resume file: None
 | 15-02 | 5 min | 2 | 14 |
 | 16-01 | 4 min | 2 | 13 |
 | 16-02 | 4 min | 2 | 5 |
+| 17-01 | 3 min | 2 | 4 |
