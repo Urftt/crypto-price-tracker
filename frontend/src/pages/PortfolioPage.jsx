@@ -88,7 +88,7 @@ function PortfolioPage() {
       <AddHoldingForm onAdded={loadPortfolio} />
       <PortfolioTable rows={portfolio.rows} onDelete={loadPortfolio} />
       {portfolio.rows.length > 0 && (
-        <div className="max-w-4xl mt-4 p-3 bg-card border border-border rounded flex flex-col gap-2 text-sm sm:flex-row sm:justify-between">
+        <div className="max-w-4xl mt-6 p-3 bg-card border border-border rounded flex flex-col gap-2 text-sm sm:flex-row sm:justify-between">
           <span>
             Total Value: <span className="text-accent font-bold">{formatEUR(portfolio.total_value)}</span>
           </span>

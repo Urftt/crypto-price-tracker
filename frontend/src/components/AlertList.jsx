@@ -20,7 +20,7 @@ function AlertList({ alerts, title, onRemove }) {
   }
 
   return (
-    <div className="max-w-4xl space-y-3">
+    <div className="max-w-4xl space-y-2">
       {alerts.map((alert) => (
         <div
           key={alert.id}

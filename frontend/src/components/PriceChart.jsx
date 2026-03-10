@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   LineChart, Line, XAxis, YAxis, Tooltip,
   ResponsiveContainer, CartesianGrid,
@@ -9,6 +9,19 @@ function PriceChart({ symbol }) {
   const [candles, setCandles] = useState([]);
   const [period, setPeriod] = useState('7d');
   const [loading, setLoading] = useState(true);
+
+  const colors = useMemo(() => {
+    const get = (prop) =>
+      getComputedStyle(document.documentElement).getPropertyValue(prop).trim();
+    return {
+      border: get('--color-border'),
+      textMuted: get('--color-text-muted'),
+      card: get('--color-card'),
+      borderLight: get('--color-border-light'),
+      text: get('--color-text'),
+      accent: get('--color-accent'),
+    };
+  }, []);
 
   useEffect(() => {
     setLoading(true);
@@ -63,22 +76,22 @@ function PriceChart({ symbol }) {
       ) : (
         <ResponsiveContainer width="100%" height={250}>
           <LineChart data={data} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#21262d" />
+            <CartesianGrid strokeDasharray="3 3" stroke={colors.border} />
             <XAxis
               dataKey="time"
-              tick={{ fill: '#8b949e', fontSize: 11 }}
-              stroke="#21262d"
+              tick={{ fill: colors.textMuted, fontSize: 11 }}
+              stroke={colors.border}
             />
             <YAxis
-              tick={{ fill: '#8b949e', fontSize: 11 }}
-              stroke="#21262d"
+              tick={{ fill: colors.textMuted, fontSize: 11 }}
+              stroke={colors.border}
               domain={['auto', 'auto']}
             />
             <Tooltip
               contentStyle={{
-                background: '#161b22',
-                border: '1px solid #30363d',
-                color: '#c9d1d9',
+                background: colors.card,
+                border: `1px solid ${colors.borderLight}`,
+                color: colors.text,
                 fontFamily: 'monospace',
               }}
               formatter={(value) =>
@@ -91,10 +104,10 @@ function PriceChart({ symbol }) {
             <Line
               type="monotone"
               dataKey="price"
-              stroke="#58a6ff"
+              stroke={colors.accent}
               strokeWidth={2}
               dot={false}
-              activeDot={{ r: 4, fill: '#58a6ff' }}
+              activeDot={{ r: 4, fill: colors.accent }}
             />
           </LineChart>
         </ResponsiveContainer>

@@ -82,12 +82,12 @@ function AlertsPage() {
       <h2 className="text-lg font-bold text-text mb-4">Price Alerts</h2>
       <AddAlertForm defaultSymbol={defaultSymbol} onAdded={loadAlerts} />
       <div className="mt-6">
-        <h3 className="text-sm font-bold text-text-muted uppercase mb-2">Active Alerts</h3>
+        <h3 className="text-sm font-bold text-text-muted uppercase tracking-wide mb-2">Active Alerts</h3>
         <AlertList alerts={activeAlerts} title="Active alerts" onRemove={handleRemove} />
       </div>
       <div className="mt-6">
         <div className="flex flex-wrap items-center justify-between gap-2 mb-2 max-w-4xl">
-          <h3 className="text-sm font-bold text-text-muted uppercase">Triggered Alerts</h3>
+          <h3 className="text-sm font-bold text-text-muted uppercase tracking-wide">Triggered Alerts</h3>
           {triggeredAlerts.length > 0 && (
             <Button variant="danger" size="sm" onClick={handleClearTriggered} type="button">
               Clear All
