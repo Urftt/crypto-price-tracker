@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useApi } from '../hooks/useApi';
 import { formatEUR, formatEURCompact, formatPct } from '../lib/format';
 import { Table, Th, Td } from './ui/Table';
@@ -7,6 +7,9 @@ import { Button } from './ui/Button';
 function PriceTable({ coins, onSelectCoin }) {
   const api = useApi();
   const [watchlistSymbols, setWatchlistSymbols] = useState(new Set());
+  const prevPrices = useRef({});
+  const isFirstRender = useRef(true);
+  const [flashSymbols, setFlashSymbols] = useState(new Set());
 
   const loadWatchlist = useCallback(async () => {
     try {
@@ -20,6 +23,31 @@ function PriceTable({ coins, onSelectCoin }) {
   useEffect(() => {
     loadWatchlist();
   }, [loadWatchlist]);
+
+  useEffect(() => {
+    if (isFirstRender.current) {
+      // First render: record prices but don't flash
+      for (const coin of coins) {
+        prevPrices.current[coin.symbol] = coin.price;
+      }
+      isFirstRender.current = false;
+      return;
+    }
+
+    const flashing = new Set();
+    for (const coin of coins) {
+      const prev = prevPrices.current[coin.symbol];
+      if (prev !== undefined && prev !== coin.price) {
+        flashing.add(coin.symbol);
+      }
+      prevPrices.current[coin.symbol] = coin.price;
+    }
+    if (flashing.size > 0) {
+      setFlashSymbols(flashing);
+      const timer = setTimeout(() => setFlashSymbols(new Set()), 600);
+      return () => clearTimeout(timer);
+    }
+  }, [coins]);
 
   const toggleWatchlist = async (e, symbol) => {
     e.stopPropagation(); // Don't trigger row click (coin modal)
@@ -50,7 +78,7 @@ function PriceTable({ coins, onSelectCoin }) {
             <div
               key={coin.symbol}
               onClick={() => onSelectCoin(coin)}
-              className="bg-card border border-border rounded p-3 cursor-pointer active:bg-border/50"
+              className={`bg-card border border-border rounded p-3 cursor-pointer active:bg-border/50 ${flashSymbols.has(coin.symbol) ? 'animate-flash' : ''}`}
             >
               <div className="flex justify-between items-start mb-1">
                 <div>
@@ -99,7 +127,7 @@ function PriceTable({ coins, onSelectCoin }) {
                 <tr
                   key={coin.symbol}
                   onClick={() => onSelectCoin(coin)}
-                  className="cursor-pointer hover:bg-card border-b border-border/50"
+                  className={`cursor-pointer hover:bg-card border-b border-border/50 ${flashSymbols.has(coin.symbol) ? 'animate-flash' : ''}`}
                 >
                   <Td align="center" className="px-1">
                     <Button

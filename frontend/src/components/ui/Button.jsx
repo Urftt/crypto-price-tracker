@@ -11,7 +11,7 @@ const sizes = {
   md: 'px-4 py-1.5 text-sm min-h-11 md:min-h-0',
 };
 
-const base = 'rounded cursor-pointer transition-colors disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center justify-center';
+const base = 'rounded cursor-pointer transition-all duration-150 active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center justify-center';
 
 export function Button({
   variant = 'primary',

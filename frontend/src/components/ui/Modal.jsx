@@ -1,7 +1,23 @@
-import { useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 export function Modal({ open, onClose, children }) {
   const modalRef = useRef(null);
+  const [visible, setVisible] = useState(false);
+
+  // Sync visible state with open prop
+  useEffect(() => {
+    if (open) {
+      setVisible(true);
+    }
+  }, [open]);
+
+  // When exit transition ends, remove from DOM
+  const handleTransitionEnd = (e) => {
+    // Only respond to the backdrop's own transition, not bubbled events
+    if (e.target === e.currentTarget && !open) {
+      setVisible(false);
+    }
+  };
 
   // Escape key handler
   useEffect(() => {
@@ -55,16 +71,21 @@ export function Modal({ open, onClose, children }) {
     return () => document.removeEventListener('keydown', handleTab);
   }, [open]);
 
-  if (!open) return null;
+  if (!visible) return null;
 
   return (
     <div
-      className="fixed inset-0 bg-black/70 z-40 flex items-center justify-center"
+      className={`fixed inset-0 z-40 flex items-center justify-center transition-opacity duration-200 ${
+        open ? 'bg-black/70 opacity-100' : 'bg-black/70 opacity-0'
+      }`}
       onClick={onClose}
+      onTransitionEnd={handleTransitionEnd}
     >
       <div
         ref={modalRef}
-        className="bg-card border-border-light w-full h-full sm:border sm:rounded-lg sm:p-6 sm:max-w-xl sm:h-auto sm:mx-4 p-4 relative z-50 overflow-y-auto"
+        className={`bg-card border-border-light w-full h-full sm:border sm:rounded-lg sm:p-6 sm:max-w-xl sm:h-auto sm:mx-4 p-4 relative z-50 overflow-y-auto transition-all duration-200 ${
+          open ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
+        }`}
         onClick={(e) => e.stopPropagation()}
       >
         {children}

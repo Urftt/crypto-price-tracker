@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Routes, Route } from 'react-router';
+import { Routes, Route, useLocation } from 'react-router';
 import PricesPage from './pages/PricesPage';
 import WatchlistPage from './pages/WatchlistPage';
 import PortfolioPage from './pages/PortfolioPage';
@@ -12,6 +12,7 @@ import { BottomNav } from './components/ui/BottomNav';
 
 function App() {
   const [exchange, setExchange] = useState('bitvavo');
+  const location = useLocation();
 
   return (
     <div className="min-h-screen bg-bg font-mono text-text">
@@ -30,12 +31,14 @@ function App() {
         <NavTab to="/alerts">Alerts</NavTab>
       </nav>
       <main className="px-5 pb-20 md:pb-0">
-        <Routes>
-          <Route index element={<PricesPage exchange={exchange} />} />
-          <Route path="watchlist" element={<WatchlistPage />} />
-          <Route path="portfolio" element={<PortfolioPage />} />
-          <Route path="alerts" element={<AlertsPage />} />
-        </Routes>
+        <div key={location.pathname} className="animate-fade-in">
+          <Routes location={location}>
+            <Route index element={<PricesPage exchange={exchange} />} />
+            <Route path="watchlist" element={<WatchlistPage />} />
+            <Route path="portfolio" element={<PortfolioPage />} />
+            <Route path="alerts" element={<AlertsPage />} />
+          </Routes>
+        </div>
       </main>
       <BottomNav />
     </div>

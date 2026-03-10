@@ -14,4 +14,35 @@
 
   --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
     "Liberation Mono", "Courier New", monospace;
+
+  --animate-fade-in: fade-in 150ms ease-out;
+  --animate-scale-in: scale-in 200ms ease-out;
+  --animate-slide-in-right: slide-in-right 300ms ease-out;
+  --animate-fade-out: fade-out 200ms ease-in forwards;
+  --animate-flash: flash 600ms ease-out;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes slide-in-right {
+  from { opacity: 0; transform: translateX(100%); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes fade-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes flash {
+  0%, 100% { background-color: transparent; }
+  15% { background-color: color-mix(in srgb, var(--color-accent) 25%, transparent); }
 }
