@@ -3,6 +3,7 @@ import { useApi } from '../hooks/useApi';
 import { formatEUR, formatPct } from '../lib/format';
 import { Table, Th, Td } from './ui/Table';
 import { Button } from './ui/Button';
+import { EmptyState } from './ui/EmptyState';
 
 function PortfolioTable({ rows, onDelete }) {
   const api = useApi();
@@ -64,7 +65,13 @@ function PortfolioTable({ rows, onDelete }) {
   };
 
   if (!rows || rows.length === 0) {
-    return <p className="text-text-muted text-sm max-w-4xl">No holdings yet. Add one above.</p>;
+    return (
+      <EmptyState
+        title="No holdings yet"
+        description="Add your first holding using the form above to start tracking your portfolio."
+        className="max-w-4xl"
+      />
+    );
   }
 
   const pnlColor = (val) => val > 0 ? 'text-up' : val < 0 ? 'text-down' : 'text-text-muted';

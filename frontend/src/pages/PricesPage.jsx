@@ -7,6 +7,8 @@ import CoinModal from '../components/CoinModal';
 import Toast from '../components/Toast';
 import { ErrorBoundary } from '../components/ErrorBoundary';
 import { Button } from '../components/ui/Button';
+import { Skeleton } from '../components/ui/Skeleton';
+import { Table, Th, Td } from '../components/ui/Table';
 
 let toastIdCounter = 0;
 
@@ -68,6 +70,54 @@ function PricesPage({ exchange }) {
           <span className="text-text-muted">via {prices.exchange}</span>
         )}
       </div>
+      {!prices && (
+        <>
+          {/* Mobile card skeletons */}
+          <div className="sm:hidden space-y-2">
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="bg-card border border-border rounded p-3">
+                <div className="flex justify-between mb-2">
+                  <Skeleton className="h-4 w-16" />
+                  <Skeleton className="h-4 w-20" />
+                </div>
+                <div className="flex justify-between">
+                  <Skeleton className="h-5 w-24" />
+                  <Skeleton className="h-4 w-12" />
+                </div>
+              </div>
+            ))}
+          </div>
+          {/* Desktop table skeletons */}
+          <div className="hidden sm:block overflow-x-auto">
+            <Table className="max-w-4xl">
+              <thead>
+                <tr>
+                  <Th className="w-8 px-1"></Th>
+                  <Th>#</Th>
+                  <Th>Symbol</Th>
+                  <Th>Name</Th>
+                  <Th align="right">Price (EUR)</Th>
+                  <Th align="right">24h %</Th>
+                  <Th align="right">Volume (EUR)</Th>
+                </tr>
+              </thead>
+              <tbody>
+                {[...Array(5)].map((_, i) => (
+                  <tr key={i} className="border-b border-border/50">
+                    <Td className="px-1"><Skeleton className="h-4 w-4" /></Td>
+                    <Td><Skeleton className="h-4 w-4" /></Td>
+                    <Td><Skeleton className="h-4 w-12" /></Td>
+                    <Td><Skeleton className="h-4 w-20" /></Td>
+                    <Td align="right"><Skeleton className="h-4 w-16" /></Td>
+                    <Td align="right"><Skeleton className="h-4 w-12" /></Td>
+                    <Td align="right"><Skeleton className="h-4 w-16" /></Td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          </div>
+        </>
+      )}
       {prices && <ErrorBoundary><PriceTable coins={prices.coins} onSelectCoin={setSelectedCoin} /></ErrorBoundary>}
       <CoinModal coin={selectedCoin} open={!!selectedCoin} onClose={() => setSelectedCoin(null)} />
       {toasts.map((toast, index) => (

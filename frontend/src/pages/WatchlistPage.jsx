@@ -5,6 +5,8 @@ import { Table, Th, Td } from '../components/ui/Table';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Badge } from '../components/ui/Badge';
+import { Skeleton } from '../components/ui/Skeleton';
+import { EmptyState } from '../components/ui/EmptyState';
 
 const TAG_COLORS = {
   Layer1: 'bg-blue-900/50 text-blue-300 border-blue-700',
@@ -134,7 +136,57 @@ function WatchlistPage() {
       });
 
   if (loading) {
-    return <p className="text-text-muted text-sm">Loading watchlist...</p>;
+    return (
+      <div>
+        {/* Mobile card skeletons */}
+        <div className="sm:hidden space-y-2">
+          {[...Array(5)].map((_, i) => (
+            <div key={i} className="bg-card border border-border rounded p-3">
+              <div className="flex justify-between mb-2">
+                <Skeleton className="h-4 w-12" />
+                <div className="flex gap-1">
+                  <Skeleton className="h-4 w-10 rounded-full" />
+                  <Skeleton className="h-4 w-10 rounded-full" />
+                </div>
+              </div>
+              <div className="flex justify-between">
+                <Skeleton className="h-5 w-20" />
+                <Skeleton className="h-4 w-12" />
+              </div>
+            </div>
+          ))}
+        </div>
+        {/* Desktop table skeletons */}
+        <div className="hidden sm:block overflow-x-auto">
+          <Table className="max-w-4xl">
+            <thead>
+              <tr>
+                <Th>Symbol</Th>
+                <Th>Name</Th>
+                <Th>Tags</Th>
+                <Th align="right">Price (EUR)</Th>
+                <Th align="right">24h %</Th>
+                <Th align="right">Volume (EUR)</Th>
+                <Th align="center"></Th>
+              </tr>
+            </thead>
+            <tbody>
+              {[...Array(5)].map((_, i) => (
+                <tr key={i} className="border-b border-border/50">
+                  <Td><Skeleton className="h-4 w-12" /></Td>
+                  <Td><Skeleton className="h-4 w-20" /></Td>
+                  <Td><div className="flex gap-1"><Skeleton className="h-4 w-10" /><Skeleton className="h-4 w-10" /></div></Td>
+                  <Td align="right"><Skeleton className="h-4 w-16" /></Td>
+                  <Td align="right"><Skeleton className="h-4 w-12" /></Td>
+                  <Td align="right"><Skeleton className="h-4 w-16" /></Td>
+                  <Td align="center"><Skeleton className="h-4 w-16" /></Td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -200,11 +252,17 @@ function WatchlistPage() {
 
       {/* Watchlist table */}
       {filteredEntries.length === 0 ? (
-        <p className="text-text-muted text-sm">
-          {activeTags.length > 0
-            ? 'No entries match the selected tags.'
-            : 'Watchlist is empty. Add coins using the form above or star them on the Prices tab.'}
-        </p>
+        activeTags.length > 0 ? (
+          <EmptyState
+            title="No entries match the selected tags"
+            description="Try removing some tag filters or add coins with those tags."
+          />
+        ) : (
+          <EmptyState
+            title="Watchlist is empty"
+            description="Add coins using the form above or star them on the Prices tab."
+          />
+        )
       ) : (
         <>
           {/* Mobile card layout */}

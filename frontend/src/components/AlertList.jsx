@@ -1,10 +1,22 @@
 import { formatEUR } from '../lib/format';
 import { Button } from './ui/Button';
 import { Badge } from './ui/Badge';
+import { EmptyState } from './ui/EmptyState';
 
 function AlertList({ alerts, title, onRemove }) {
   if (!alerts || alerts.length === 0) {
-    return <p className="text-text-muted text-sm">No {title.toLowerCase()}</p>;
+    const isTriggered = title.toLowerCase().includes('triggered');
+    return (
+      <EmptyState
+        title={isTriggered ? 'No triggered alerts' : 'No active alerts'}
+        description={
+          isTriggered
+            ? 'Your alerts will appear here when target prices are reached.'
+            : 'Set up a price alert using the form above to get notified when prices move.'
+        }
+        className="max-w-4xl"
+      />
+    );
   }
 
   return (

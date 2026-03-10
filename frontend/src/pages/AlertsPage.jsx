@@ -4,6 +4,7 @@ import { useApi } from '../hooks/useApi';
 import AddAlertForm from '../components/AddAlertForm';
 import AlertList from '../components/AlertList';
 import { Button } from '../components/ui/Button';
+import { Skeleton } from '../components/ui/Skeleton';
 
 function AlertsPage() {
   const api = useApi();
@@ -57,7 +58,23 @@ function AlertsPage() {
   const triggeredAlerts = alerts.filter((a) => a.status === 'triggered');
 
   if (loading) {
-    return <p className="text-text-muted text-sm">Loading alerts...</p>;
+    return (
+      <div>
+        <h2 className="text-lg font-bold text-text mb-4">Price Alerts</h2>
+        <div className="max-w-4xl space-y-2">
+          {[...Array(5)].map((_, i) => (
+            <div key={i} className="bg-card border border-border rounded p-3 flex flex-col gap-2 sm:flex-row sm:justify-between sm:items-center">
+              <div className="flex items-center gap-3">
+                <Skeleton className="h-4 w-12" />
+                <Skeleton className="h-4 w-20" />
+                <Skeleton className="h-5 w-14 rounded-full" />
+              </div>
+              <Skeleton className="h-8 w-16" />
+            </div>
+          ))}
+        </div>
+      </div>
+    );
   }
 
   return (

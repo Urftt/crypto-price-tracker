@@ -4,6 +4,8 @@ import { formatEUR, formatPct } from '../lib/format';
 import AddHoldingForm from '../components/AddHoldingForm';
 import DownloadReport from '../components/DownloadReport';
 import PortfolioTable from '../components/PortfolioTable';
+import { Skeleton } from '../components/ui/Skeleton';
+import { Table, Th, Td } from '../components/ui/Table';
 
 function PortfolioPage() {
   const api = useApi();
@@ -25,7 +27,56 @@ function PortfolioPage() {
   }, [loadPortfolio]);
 
   if (loading) {
-    return <p className="text-text-muted text-sm">Loading portfolio...</p>;
+    return (
+      <div>
+        {/* Mobile card skeletons */}
+        <div className="sm:hidden space-y-2">
+          {[...Array(5)].map((_, i) => (
+            <div key={i} className="bg-card border border-border rounded p-3">
+              <div className="flex justify-between mb-2">
+                <Skeleton className="h-4 w-12" />
+                <Skeleton className="h-4 w-16" />
+              </div>
+              <div className="flex justify-between">
+                <Skeleton className="h-5 w-20" />
+                <Skeleton className="h-4 w-14" />
+              </div>
+            </div>
+          ))}
+        </div>
+        {/* Desktop table skeletons */}
+        <div className="hidden sm:block max-w-4xl overflow-x-auto">
+          <Table>
+            <thead>
+              <tr>
+                <Th>Symbol</Th>
+                <Th align="right">Amount</Th>
+                <Th align="right">Avg Buy</Th>
+                <Th align="right">Current</Th>
+                <Th align="right">Value</Th>
+                <Th align="right">P&L EUR</Th>
+                <Th align="right">P&L %</Th>
+                <Th align="right">Alloc %</Th>
+              </tr>
+            </thead>
+            <tbody>
+              {[...Array(5)].map((_, i) => (
+                <tr key={i} className="border-b border-border/50">
+                  <Td><Skeleton className="h-4 w-12" /></Td>
+                  <Td align="right"><Skeleton className="h-4 w-10" /></Td>
+                  <Td align="right"><Skeleton className="h-4 w-16" /></Td>
+                  <Td align="right"><Skeleton className="h-4 w-16" /></Td>
+                  <Td align="right"><Skeleton className="h-4 w-16" /></Td>
+                  <Td align="right"><Skeleton className="h-4 w-14" /></Td>
+                  <Td align="right"><Skeleton className="h-4 w-10" /></Td>
+                  <Td align="right"><Skeleton className="h-4 w-10" /></Td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        </div>
+      </div>
+    );
   }
 
   return (
