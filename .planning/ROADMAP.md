@@ -13,7 +13,7 @@
 |---|-------|------|--------------|--------|
 | 15 | UI Component Library | Extract shared primitives (Button, Input, Table, Modal, Badge, NavTab) and fix form accessibility | COMP-01 → COMP-08 | Complete (2/2) |
 | 16 | Responsive Layout & Mobile Nav | Add responsive breakpoints, mobile bottom nav, full-screen modal, touch targets | RESP-01 → RESP-07 | Complete (2/2) |
-| 17 | Mobile Data Views | Card-based table layouts on mobile, loading skeletons, empty states | MOB-01 → MOB-06 | Executing (1/2) |
+| 17 | Mobile Data Views | Card-based table layouts on mobile, loading skeletons, empty states | MOB-01 → MOB-06 | Complete (2/2) |
 | 18 | Visual Polish & Animations | Page transitions, modal/toast animations, typography, spacing, price flash | VIS-01 → VIS-08 | Planned |
 
 ### Phase 15: UI Component Library
@@ -57,7 +57,7 @@ Plans:
 
 Plans:
 - [x] 17-01-PLAN.md — Mobile card layouts for PriceTable, PortfolioTable, WatchlistPage, AlertList spacing (MOB-01, MOB-02, MOB-03, MOB-04)
-- [ ] 17-02-PLAN.md — Skeleton + EmptyState primitives, loading skeletons and empty states across all pages (MOB-05, MOB-06)
+- [x] 17-02-PLAN.md — Skeleton + EmptyState primitives, loading skeletons and empty states across all pages (MOB-05, MOB-06)
 
 **Success Criteria**:
   1. PriceTable shows cards below 640px, table above

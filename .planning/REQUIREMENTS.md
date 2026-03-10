@@ -31,8 +31,8 @@
 - [x] **MOB-02**: Portfolio table switches to a card layout on mobile with expandable lot details
 - [x] **MOB-03**: Watchlist table switches to a card layout on mobile with tag pills
 - [x] **MOB-04**: Alerts display as stacked cards on mobile (already card-based, ensure proper spacing)
-- [ ] **MOB-05**: Loading skeleton placeholders shown while data is fetching (matching card/table layout)
-- [ ] **MOB-06**: Empty state illustrations/messages for tables with no data (portfolio, watchlist, alerts)
+- [x] **MOB-05**: Loading skeleton placeholders shown while data is fetching (matching card/table layout)
+- [x] **MOB-06**: Empty state illustrations/messages for tables with no data (portfolio, watchlist, alerts)
 
 ## Visual Polish & Animations (Phase 18)
 
@@ -58,9 +58,9 @@
 ## Coverage
 
 - **Total requirements:** 28
-- **Complete:** 19
-- **Incomplete:** 9
-- **Coverage:** 68%
+- **Complete:** 21
+- **Incomplete:** 7
+- **Coverage:** 75%
 
 ---
 *Created: 2026-03-09*
