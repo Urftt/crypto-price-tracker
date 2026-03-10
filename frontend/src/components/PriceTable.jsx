@@ -41,29 +41,22 @@ function PriceTable({ coins, onSelectCoin }) {
   };
 
   return (
-    <div className="overflow-x-auto">
-    <Table className="max-w-4xl">
-      <thead>
-        <tr>
-          <Th align="center" className="w-8 px-1"></Th>
-          <Th>#</Th>
-          <Th>Symbol</Th>
-          <Th>Name</Th>
-          <Th align="right">Price (EUR)</Th>
-          <Th align="right">24h %</Th>
-          <Th align="right">Volume (EUR)</Th>
-        </tr>
-      </thead>
-      <tbody>
-        {coins.map((coin, i) => {
+    <>
+      {/* Mobile card layout */}
+      <div className="sm:hidden space-y-2">
+        {coins.map((coin) => {
           const isWatched = watchlistSymbols.has(coin.symbol);
           return (
-            <tr
+            <div
               key={coin.symbol}
               onClick={() => onSelectCoin(coin)}
-              className="cursor-pointer hover:bg-card border-b border-border/50"
+              className="bg-card border border-border rounded p-3 cursor-pointer active:bg-border/50"
             >
-              <Td align="center" className="px-1">
+              <div className="flex justify-between items-start mb-1">
+                <div>
+                  <span className="text-accent font-bold">{coin.symbol}</span>
+                  <span className="text-text-muted text-sm ml-2">{coin.name}</span>
+                </div>
                 <Button
                   variant="ghost"
                   size="xs"
@@ -74,21 +67,67 @@ function PriceTable({ coins, onSelectCoin }) {
                 >
                   {isWatched ? '\u2605' : '\u2606'}
                 </Button>
-              </Td>
-              <Td className="text-text-dim text-sm">{i + 1}</Td>
-              <Td className="text-accent font-bold">{coin.symbol}</Td>
-              <Td className="text-text-muted text-sm">{coin.name}</Td>
-              <Td align="right">{formatEUR(coin.price)}</Td>
-              <Td align="right" className={coin.change_24h > 0 ? 'text-up' : coin.change_24h < 0 ? 'text-down' : 'text-text-muted'}>
-                {formatPct(coin.change_24h)}
-              </Td>
-              <Td align="right" className="text-text-muted">{formatEURCompact(coin.volume_eur)}</Td>
-            </tr>
+              </div>
+              <div className="flex justify-between items-baseline">
+                <span className="text-text">{formatEUR(coin.price)}</span>
+                <span className={coin.change_24h > 0 ? 'text-up' : coin.change_24h < 0 ? 'text-down' : 'text-text-muted'}>
+                  {formatPct(coin.change_24h)}
+                </span>
+              </div>
+            </div>
           );
         })}
-      </tbody>
-    </Table>
-    </div>
+      </div>
+      {/* Desktop table */}
+      <div className="hidden sm:block overflow-x-auto">
+        <Table className="max-w-4xl">
+          <thead>
+            <tr>
+              <Th align="center" className="w-8 px-1"></Th>
+              <Th>#</Th>
+              <Th>Symbol</Th>
+              <Th>Name</Th>
+              <Th align="right">Price (EUR)</Th>
+              <Th align="right">24h %</Th>
+              <Th align="right">Volume (EUR)</Th>
+            </tr>
+          </thead>
+          <tbody>
+            {coins.map((coin, i) => {
+              const isWatched = watchlistSymbols.has(coin.symbol);
+              return (
+                <tr
+                  key={coin.symbol}
+                  onClick={() => onSelectCoin(coin)}
+                  className="cursor-pointer hover:bg-card border-b border-border/50"
+                >
+                  <Td align="center" className="px-1">
+                    <Button
+                      variant="ghost"
+                      size="xs"
+                      onClick={(e) => toggleWatchlist(e, coin.symbol)}
+                      type="button"
+                      className={`text-sm ${isWatched ? 'text-yellow-400' : 'text-text-dim hover:text-yellow-400/60'}`}
+                      title={isWatched ? 'Remove from watchlist' : 'Add to watchlist'}
+                    >
+                      {isWatched ? '\u2605' : '\u2606'}
+                    </Button>
+                  </Td>
+                  <Td className="text-text-dim text-sm">{i + 1}</Td>
+                  <Td className="text-accent font-bold">{coin.symbol}</Td>
+                  <Td className="text-text-muted text-sm">{coin.name}</Td>
+                  <Td align="right">{formatEUR(coin.price)}</Td>
+                  <Td align="right" className={coin.change_24h > 0 ? 'text-up' : coin.change_24h < 0 ? 'text-down' : 'text-text-muted'}>
+                    {formatPct(coin.change_24h)}
+                  </Td>
+                  <Td align="right" className="text-text-muted">{formatEURCompact(coin.volume_eur)}</Td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </Table>
+      </div>
+    </>
   );
 }
 

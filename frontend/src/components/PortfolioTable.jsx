@@ -70,99 +70,197 @@ function PortfolioTable({ rows, onDelete }) {
   const pnlColor = (val) => val > 0 ? 'text-up' : val < 0 ? 'text-down' : 'text-text-muted';
 
   return (
-    <div className="max-w-4xl overflow-x-auto">
-      <Table>
-        <thead>
-          <tr>
-            <Th>Symbol</Th>
-            <Th align="right">Amount</Th>
-            <Th align="right">Avg Buy</Th>
-            <Th align="right">Current</Th>
-            <Th align="right">Value</Th>
-            <Th align="right">P&L EUR</Th>
-            <Th align="right">P&L %</Th>
-            <Th align="right">Alloc %</Th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row) => (
-            <>
-              <tr
-                key={row.symbol}
-                onClick={() => toggleLots(row.symbol)}
-                className="cursor-pointer hover:bg-card border-b border-border/50"
-              >
-                <Td className="text-accent font-bold">
-                  {row.symbol}
-                  <span className="text-text-dim text-xs ml-1">({row.num_lots} lot{row.num_lots !== 1 ? 's' : ''})</span>
-                </Td>
-                <Td align="right" className="text-sm">{row.total_amount}</Td>
-                <Td align="right" className="text-sm">{formatEUR(row.avg_buy_price)}</Td>
-                <Td align="right" className="text-sm">{row.current_price != null ? formatEUR(row.current_price) : 'N/A'}</Td>
-                <Td align="right" className="text-sm">{row.current_value != null ? formatEUR(row.current_value) : 'N/A'}</Td>
-                <Td align="right" className={`text-sm ${row.pnl_eur != null ? pnlColor(row.pnl_eur) : 'text-text-dim'}`}>{row.pnl_eur != null ? formatEUR(row.pnl_eur) : 'N/A'}</Td>
-                <Td align="right" className={`text-sm ${row.pnl_pct != null ? pnlColor(row.pnl_pct) : 'text-text-dim'}`}>{row.pnl_pct != null ? formatPct(row.pnl_pct) : 'N/A'}</Td>
-                <Td align="right" className="text-sm">{row.allocation_pct != null ? `${row.allocation_pct.toFixed(1)}%` : 'N/A'}</Td>
-              </tr>
-              {expandedSymbol === row.symbol && (
-                lotsLoading ? (
-                  <tr key={`${row.symbol}-loading`}>
-                    <Td colSpan={8} className="py-1 px-6 text-text-dim text-xs">Loading lots...</Td>
-                  </tr>
-                ) : (
-                  lots.map((lot) => (
-                    <tr key={`lot-${lot.id}`} className="bg-bg/50 border-b border-border/30">
-                      <Td className="py-1 px-6 text-text-dim text-xs">Lot #{lot.id}</Td>
-                      <Td align="right" className="py-1 text-text-muted text-xs">
-                        {editingLotId === lot.id ? (
-                          <input
-                            type="number"
-                            step="any"
-                            value={editAmount}
-                            onChange={(e) => setEditAmount(e.target.value)}
-                            onKeyDown={(e) => { if (e.key === 'Enter') handleEditLot(lot.id); if (e.key === 'Escape') { setEditingLotId(null); setEditAmount(''); } }}
-                            onClick={(e) => e.stopPropagation()}
-                            aria-label="Edit amount"
-                            className="bg-bg border border-border rounded px-1 py-0.5 text-text text-xs w-20 focus:border-accent focus:outline-none"
-                            autoFocus
-                          />
-                        ) : lot.amount}
-                      </Td>
-                      <Td align="right" className="py-1 text-text-muted text-xs">{formatEUR(lot.buy_price)}</Td>
-                      <Td align="right" className="py-1 text-text-muted text-xs">{lot.buy_date || '--'}</Td>
-                      <Td colSpan={3}></Td>
-                      <Td align="right" className="py-1">
-                        <div className="flex gap-2 justify-end">
+    <>
+      {/* Mobile card layout */}
+      <div className="sm:hidden space-y-2">
+        {rows.map((row) => (
+          <div key={row.symbol} className="bg-card border border-border rounded overflow-hidden">
+            <div
+              onClick={() => toggleLots(row.symbol)}
+              className="p-3 cursor-pointer active:bg-border/50"
+            >
+              <div className="flex justify-between items-start mb-1">
+                <div>
+                  <span className="text-accent font-bold">{row.symbol}</span>
+                  <span className="text-text-dim text-xs ml-1">
+                    ({row.num_lots} lot{row.num_lots !== 1 ? 's' : ''})
+                  </span>
+                </div>
+                <span className={`text-sm ${row.pnl_pct != null ? pnlColor(row.pnl_pct) : 'text-text-dim'}`}>
+                  {row.pnl_pct != null ? formatPct(row.pnl_pct) : 'N/A'}
+                </span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-text-muted">
+                  Value: {row.current_value != null ? formatEUR(row.current_value) : 'N/A'}
+                </span>
+                <span className={row.pnl_eur != null ? pnlColor(row.pnl_eur) : 'text-text-dim'}>
+                  {row.pnl_eur != null ? formatEUR(row.pnl_eur) : 'N/A'}
+                </span>
+              </div>
+            </div>
+
+            {/* Expanded lots section */}
+            {expandedSymbol === row.symbol && (
+              lotsLoading ? (
+                <div className="border-t border-border/50 bg-bg/50 px-3 py-2 text-text-dim text-xs">
+                  Loading lots...
+                </div>
+              ) : (
+                <div className="border-t border-border/50 bg-bg/50">
+                  {lots.map((lot) => (
+                    <div key={`lot-${lot.id}`} className="px-3 py-2 border-b border-border/30 last:border-b-0">
+                      <div className="flex justify-between items-center text-xs mb-1">
+                        <span className="text-text-dim">Lot #{lot.id}</span>
+                        <span className="text-text-muted">{formatEUR(lot.buy_price)}</span>
+                      </div>
+                      <div className="flex justify-between items-center text-xs">
+                        <span className="text-text-muted">
                           {editingLotId === lot.id ? (
-                            <>
-                              <Button variant="ghost" size="sm" className="text-up hover:text-up/80" onClick={(e) => { e.stopPropagation(); handleEditLot(lot.id); }} type="button">
-                                Save
-                              </Button>
-                              <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setEditingLotId(null); setEditAmount(''); }} type="button">
-                                Cancel
-                              </Button>
-                            </>
+                            <input
+                              type="number"
+                              step="any"
+                              value={editAmount}
+                              onChange={(e) => setEditAmount(e.target.value)}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') handleEditLot(lot.id);
+                                if (e.key === 'Escape') { setEditingLotId(null); setEditAmount(''); }
+                              }}
+                              onClick={(e) => e.stopPropagation()}
+                              aria-label="Edit amount"
+                              className="bg-bg border border-border rounded px-1 py-0.5 text-text text-xs w-20 focus:border-accent focus:outline-none"
+                              autoFocus
+                            />
                           ) : (
-                            <>
-                              <Button variant="ghost" size="sm" className="text-accent hover:text-accent/80" onClick={(e) => { e.stopPropagation(); setEditingLotId(lot.id); setEditAmount(String(lot.amount)); }} type="button">
-                                Edit
-                              </Button>
-                              <Button variant="danger" size="sm" onClick={(e) => { e.stopPropagation(); handleDeleteLot(lot.id); }} type="button">
-                                Delete
-                              </Button>
-                            </>
+                            <span>Amt: {lot.amount}</span>
                           )}
-                        </div>
-                      </Td>
+                        </span>
+                        <span className="text-text-dim">{lot.buy_date || '--'}</span>
+                      </div>
+                      <div className="flex gap-2 justify-end mt-1">
+                        {editingLotId === lot.id ? (
+                          <>
+                            <Button variant="ghost" size="sm" className="text-up hover:text-up/80" onClick={(e) => { e.stopPropagation(); handleEditLot(lot.id); }} type="button">
+                              Save
+                            </Button>
+                            <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setEditingLotId(null); setEditAmount(''); }} type="button">
+                              Cancel
+                            </Button>
+                          </>
+                        ) : (
+                          <>
+                            <Button variant="ghost" size="sm" className="text-accent hover:text-accent/80" onClick={(e) => { e.stopPropagation(); setEditingLotId(lot.id); setEditAmount(String(lot.amount)); }} type="button">
+                              Edit
+                            </Button>
+                            <Button variant="danger" size="sm" onClick={(e) => { e.stopPropagation(); handleDeleteLot(lot.id); }} type="button">
+                              Delete
+                            </Button>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )
+            )}
+          </div>
+        ))}
+      </div>
+      {/* Desktop table */}
+      <div className="hidden sm:block max-w-4xl overflow-x-auto">
+        <Table>
+          <thead>
+            <tr>
+              <Th>Symbol</Th>
+              <Th align="right">Amount</Th>
+              <Th align="right">Avg Buy</Th>
+              <Th align="right">Current</Th>
+              <Th align="right">Value</Th>
+              <Th align="right">P&L EUR</Th>
+              <Th align="right">P&L %</Th>
+              <Th align="right">Alloc %</Th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((row) => (
+              <>
+                <tr
+                  key={row.symbol}
+                  onClick={() => toggleLots(row.symbol)}
+                  className="cursor-pointer hover:bg-card border-b border-border/50"
+                >
+                  <Td className="text-accent font-bold">
+                    {row.symbol}
+                    <span className="text-text-dim text-xs ml-1">({row.num_lots} lot{row.num_lots !== 1 ? 's' : ''})</span>
+                  </Td>
+                  <Td align="right" className="text-sm">{row.total_amount}</Td>
+                  <Td align="right" className="text-sm">{formatEUR(row.avg_buy_price)}</Td>
+                  <Td align="right" className="text-sm">{row.current_price != null ? formatEUR(row.current_price) : 'N/A'}</Td>
+                  <Td align="right" className="text-sm">{row.current_value != null ? formatEUR(row.current_value) : 'N/A'}</Td>
+                  <Td align="right" className={`text-sm ${row.pnl_eur != null ? pnlColor(row.pnl_eur) : 'text-text-dim'}`}>{row.pnl_eur != null ? formatEUR(row.pnl_eur) : 'N/A'}</Td>
+                  <Td align="right" className={`text-sm ${row.pnl_pct != null ? pnlColor(row.pnl_pct) : 'text-text-dim'}`}>{row.pnl_pct != null ? formatPct(row.pnl_pct) : 'N/A'}</Td>
+                  <Td align="right" className="text-sm">{row.allocation_pct != null ? `${row.allocation_pct.toFixed(1)}%` : 'N/A'}</Td>
+                </tr>
+                {expandedSymbol === row.symbol && (
+                  lotsLoading ? (
+                    <tr key={`${row.symbol}-loading`}>
+                      <Td colSpan={8} className="py-1 px-6 text-text-dim text-xs">Loading lots...</Td>
                     </tr>
-                  ))
-                )
-              )}
-            </>
-          ))}
-        </tbody>
-      </Table>
-    </div>
+                  ) : (
+                    lots.map((lot) => (
+                      <tr key={`lot-${lot.id}`} className="bg-bg/50 border-b border-border/30">
+                        <Td className="py-1 px-6 text-text-dim text-xs">Lot #{lot.id}</Td>
+                        <Td align="right" className="py-1 text-text-muted text-xs">
+                          {editingLotId === lot.id ? (
+                            <input
+                              type="number"
+                              step="any"
+                              value={editAmount}
+                              onChange={(e) => setEditAmount(e.target.value)}
+                              onKeyDown={(e) => { if (e.key === 'Enter') handleEditLot(lot.id); if (e.key === 'Escape') { setEditingLotId(null); setEditAmount(''); } }}
+                              onClick={(e) => e.stopPropagation()}
+                              aria-label="Edit amount"
+                              className="bg-bg border border-border rounded px-1 py-0.5 text-text text-xs w-20 focus:border-accent focus:outline-none"
+                              autoFocus
+                            />
+                          ) : lot.amount}
+                        </Td>
+                        <Td align="right" className="py-1 text-text-muted text-xs">{formatEUR(lot.buy_price)}</Td>
+                        <Td align="right" className="py-1 text-text-muted text-xs">{lot.buy_date || '--'}</Td>
+                        <Td colSpan={3}></Td>
+                        <Td align="right" className="py-1">
+                          <div className="flex gap-2 justify-end">
+                            {editingLotId === lot.id ? (
+                              <>
+                                <Button variant="ghost" size="sm" className="text-up hover:text-up/80" onClick={(e) => { e.stopPropagation(); handleEditLot(lot.id); }} type="button">
+                                  Save
+                                </Button>
+                                <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setEditingLotId(null); setEditAmount(''); }} type="button">
+                                  Cancel
+                                </Button>
+                              </>
+                            ) : (
+                              <>
+                                <Button variant="ghost" size="sm" className="text-accent hover:text-accent/80" onClick={(e) => { e.stopPropagation(); setEditingLotId(lot.id); setEditAmount(String(lot.amount)); }} type="button">
+                                  Edit
+                                </Button>
+                                <Button variant="danger" size="sm" onClick={(e) => { e.stopPropagation(); handleDeleteLot(lot.id); }} type="button">
+                                  Delete
+                                </Button>
+                              </>
+                            )}
+                          </div>
+                        </Td>
+                      </tr>
+                    ))
+                  )
+                )}
+              </>
+            ))}
+          </tbody>
+        </Table>
+      </div>
+    </>
   );
 }
 

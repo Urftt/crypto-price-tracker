@@ -206,25 +206,24 @@ function WatchlistPage() {
             : 'Watchlist is empty. Add coins using the form above or star them on the Prices tab.'}
         </p>
       ) : (
-        <div className="overflow-x-auto">
-        <Table className="max-w-4xl">
-          <thead>
-            <tr>
-              <Th>Symbol</Th>
-              <Th>Name</Th>
-              <Th>Tags</Th>
-              <Th align="right">Price (EUR)</Th>
-              <Th align="right">24h %</Th>
-              <Th align="right">Volume (EUR)</Th>
-              <Th align="center"></Th>
-            </tr>
-          </thead>
-          <tbody>
+        <>
+          {/* Mobile card layout */}
+          <div className="sm:hidden space-y-2">
             {filteredEntries.map((entry) => (
-              <tr key={entry.symbol} className="border-b border-border/50">
-                <Td className="text-accent font-bold">{entry.symbol}</Td>
-                <Td className="text-text-muted text-sm">{entry.name || '-'}</Td>
-                <Td>
+              <div
+                key={entry.symbol}
+                className="bg-card border border-border rounded p-3"
+              >
+                {/* Header: symbol + name */}
+                <div className="flex justify-between items-start mb-2">
+                  <div>
+                    <span className="text-accent font-bold">{entry.symbol}</span>
+                    <span className="text-text-muted text-sm ml-2">{entry.name || '-'}</span>
+                  </div>
+                </div>
+
+                {/* Tags */}
+                <div className="mb-2">
                   {editingSymbol === entry.symbol ? (
                     <div className="flex gap-1 flex-wrap items-center">
                       {allTags.map((tag) => (
@@ -254,49 +253,141 @@ function WatchlistPage() {
                               {tag}
                             </Badge>
                           ))
-                        : <span className="text-text-dim text-xs">-</span>}
+                        : <span className="text-text-dim text-xs">No tags</span>}
                     </div>
                   )}
-                </Td>
-                <Td align="right">
-                  {entry.price != null ? formatEUR(entry.price) : <span className="text-text-dim">N/A</span>}
-                </Td>
-                <Td align="right" className={
-                  entry.change_24h > 0 ? 'text-up' : entry.change_24h < 0 ? 'text-down' : 'text-text-muted'
-                }>
-                  {entry.change_24h != null ? formatPct(entry.change_24h) : <span className="text-text-dim">N/A</span>}
-                </Td>
-                <Td align="right" className="text-text-muted">
-                  {entry.volume_eur != null ? formatEURCompact(entry.volume_eur) : <span className="text-text-dim">N/A</span>}
-                </Td>
-                <Td align="center">
-                  <div className="flex gap-2 justify-center">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-accent hover:text-accent/80"
-                      onClick={() => handleStartEditTags(entry)}
-                      type="button"
-                      title={`Edit tags for ${entry.symbol}`}
-                    >
-                      Edit Tags
-                    </Button>
-                    <Button
-                      variant="danger"
-                      size="sm"
-                      onClick={() => handleRemove(entry.symbol)}
-                      type="button"
-                      title={`Remove ${entry.symbol} from watchlist`}
-                    >
-                      Remove
-                    </Button>
-                  </div>
-                </Td>
-              </tr>
+                </div>
+
+                {/* Price + change */}
+                <div className="flex justify-between items-baseline mb-2">
+                  <span className="text-text text-sm">
+                    {entry.price != null ? formatEUR(entry.price) : <span className="text-text-dim">N/A</span>}
+                  </span>
+                  <span className={`text-sm ${
+                    entry.change_24h > 0 ? 'text-up' : entry.change_24h < 0 ? 'text-down' : 'text-text-muted'
+                  }`}>
+                    {entry.change_24h != null ? formatPct(entry.change_24h) : <span className="text-text-dim">N/A</span>}
+                  </span>
+                </div>
+
+                {/* Actions */}
+                <div className="flex gap-2 pt-1 border-t border-border/30">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-accent hover:text-accent/80"
+                    onClick={() => handleStartEditTags(entry)}
+                    type="button"
+                    title={`Edit tags for ${entry.symbol}`}
+                  >
+                    Edit Tags
+                  </Button>
+                  <Button
+                    variant="danger"
+                    size="sm"
+                    onClick={() => handleRemove(entry.symbol)}
+                    type="button"
+                    title={`Remove ${entry.symbol} from watchlist`}
+                  >
+                    Remove
+                  </Button>
+                </div>
+              </div>
             ))}
-          </tbody>
-        </Table>
-        </div>
+          </div>
+          {/* Desktop table */}
+          <div className="hidden sm:block overflow-x-auto">
+            <Table className="max-w-4xl">
+              <thead>
+                <tr>
+                  <Th>Symbol</Th>
+                  <Th>Name</Th>
+                  <Th>Tags</Th>
+                  <Th align="right">Price (EUR)</Th>
+                  <Th align="right">24h %</Th>
+                  <Th align="right">Volume (EUR)</Th>
+                  <Th align="center"></Th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredEntries.map((entry) => (
+                  <tr key={entry.symbol} className="border-b border-border/50">
+                    <Td className="text-accent font-bold">{entry.symbol}</Td>
+                    <Td className="text-text-muted text-sm">{entry.name || '-'}</Td>
+                    <Td>
+                      {editingSymbol === entry.symbol ? (
+                        <div className="flex gap-1 flex-wrap items-center">
+                          {allTags.map((tag) => (
+                            <button
+                              key={tag}
+                              type="button"
+                              onClick={() => handleEditTagToggle(tag)}
+                              className={`px-1.5 py-0.5 rounded text-xs border cursor-pointer transition-opacity min-h-11 md:min-h-0 ${
+                                TAG_COLORS[tag] || 'bg-border text-text-muted border-border'
+                              } ${editTags.includes(tag) ? 'opacity-100 ring-1 ring-accent' : 'opacity-40'}`}
+                            >
+                              {tag}
+                            </button>
+                          ))}
+                          <Button variant="ghost" size="sm" className="text-up hover:text-up/80 ml-1" onClick={() => handleSaveTags(entry.symbol)} type="button">
+                            Save
+                          </Button>
+                          <Button variant="ghost" size="sm" onClick={() => { setEditingSymbol(null); setEditTags([]); }} type="button">
+                            Cancel
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="flex gap-1 flex-wrap">
+                          {entry.tags
+                            ? entry.tags.split(',').map((tag) => (
+                                <Badge key={tag} colorScheme={TAG_COLOR_MAP[tag] || 'gray'} className="px-1.5 py-0.5">
+                                  {tag}
+                                </Badge>
+                              ))
+                            : <span className="text-text-dim text-xs">-</span>}
+                        </div>
+                      )}
+                    </Td>
+                    <Td align="right">
+                      {entry.price != null ? formatEUR(entry.price) : <span className="text-text-dim">N/A</span>}
+                    </Td>
+                    <Td align="right" className={
+                      entry.change_24h > 0 ? 'text-up' : entry.change_24h < 0 ? 'text-down' : 'text-text-muted'
+                    }>
+                      {entry.change_24h != null ? formatPct(entry.change_24h) : <span className="text-text-dim">N/A</span>}
+                    </Td>
+                    <Td align="right" className="text-text-muted">
+                      {entry.volume_eur != null ? formatEURCompact(entry.volume_eur) : <span className="text-text-dim">N/A</span>}
+                    </Td>
+                    <Td align="center">
+                      <div className="flex gap-2 justify-center">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-accent hover:text-accent/80"
+                          onClick={() => handleStartEditTags(entry)}
+                          type="button"
+                          title={`Edit tags for ${entry.symbol}`}
+                        >
+                          Edit Tags
+                        </Button>
+                        <Button
+                          variant="danger"
+                          size="sm"
+                          onClick={() => handleRemove(entry.symbol)}
+                          type="button"
+                          title={`Remove ${entry.symbol} from watchlist`}
+                        >
+                          Remove
+                        </Button>
+                      </div>
+                    </Td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          </div>
+        </>
       )}
     </div>
   );
