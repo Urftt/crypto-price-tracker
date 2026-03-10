@@ -59,7 +59,7 @@ function PricesPage({ exchange }) {
 
   return (
     <div>
-      <div className="flex items-center gap-2 text-text-dim text-xs mb-4">
+      <div className="flex flex-wrap items-center gap-2 text-text-dim text-xs mb-4">
         <CountdownTimer lastUpdate={lastUpdate} interval={10} />
         <Button variant="secondary" size="sm" onClick={handleRefresh} type="button" className="bg-border border-border-light hover:border-accent hover:text-accent">
           Refresh

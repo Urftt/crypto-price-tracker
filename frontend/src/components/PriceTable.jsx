@@ -41,6 +41,7 @@ function PriceTable({ coins, onSelectCoin }) {
   };
 
   return (
+    <div className="overflow-x-auto">
     <Table className="max-w-4xl">
       <thead>
         <tr>
@@ -87,6 +88,7 @@ function PriceTable({ coins, onSelectCoin }) {
         })}
       </tbody>
     </Table>
+    </div>
   );
 }
 

@@ -8,6 +8,7 @@ import ExchangeDropdown from './components/ExchangeDropdown';
 import OfflineBanner from './components/OfflineBanner';
 import InstallButton from './components/InstallButton';
 import { NavTab } from './components/ui/NavTab';
+import { BottomNav } from './components/ui/BottomNav';
 
 function App() {
   const [exchange, setExchange] = useState('bitvavo');
@@ -15,20 +16,20 @@ function App() {
   return (
     <div className="min-h-screen bg-bg font-mono text-text">
       <OfflineBanner />
-      <header className="p-5 flex items-center justify-between">
+      <header className="p-5 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <h1 className="text-accent text-2xl font-bold">Crypto Prices -- EUR</h1>
         <div className="flex items-center gap-3">
           <InstallButton />
           <ExchangeDropdown value={exchange} onChange={setExchange} />
         </div>
       </header>
-      <nav className="flex gap-1 px-5 mb-4">
+      <nav className="hidden md:flex gap-1 px-5 mb-4">
         <NavTab to="/" end>Prices</NavTab>
         <NavTab to="/watchlist">Watchlist</NavTab>
         <NavTab to="/portfolio">Portfolio</NavTab>
         <NavTab to="/alerts">Alerts</NavTab>
       </nav>
-      <main className="px-5">
+      <main className="px-5 pb-20 md:pb-0">
         <Routes>
           <Route index element={<PricesPage exchange={exchange} />} />
           <Route path="watchlist" element={<WatchlistPage />} />
@@ -36,6 +37,7 @@ function App() {
           <Route path="alerts" element={<AlertsPage />} />
         </Routes>
       </main>
+      <BottomNav />
     </div>
   );
 }

@@ -69,7 +69,7 @@ function AlertsPage() {
         <AlertList alerts={activeAlerts} title="Active alerts" onRemove={handleRemove} />
       </div>
       <div className="mt-6">
-        <div className="flex items-center justify-between mb-2 max-w-4xl">
+        <div className="flex flex-wrap items-center justify-between gap-2 mb-2 max-w-4xl">
           <h3 className="text-sm font-bold text-text-muted uppercase">Triggered Alerts</h3>
           {triggeredAlerts.length > 0 && (
             <Button variant="danger" size="sm" onClick={handleClearTriggered} type="button">

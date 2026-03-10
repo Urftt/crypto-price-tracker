@@ -206,6 +206,7 @@ function WatchlistPage() {
             : 'Watchlist is empty. Add coins using the form above or star them on the Prices tab.'}
         </p>
       ) : (
+        <div className="overflow-x-auto">
         <Table className="max-w-4xl">
           <thead>
             <tr>
@@ -295,6 +296,7 @@ function WatchlistPage() {
             ))}
           </tbody>
         </Table>
+        </div>
       )}
     </div>
   );

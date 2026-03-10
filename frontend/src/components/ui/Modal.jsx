@@ -64,7 +64,7 @@ export function Modal({ open, onClose, children }) {
     >
       <div
         ref={modalRef}
-        className="bg-card border border-border-light rounded-lg p-6 max-w-xl w-full mx-4 relative z-50"
+        className="bg-card border-border-light w-full h-full sm:border sm:rounded-lg sm:p-6 sm:max-w-xl sm:h-auto sm:mx-4 p-4 relative z-50 overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {children}

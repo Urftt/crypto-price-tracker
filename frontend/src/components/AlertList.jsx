@@ -12,7 +12,7 @@ function AlertList({ alerts, title, onRemove }) {
       {alerts.map((alert) => (
         <div
           key={alert.id}
-          className="bg-card border border-border rounded p-3 mb-2 flex justify-between items-center"
+          className="bg-card border border-border rounded p-3 mb-2 flex flex-col gap-2 sm:flex-row sm:justify-between sm:items-center"
         >
           <div className="flex items-center gap-3">
             <span className="text-accent font-bold">{alert.symbol}</span>

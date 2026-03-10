@@ -24,7 +24,7 @@ function CoinModal({ coin, open, onClose }) {
             <span className="text-text-muted">{coin.name}</span>
           </div>
 
-          <div className="grid grid-cols-2 gap-3 mb-5 text-sm">
+          <div className="grid grid-cols-1 gap-3 mb-5 text-sm sm:grid-cols-2">
             <div>
               <span className="text-text-muted">Price</span>
               <div className="text-text">{formatEUR(coin.price)}</div>

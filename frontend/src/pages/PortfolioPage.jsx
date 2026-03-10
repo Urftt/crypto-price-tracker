@@ -30,14 +30,14 @@ function PortfolioPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
         <h2 className="text-lg font-bold text-text">Portfolio</h2>
         <DownloadReport />
       </div>
       <AddHoldingForm onAdded={loadPortfolio} />
       <PortfolioTable rows={portfolio.rows} onDelete={loadPortfolio} />
       {portfolio.rows.length > 0 && (
-        <div className="max-w-4xl mt-4 p-3 bg-card border border-border rounded flex justify-between text-sm">
+        <div className="max-w-4xl mt-4 p-3 bg-card border border-border rounded flex flex-col gap-2 text-sm sm:flex-row sm:justify-between">
           <span>
             Total Value: <span className="text-accent font-bold">{formatEUR(portfolio.total_value)}</span>
           </span>
